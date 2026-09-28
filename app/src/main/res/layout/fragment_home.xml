@@ -4,78 +4,153 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
+    android:background="@color/white"
+    android:padding="16dp"
     tools:context=".HomeFragment">
 
     <TextView
-        android:id="@+id/tv_title"
+        android:id="@+id/tv_choose_character"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/welcome_title"
-        android:textSize="22sp"
+        android:text="@string/choose_character"
+        android:textColor="@color/character_title"
+        android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/tv_select_subtitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_select_subtitle"
+    <LinearLayout
+        android:id="@+id/layout_character_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/layout_thumbnails"
+        app:layout_constraintEnd_toStartOf="@id/iv_character_image"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_choose_character">
+
+        <TextView
+            android:id="@+id/tv_character_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/character_macron_name"
+            android:textColor="@color/character_title"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_character_quote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/character_macron_quote"
+            android:textColor="@color/orange_quote"
+            android:textSize="16sp"
+            android:textStyle="bold|italic" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_character_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="8dp"
+        android:contentDescription="Selected Character"
+        android:scaleType="fitCenter"
+        android:src="@drawable/macron"
+        app:layout_constraintBottom_toTopOf="@id/layout_thumbnails"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/layout_character_info"
+        app:layout_constraintTop_toBottomOf="@id/tv_choose_character" />
+
+    <LinearLayout
+        android:id="@+id/layout_thumbnails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/select_character_subtitle"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/rg_characters"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+        app:layout_constraintStart_toStartOf="parent">
 
-    <RadioGroup
-        android:id="@+id/rg_characters"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintBottom_toTopOf="@id/btn_start_game"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_select_subtitle">
+        <FrameLayout
+            android:id="@+id/fl_thumb_macron"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_thumbnail_selected"
+            android:padding="4dp">
 
-        <RadioButton
-            android:id="@+id/rb_macron"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/character_macron"
-            android:textSize="18sp" />
+            <ImageView
+                android:id="@+id/iv_thumb_macron"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Macron"
+                android:scaleType="fitCenter"
+                android:src="@drawable/macron" />
+        </FrameLayout>
 
-        <RadioButton
-            android:id="@+id/rb_lepen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/character_lepen"
-            android:textSize="18sp" />
+        <FrameLayout
+            android:id="@+id/fl_thumb_lepen"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_thumbnail_unselected"
+            android:padding="4dp">
 
-        <RadioButton
-            android:id="@+id/rb_poutou"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/character_poutou"
-            android:textSize="18sp" />
+            <ImageView
+                android:id="@+id/iv_thumb_lepen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Le Pen"
+                android:scaleType="fitCenter"
+                android:src="@drawable/lepen" />
+        </FrameLayout>
 
-    </RadioGroup>
+        <FrameLayout
+            android:id="@+id/fl_thumb_melenchon"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_thumbnail_unselected"
+            android:padding="4dp">
+
+            <ImageView
+                android:id="@+id/iv_thumb_melenchon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Mélenchon"
+                android:scaleType="fitCenter"
+                android:src="@drawable/melanchon" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/fl_thumb_poutou"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_thumbnail_unselected"
+            android:padding="4dp">
+
+            <ImageView
+                android:id="@+id/iv_thumb_poutou"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Poutou"
+                android:scaleType="fitCenter"
+                android:src="@drawable/poutou" />
+        </FrameLayout>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_start_game"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:text="@string/btn_start_game"
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rg_characters" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

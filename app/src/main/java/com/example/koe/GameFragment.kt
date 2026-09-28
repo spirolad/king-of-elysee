@@ -25,7 +25,7 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val characterName = arguments?.getString("characterName") ?: getString(R.string.character_macron)
+        val characterName = arguments?.getString("characterName") ?: getString(R.string.character_macron_name)
         binding.tvSelectedCharacter.text = getString(R.string.selected_character_format, characterName)
 
         binding.btnBackHome.setOnClickListener {

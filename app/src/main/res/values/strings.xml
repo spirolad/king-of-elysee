@@ -1,12 +1,20 @@
 <resources>
     <string name="app_name">King of Elysee</string>
-    <string name="welcome_title">Bienvenue dans King of Elysee !</string>
-    <string name="select_character_subtitle">Choisissez votre personnage :</string>
-    <string name="character_macron">Macron</string>
-    <string name="character_lepen">Le Pen</string>
-    <string name="character_poutou">Poutou</string>
-    <string name="btn_start_game">Commencer le jeu</string>
+    <string name="choose_character">Choisir votre personnage</string>
+    <string name="btn_start_game">Commencer</string>
     <string name="game_title">Écran du Jeu</string>
     <string name="selected_character_format">Personnage sélectionné : %1$s</string>
     <string name="btn_back_home">Retour au choix</string>
+
+    <string name="character_macron_name">Macron</string>
+    <string name="character_macron_quote">"Parce que c\'est notre projet!!!"</string>
+
+    <string name="character_lepen_name">Le Pen</string>
+    <string name="character_lepen_quote">"La France aux Français !"</string>
+
+    <string name="character_melenchon_name">Mélenchon</string>
+    <string name="character_melenchon_quote">"La République, c\'est moi !"</string>
+
+    <string name="character_poutou_name">Poutou</string>
+    <string name="character_poutou_quote">"On est là, même si Macron ne veut pas !"</string>
 </resources>
