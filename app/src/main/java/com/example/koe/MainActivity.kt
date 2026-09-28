@@ -1,5 +1,6 @@
 package com.example.koe
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,5 +17,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE;
     }
 }
