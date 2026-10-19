@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/koe_screen_board_container"
     android:padding="24dp"
     tools:context=".GameFragment">
 
@@ -12,8 +13,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/game_title"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.Koe.H1"
+        android:textColor="@color/koe_screen_board_content"
         app:layout_constraintBottom_toTopOf="@id/tv_selected_character"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,7 +26,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:textSize="18sp"
+        android:textAppearance="@style/TextAppearance.Koe.Body"
+        android:textColor="@color/koe_screen_board_content"
         tools:text="Personnage sélectionné : Guerrier"
         app:layout_constraintBottom_toTopOf="@id/btn_back_home"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,6 +36,7 @@
 
     <Button
         android:id="@+id/btn_back_home"
+        style="@style/Widget.Koe.Button.Secondary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"

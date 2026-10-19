@@ -4,4 +4,21 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">10dp</item>
     </style>
+
+    <!-- Every button sits on the azur screen, so each one carries the 2 dp ink outline. -->
+    <style name="Widget.Koe.Button" parent="Widget.Material3.Button">
+        <item name="android:textAppearance">@style/TextAppearance.Koe.Button</item>
+        <item name="strokeColor">@color/koe_action_outline</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <style name="Widget.Koe.Button.Validate">
+        <item name="backgroundTint">@color/koe_action_validate_container</item>
+        <item name="android:textColor">@color/koe_action_validate_content</item>
+    </style>
+
+    <style name="Widget.Koe.Button.Secondary">
+        <item name="backgroundTint">@color/koe_action_secondary_container</item>
+        <item name="android:textColor">@color/koe_action_secondary_content</item>
+    </style>
 </resources>

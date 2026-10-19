@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/koe_screen_home_container"
     android:padding="16dp"
     tools:context=".HomeFragment">
 
@@ -13,9 +13,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/choose_character"
-        android:textColor="@color/character_title"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.Koe.H2"
+        android:textColor="@color/koe_screen_home_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,9 +35,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/character_macron_name"
-            android:textColor="@color/character_title"
-            android:textSize="36sp"
-            android:textStyle="bold" />
+            android:textAppearance="@style/TextAppearance.Koe.H1"
+            android:textColor="@color/koe_screen_home_content" />
 
         <TextView
             android:id="@+id/tv_character_quote"
@@ -46,9 +44,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/character_macron_quote"
-            android:textColor="@color/orange_quote"
-            android:textSize="16sp"
-            android:textStyle="bold|italic" />
+            android:textAppearance="@style/TextAppearance.Koe.Body"
+            android:textColor="@color/koe_screen_home_content"
+            android:textStyle="italic" />
 
     </LinearLayout>
 
@@ -154,10 +152,10 @@
 
     <Button
         android:id="@+id/btn_start_game"
+        style="@style/Widget.Koe.Button.Validate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/btn_start_game"
-        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

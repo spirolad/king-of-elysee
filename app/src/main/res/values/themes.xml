@@ -1,8 +1,30 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.KingOfElysee" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!--
+        The game ships a single light look, hence a Light parent and no values-night override.
+        Bridges the King of Élysée tokens to Material 3 so stock components render with the
+        game palette (mirror of KoeMaterialMapping.kt).
+    -->
+    <style name="Base.Theme.KingOfElysee" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/koe_action_primary_container</item>
+        <item name="colorOnPrimary">@color/koe_action_primary_content</item>
+        <item name="colorSecondary">@color/koe_action_validate_container</item>
+        <item name="colorOnSecondary">@color/koe_action_validate_content</item>
+        <item name="colorTertiary">@color/koe_resource_mechancete_container</item>
+        <item name="colorOnTertiary">@color/koe_resource_mechancete_content</item>
+        <item name="android:colorBackground">@color/koe_screen_board_container</item>
+        <item name="colorOnBackground">@color/koe_screen_board_content</item>
+        <item name="colorSurface">@color/koe_surface</item>
+        <item name="colorOnSurface">@color/koe_text_primary</item>
+        <item name="colorSurfaceVariant">@color/koe_surface_sunken</item>
+        <item name="colorOnSurfaceVariant">@color/koe_text_muted</item>
+        <item name="colorOutline">@color/koe_action_outline</item>
+        <item name="colorOutlineVariant">@color/koe_surface_line</item>
+        <item name="colorError">@color/koe_text_danger</item>
+        <item name="colorOnError">@color/koe_text_on_dark</item>
+        <item name="colorErrorContainer">@color/koe_status_danger_container</item>
+        <item name="colorOnErrorContainer">@color/koe_status_danger_content</item>
+        <item name="android:fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="fontFamily">@font/hanken_grotesk_semibold</item>
     </style>
 
     <style name="Theme.KingOfElysee" parent="Base.Theme.KingOfElysee" />

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Typography tokens of King of Élysée (mirror of KoeTypography.kt).
+
+    Display styles use Anton, a single-weight poster face, and are always in capitals.
+    UI styles use Hanken Grotesk; each weight is its own static file because minSdk 24
+    cannot pick a weight out of a variable font. "Heavy" in the design system is 800.
+    android:lineHeight is read from text appearances by MaterialTextView on every API level.
+-->
+<resources>
+    <style name="TextAppearance.Koe.Display" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">@font/anton_regular</item>
+        <item name="fontFamily">@font/anton_regular</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Hero" parent="TextAppearance.Koe.Display">
+        <item name="android:textSize">64sp</item>
+        <item name="android:lineHeight">56sp</item>
+        <item name="android:letterSpacing">0.005</item>
+    </style>
+
+    <style name="TextAppearance.Koe.H1" parent="TextAppearance.Koe.Display">
+        <item name="android:textSize">36sp</item>
+        <item name="android:lineHeight">36sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.H2" parent="TextAppearance.Koe.Display">
+        <item name="android:textSize">26sp</item>
+        <item name="android:lineHeight">28sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.StatBig" parent="TextAppearance.Koe.Display">
+        <item name="android:textSize">30sp</item>
+        <item name="android:lineHeight">30sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.ButtonLarge" parent="TextAppearance.Koe.Display">
+        <item name="android:textSize">24sp</item>
+        <item name="android:lineHeight">26sp</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.Koe.DieNumber" parent="TextAppearance.Koe.Display">
+        <item name="android:textSize">30sp</item>
+        <item name="android:lineHeight">30sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Ui" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Title" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:lineHeight">24sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Name" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_bold</item>
+        <item name="fontFamily">@font/hanken_grotesk_bold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">18sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Body" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.BodySmall" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">17sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Caption" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineHeight">14sp</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Button" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.Koe.Stat" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.CardTitle" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="fontFamily">@font/hanken_grotesk_extrabold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+    </style>
+
+    <style name="TextAppearance.Koe.CardDescription" parent="TextAppearance.Koe.Ui">
+        <item name="android:fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="fontFamily">@font/hanken_grotesk_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineHeight">16sp</item>
+    </style>
+</resources>

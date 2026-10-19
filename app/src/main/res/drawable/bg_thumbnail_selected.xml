@@ -2,8 +2,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners android:radius="14dp" />
-    <solid android:color="#FFFFFF" />
+    <solid android:color="@color/koe_surface" />
     <stroke
         android:width="3dp"
-        android:color="#E65100" />
+        android:color="@color/koe_action_outline" />
 </shape>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Color tokens of King of Élysée, translated from the Compose design system (KoeColors.kt).
+
+    Layouts never read a koe_palette_* primitive: they go through the semantic roles below,
+    so a primitive can change without touching any screen. A *_container color is always
+    used with its *_content sibling (WCAG AA, guarded by KoeColorContrastTest).
+-->
+<resources>
+    <!-- Primitives -->
+    <color name="koe_palette_ink">#FF111111</color>
+    <color name="koe_palette_white">#FFFFFFFF</color>
+    <color name="koe_palette_grey">#FF5D6473</color>
+    <color name="koe_palette_mist">#FFE3E8F0</color>
+    <color name="koe_palette_azur">#FF54B2FF</color>
+    <color name="koe_palette_bleu">#FF2458C9</color>
+    <color name="koe_palette_rouge">#FFEF5A4F</color>
+    <color name="koe_palette_rouge_dark">#FFC2352C</color>
+    <color name="koe_palette_or">#FFF5B31C</color>
+    <color name="koe_palette_or_dark">#FF9A6500</color>
+    <color name="koe_palette_lime">#FFC6F24A</color>
+    <color name="koe_palette_vert">#FF5B7A10</color>
+    <color name="koe_palette_teal">#FF2FC2B3</color>
+    <color name="koe_palette_violet">#FF7A45E0</color>
+    <color name="koe_palette_violet_dark">#FF4E25A3</color>
+    <color name="koe_palette_ink_overlay">#80111111</color>
+    <color name="koe_palette_violet_dark_overlay">#B34E25A3</color>
+
+    <!-- Text, all readable on koe_surface -->
+    <color name="koe_text_primary">@color/koe_palette_ink</color>
+    <color name="koe_text_muted">@color/koe_palette_grey</color>
+    <color name="koe_text_disabled">@color/koe_palette_grey</color>
+    <color name="koe_text_on_dark">@color/koe_palette_white</color>
+    <color name="koe_text_success">@color/koe_palette_vert</color>
+    <color name="koe_text_warning">@color/koe_palette_or_dark</color>
+    <color name="koe_text_danger">@color/koe_palette_rouge_dark</color>
+
+    <!-- Surfaces -->
+    <color name="koe_surface">@color/koe_palette_white</color>
+    <color name="koe_surface_sunken">@color/koe_palette_mist</color>
+    <color name="koe_surface_line">@color/koe_palette_mist</color>
+    <color name="koe_surface_disabled">@color/koe_palette_mist</color>
+    <color name="koe_surface_overlay">@color/koe_palette_ink_overlay</color>
+    <color name="koe_surface_overlay_evil">@color/koe_palette_violet_dark_overlay</color>
+
+    <!--
+        Actions. koe_action_outline is the 2 dp ink stroke required on every colored element
+        drawn on the azur screen: lime, gold, teal and red fills are too close to azur.
+    -->
+    <color name="koe_action_primary_container">@color/koe_palette_ink</color>
+    <color name="koe_action_primary_content">@color/koe_palette_white</color>
+    <color name="koe_action_validate_container">@color/koe_palette_lime</color>
+    <color name="koe_action_validate_content">@color/koe_palette_ink</color>
+    <color name="koe_action_secondary_container">@color/koe_palette_white</color>
+    <color name="koe_action_secondary_content">@color/koe_palette_ink</color>
+    <color name="koe_action_outline">@color/koe_palette_ink</color>
+    <color name="koe_action_focus">@color/koe_palette_bleu</color>
+
+    <!-- Status -->
+    <color name="koe_status_success_container">@color/koe_palette_lime</color>
+    <color name="koe_status_success_content">@color/koe_palette_ink</color>
+    <color name="koe_status_warning_container">@color/koe_palette_or</color>
+    <color name="koe_status_warning_content">@color/koe_palette_ink</color>
+    <color name="koe_status_danger_container">@color/koe_palette_rouge</color>
+    <color name="koe_status_danger_content">@color/koe_palette_ink</color>
+
+    <!-- Game resources -->
+    <color name="koe_resource_popularite_container">@color/koe_palette_rouge</color>
+    <color name="koe_resource_popularite_content">@color/koe_palette_ink</color>
+    <color name="koe_resource_fonds_publics_container">@color/koe_palette_or</color>
+    <color name="koe_resource_fonds_publics_content">@color/koe_palette_ink</color>
+    <color name="koe_resource_votes_container">@color/koe_palette_bleu</color>
+    <color name="koe_resource_votes_content">@color/koe_palette_white</color>
+    <color name="koe_resource_mechancete_container">@color/koe_palette_violet</color>
+    <color name="koe_resource_mechancete_content">@color/koe_palette_white</color>
+    <color name="koe_resource_tweet_container">@color/koe_palette_azur</color>
+    <color name="koe_resource_tweet_content">@color/koe_palette_ink</color>
+
+    <!-- Candidates -->
+    <color name="koe_candidate_macron_container">@color/koe_palette_teal</color>
+    <color name="koe_candidate_macron_content">@color/koe_palette_ink</color>
+    <color name="koe_candidate_melenchon_container">@color/koe_palette_rouge</color>
+    <color name="koe_candidate_melenchon_content">@color/koe_palette_ink</color>
+    <color name="koe_candidate_lepen_container">@color/koe_palette_bleu</color>
+    <color name="koe_candidate_lepen_content">@color/koe_palette_white</color>
+    <color name="koe_candidate_poutou_container">@color/koe_palette_or</color>
+    <color name="koe_candidate_poutou_content">@color/koe_palette_ink</color>
+    <color name="koe_candidate_boudi_container">@color/koe_palette_lime</color>
+    <color name="koe_candidate_boudi_content">@color/koe_palette_ink</color>
+
+    <!-- Screens: one solid background each, with the color of its headline -->
+    <color name="koe_screen_home_container">@color/koe_palette_azur</color>
+    <color name="koe_screen_home_content">@color/koe_palette_ink</color>
+    <color name="koe_screen_board_container">@color/koe_palette_azur</color>
+    <color name="koe_screen_board_content">@color/koe_palette_ink</color>
+    <color name="koe_screen_profile_container">@color/koe_palette_azur</color>
+    <color name="koe_screen_profile_content">@color/koe_palette_ink</color>
+    <color name="koe_screen_rank_container">@color/koe_palette_or</color>
+    <color name="koe_screen_rank_content">@color/koe_palette_ink</color>
+    <color name="koe_screen_win_container">@color/koe_palette_lime</color>
+    <color name="koe_screen_win_content">@color/koe_palette_ink</color>
+    <color name="koe_screen_lose_container">@color/koe_palette_mist</color>
+    <color name="koe_screen_lose_content">@color/koe_palette_ink</color>
+    <color name="koe_screen_evil_container">@color/koe_palette_violet_dark</color>
+    <color name="koe_screen_evil_content">@color/koe_palette_white</color>
+</resources>
