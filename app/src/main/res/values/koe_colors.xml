@@ -25,6 +25,24 @@
     <color name="koe_palette_violet_dark">#FF4E25A3</color>
     <color name="koe_palette_ink_overlay">#80111111</color>
     <color name="koe_palette_violet_dark_overlay">#B34E25A3</color>
+    <color name="koe_palette_or_clair">#FFF7C948</color>
+    <color name="koe_palette_framboise">#FFC42F55</color>
+    <color name="koe_palette_marine">#FF1D3E99</color>
+    <color name="koe_palette_corail">#FFFF7A5C</color>
+    <color name="koe_palette_ardoise">#FF3B5BB0</color>
+    <color name="koe_palette_orange">#FFFF9F2E</color>
+    <color name="koe_palette_ardoise_overlay">#800F172A</color>
+    <color name="koe_palette_nuit_violette_overlay">#B31E0B45</color>
+    <color name="koe_palette_brume">#FFF2F5FA</color>
+    <color name="koe_palette_gris_bleu">#FF8B97AD</color>
+    <color name="koe_palette_creme">#FFFDF1C9</color>
+    <color name="koe_palette_ciel">#FFDBE8FD</color>
+    <color name="koe_palette_lilas">#FFECE2FD</color>
+    <color name="koe_palette_vert_vif">#FF3CBD00</color>
+    <color name="koe_palette_rose">#FFF0567A</color>
+    <color name="koe_palette_rose_pale">#FFEBB5C1</color>
+    <color name="koe_palette_bleu_vote">#FF2F5FD6</color>
+    <color name="koe_palette_bleu_pale">#FFDDE6FB</color>
 
     <!-- Text, all readable on koe_surface -->
     <color name="koe_text_primary">@color/koe_palette_ink</color>
@@ -34,6 +52,9 @@
     <color name="koe_text_success">@color/koe_palette_vert</color>
     <color name="koe_text_warning">@color/koe_palette_or_dark</color>
     <color name="koe_text_danger">@color/koe_palette_rouge_dark</color>
+    <color name="koe_text_popularite">@color/koe_palette_framboise</color>
+    <color name="koe_text_votes">@color/koe_palette_marine</color>
+    <color name="koe_text_mechancete">@color/koe_palette_violet_dark</color>
 
     <!-- Surfaces -->
     <color name="koe_surface">@color/koe_palette_white</color>
@@ -57,6 +78,8 @@
     <color name="koe_action_focus">@color/koe_palette_bleu</color>
 
     <!-- Status -->
+    <!-- Gold ring of the king and of scoring dice -->
+    <color name="koe_status_highlight">@color/koe_palette_or_clair</color>
     <color name="koe_status_success_container">@color/koe_palette_lime</color>
     <color name="koe_status_success_content">@color/koe_palette_ink</color>
     <color name="koe_status_warning_container">@color/koe_palette_or</color>
@@ -87,6 +110,31 @@
     <color name="koe_candidate_poutou_content">@color/koe_palette_ink</color>
     <color name="koe_candidate_boudi_container">@color/koe_palette_lime</color>
     <color name="koe_candidate_boudi_content">@color/koe_palette_ink</color>
+
+    <!-- Avatar discs on the board -->
+    <color name="koe_avatar_macron">@color/koe_palette_teal</color>
+    <color name="koe_avatar_melenchon">@color/koe_palette_corail</color>
+    <color name="koe_avatar_lepen">@color/koe_palette_ardoise</color>
+    <color name="koe_avatar_poutou">@color/koe_palette_orange</color>
+
+    <!-- Dialogs -->
+    <color name="koe_scrim">@color/koe_palette_ardoise_overlay</color>
+    <color name="koe_scrim_evil">@color/koe_palette_nuit_violette_overlay</color>
+    <color name="koe_surface_inset">@color/koe_palette_brume</color>
+    <color name="koe_surface_mechancete">@color/koe_palette_lilas</color>
+    <color name="koe_action_disabled">@color/koe_palette_gris_bleu</color>
+    <color name="koe_action_danger">@color/koe_palette_rouge_dark</color>
+    <color name="koe_card_header_pouvoir">@color/koe_palette_creme</color>
+    <color name="koe_card_header_action">@color/koe_palette_ciel</color>
+    <color name="koe_card_header_mechancete">@color/koe_palette_lilas</color>
+    <color name="koe_card_badge_action">@color/koe_palette_bleu</color>
+    <color name="koe_card_badge_mechancete">@color/koe_palette_violet_dark</color>
+    <color name="koe_card_owned">@color/koe_palette_vert_vif</color>
+    <color name="koe_meter_popularite_on">@color/koe_palette_rose</color>
+    <color name="koe_meter_popularite_off">@color/koe_palette_rose_pale</color>
+    <color name="koe_meter_votes_on">@color/koe_palette_bleu_vote</color>
+    <color name="koe_meter_votes_off">@color/koe_palette_bleu_pale</color>
+    <color name="koe_meter_mechancete_on">@color/koe_palette_violet</color>
 
     <!-- Screens: one solid background each, with the color of its headline -->
     <color name="koe_screen_home_container">@color/koe_palette_azur</color>

@@ -4,11 +4,6 @@
         <item name="cornerSize">10dp</item>
     </style>
 
-    <style name="CircleShapeAppearance">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item>
-    </style>
-
     <!-- Every button sits on the azur screen, so each one carries the 2 dp ink outline. -->
     <style name="Widget.Koe.Button" parent="Widget.Material3.Button">
         <item name="android:textAppearance">@style/TextAppearance.Koe.Button</item>
@@ -20,54 +15,6 @@
     <style name="Widget.Koe.Button.Validate">
         <item name="backgroundTint">@color/koe_action_validate_container</item>
         <item name="android:textColor">@color/koe_action_validate_content</item>
-    </style>
-
-    <style name="Widget.Koe.Button.Secondary">
-        <item name="backgroundTint">@color/koe_action_secondary_container</item>
-        <item name="android:textColor">@color/koe_action_secondary_content</item>
-        <item name="strokeWidth">@dimen/koe_outline_thick</item>
-    </style>
-
-    <style name="Widget.Koe.Button.Primary" parent="Widget.Koe.Button">
-        <item name="backgroundTint">@color/koe_action_primary_container</item>
-        <item name="android:textColor">@color/koe_action_primary_content</item>
-        <item name="android:minHeight">@dimen/koe_button_height</item>
-        <item name="cornerRadius">@dimen/koe_radius_pill</item>
-    </style>
-
-    <style name="Widget.Koe.Button.Danger" parent="Widget.Koe.Button">
-        <item name="backgroundTint">@color/koe_status_danger_container</item>
-        <item name="android:textColor">@color/koe_status_danger_content</item>
-    </style>
-
-    <style name="Widget.Koe.Button.Large" parent="Widget.Koe.Button.Primary">
-        <item name="android:textAppearance">@style/TextAppearance.Koe.ButtonLarge</item>
-        <item name="android:minHeight">@dimen/koe_button_height_large</item>
-    </style>
-
-    <style name="Widget.Koe.IconButton.Outline" parent="Widget.Material3.Button.IconButton.Outlined">
-        <item name="strokeColor">@color/koe_action_outline</item>
-        <item name="strokeWidth">@dimen/koe_outline_thick</item>
-        <item name="iconTint">@color/koe_text_primary</item>
-        <item name="backgroundTint">@color/koe_surface</item>
-        <item name="android:layout_width">@dimen/koe_round_button</item>
-        <item name="android:layout_height">@dimen/koe_round_button</item>
-    </style>
-
-    <style name="Widget.Koe.Badge" parent="">
-        <item name="android:background">@drawable/bg_pill</item>
-        <item name="android:textAppearance">@style/TextAppearance.Koe.Caption</item>
-        <item name="android:paddingStart">@dimen/koe_space_s</item>
-        <item name="android:paddingEnd">@dimen/koe_space_s</item>
-        <item name="android:paddingTop">@dimen/koe_space_xxs</item>
-        <item name="android:paddingBottom">@dimen/koe_space_xxs</item>
-        <item name="android:textColor">@color/koe_status_warning_content</item>
-        <item name="android:backgroundTint">@color/koe_status_warning_container</item>
-    </style>
-
-    <style name="Widget.Koe.Panel" parent="">
-        <item name="android:background">@drawable/bg_panel</item>
-        <item name="android:padding">@dimen/koe_space_l</item>
     </style>
 
     <!-- Default text look, applied through android:textViewStyle in the theme. -->

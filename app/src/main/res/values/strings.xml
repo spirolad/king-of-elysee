@@ -20,6 +20,13 @@
     <string name="match_king_title">KING OF ÉLYSÉE</string>
     <string name="match_badge_in_power">AU POUVOIR</string>
     <string name="match_king_bonus">+2 Votes à chaque début de tour</string>
+    <string name="match_chip_description">%1$s, %2$d Popularité, %3$d Votes</string>
+    <string name="match_chip_description_king">%1$s, %2$d Popularité, %3$d Votes, au pouvoir</string>
+    <string name="match_die_description">Dé %1$d : %2$s</string>
+    <string name="match_tweet_banner">%1$s −%2$d Popularité</string>
+    <string name="die_face_tweet">Tweet</string>
+    <string name="die_face_fonds">Fonds publics</string>
+    <string name="die_face_popularite">Popularité</string>
     <string name="match_your_turn">À toi, %1$s</string>
     <string name="match_roll_count">Lancer %1$d sur %2$d · touche un dé pour le garder</string>
     <string name="match_roll_prompt">Lance les dés pour commencer ton tour.</string>
@@ -81,6 +88,8 @@
     <string name="shop_affordable">Achetable · il te restera %1$d Fonds.</string>
     <string name="btn_buy">ACHETER</string>
     <string name="btn_renew">RENOUVELER</string>
+    <string name="shop_unaffordable">Pas assez de Fonds.</string>
+    <string name="shop_no_choice">Touche une carte pour la choisir.</string>
 
     <!-- My cards dialog -->
     <string name="my_cards_title">TES CARTES</string>
@@ -93,6 +102,8 @@
     <string name="card_type_pouvoir">POUVOIR</string>
     <string name="card_type_mechancete">MÉCHANCETÉ</string>
     <string name="card_detail_badge_pouvoir">CARTE POUVOIR</string>
+    <string name="card_detail_badge_action">CARTE ACTION</string>
+    <string name="card_detail_badge_mechancete">CARTE MÉCHANCETÉ</string>
     <string name="card_detail_paid">Payée %1$d Fonds publics au tour %2$d</string>
     <string name="card_detail_permanent">Effet permanent</string>
 

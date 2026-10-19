@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.koe.databinding.FragmentHomeBinding
@@ -35,6 +38,19 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Keep the content clear of the camera cutout, on top of the layout's own padding.
+        val basePadding = Insets.of(view.paddingLeft, view.paddingTop, view.paddingRight, view.paddingBottom)
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            v.setPadding(
+                basePadding.left + cutout.left,
+                basePadding.top + cutout.top,
+                basePadding.right + cutout.right,
+                basePadding.bottom + cutout.bottom,
+            )
+            insets
+        }
 
         val characters = listOf(
             CharacterModel(

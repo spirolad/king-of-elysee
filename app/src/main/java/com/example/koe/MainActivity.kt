@@ -4,7 +4,6 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -21,12 +20,8 @@ class MainActivity : AppCompatActivity() {
             hide(WindowInsetsCompat.Type.systemBars())
         }
 
-        // Only keep content clear of the camera cutout, the hidden bars take no space.
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-            v.setPadding(cutout.left, cutout.top, cutout.right, cutout.bottom)
-            insets
-        }
+        // Each screen keeps its own content clear of the camera cutout: the match board and its
+        // dialog scrims are drawn edge to edge, as in Figma.
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
     }
 }
