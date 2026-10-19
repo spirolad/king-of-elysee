@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="@dimen/koe_radius_card" />
+    <solid android:color="@color/koe_surface" />
+    <stroke
+        android:width="@dimen/koe_outline"
+        android:color="@color/koe_surface_line" />
+</shape>

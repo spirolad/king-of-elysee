@@ -97,7 +97,7 @@ class HomeFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString("characterName", selectedName)
             }
-            findNavController().navigate(R.id.action_homeFragment_to_gameFragment, bundle)
+            findNavController().navigate(R.id.action_homeFragment_to_matchFragment, bundle)
         }
     }
 

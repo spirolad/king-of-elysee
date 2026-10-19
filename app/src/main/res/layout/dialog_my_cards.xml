@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_panel"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="18dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_cards"
+                app:tint="@color/koe_text_primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/my_cards_title"
+                android:textAppearance="@style/TextAppearance.Koe.H2"
+                android:textColor="@color/koe_text_primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="24dp"
+                android:text="@string/my_cards_hint"
+                android:textAppearance="@style/TextAppearance.Koe.BodySmall"
+                android:textColor="@color/koe_text_muted" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_close"
+                style="@style/Widget.Koe.IconButton.Outline"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/cd_close"
+                app:icon="@drawable/ic_close"
+                app:iconSize="20dp" />
+
+        </LinearLayout>
+
+        <!-- Body: card row and Mechancete panel -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/card_1"
+                    android:layout_width="@dimen/koe_card_width"
+                    android:layout_height="@dimen/koe_card_height"
+                    android:layout_marginEnd="8dp"
+                    layout="@layout/item_power_card_meeting" />
+
+                <include
+                    android:id="@+id/card_2"
+                    android:layout_width="@dimen/koe_card_width"
+                    android:layout_height="@dimen/koe_card_height"
+                    android:layout_marginEnd="8dp"
+                    layout="@layout/item_power_card_meeting" />
+
+                <include
+                    android:id="@+id/card_3"
+                    android:layout_width="@dimen/koe_card_width"
+                    android:layout_height="@dimen/koe_card_height"
+                    layout="@layout/item_power_card_petite_phrase" />
+
+            </LinearLayout>
+
+            <!-- Right: Mechancete panel -->
+            <FrameLayout
+                android:layout_width="208dp"
+                android:layout_height="206dp"
+                android:layout_marginStart="28dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:alpha="0.18"
+                    android:background="@drawable/bg_inset"
+                    android:backgroundTint="@color/koe_resource_mechancete_container" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:paddingStart="14dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="14dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="@dimen/koe_icon_m"
+                            android:layout_height="@dimen/koe_icon_m"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_mechancete"
+                            app:tint="@color/koe_resource_mechancete_container" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="@string/stat_mechancete"
+                            android:textAppearance="@style/TextAppearance.Koe.Stat"
+                            android:textColor="@color/koe_text_primary" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/mock_mechancete_value"
+                            android:textAppearance="@style/TextAppearance.Koe.StatBig"
+                            android:textColor="@color/koe_resource_mechancete_container" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/mock_mechancete_progress"
+                            android:textAppearance="@style/TextAppearance.Koe.BodySmall"
+                            android:textColor="@color/koe_resource_mechancete_container" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_on"
+                            android:backgroundTint="@color/koe_resource_mechancete_container" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_on"
+                            android:backgroundTint="@color/koe_resource_mechancete_container" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_tier" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_off" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_off" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_tier" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_off" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_off" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/bg_meter_segment_off" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="12dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_meter_segment_tier" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/mechancete_tiers_hint"
+                        android:textAppearance="@style/TextAppearance.Koe.CardDescription"
+                        android:textColor="@color/koe_resource_mechancete_container" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

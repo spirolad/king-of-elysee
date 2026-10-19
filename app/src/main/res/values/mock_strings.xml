@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sample content for the match layouts. Everything here is mock data, to be deleted once the
+    game engine feeds real values. grep @string/mock_ to find every usage.
+-->
+<resources>
+    <!-- Player chips -->
+    <string name="mock_chip_melenchon_popularite">8</string>
+    <string name="mock_chip_melenchon_votes">11</string>
+    <string name="mock_chip_lepen_popularite">6</string>
+    <string name="mock_chip_lepen_votes">17</string>
+    <string name="mock_chip_poutou_popularite">3</string>
+    <string name="mock_chip_poutou_votes">6</string>
+
+    <!-- Local player stats -->
+    <string name="mock_me_votes">20</string>
+    <string name="mock_me_popularite">7</string>
+    <string name="mock_me_fonds">5</string>
+    <string name="mock_me_mechancete">2</string>
+
+    <!-- Turn and dice -->
+    <string name="mock_match_your_turn">À toi, Macron</string>
+    <string name="mock_match_roll_count">Lancer 2 sur 3 · touche un dé pour le garder</string>
+    <string name="mock_die_three">3</string>
+    <string name="mock_die_unknown">\?</string>
+    <string name="mock_turn_result">+3 Votes, +1 Fonds, 2 Tweets sur Le Pen</string>
+    <string name="mock_votes_delta">+3</string>
+    <string name="mock_tweet_banner">Le Pen −2 Popularité</string>
+    <string name="mock_cards_count">3</string>
+
+    <!-- Pause and quit -->
+    <string name="mock_pause_turn">Tour 9 · à Macron de jouer</string>
+    <string name="mock_quit_message">La partie en cours sera perdue. Le Pen garde l\'Élysée, par forfait.</string>
+
+    <!-- Ranking -->
+    <string name="mock_rank_votes_lepen">17</string>
+    <string name="mock_rank_votes_macron">14</string>
+    <string name="mock_rank_votes_melenchon">11</string>
+    <string name="mock_rank_votes_poutou">6</string>
+
+    <!-- Yield dialog -->
+    <string name="mock_yield_pass_phone">PASSE LE TÉLÉPHONE À LE PEN</string>
+    <string name="mock_yield_tweet_notice">Macron t\'a tweeté dessus :</string>
+    <string name="mock_yield_damage">−2 Popularité</string>
+    <string name="mock_yield_remaining">. Il t\'en reste 4.</string>
+    <string name="mock_yield_cede_hint">Macron entre à l\'Élysée et gagne 1 Vote.</string>
+
+    <!-- Player details dialog -->
+    <string name="mock_player_details_name">MELENCHON</string>
+    <string name="mock_player_details_number">Joueur 3</string>
+    <string name="mock_player_details_popularite">6</string>
+    <string name="mock_player_details_votes">17</string>
+    <string name="mock_player_details_fonds">4</string>
+    <string name="mock_player_details_mechancete">2</string>
+
+    <!-- Power cards -->
+    <string name="mock_card_meeting_title">Meeting géant</string>
+    <string name="mock_card_meeting_desc">+1 Popularité au début de chacun de ses tours.</string>
+    <string name="mock_card_meeting_cost">5</string>
+    <string name="mock_card_petite_phrase_title">Petite phrase</string>
+    <string name="mock_card_petite_phrase_desc">Ses Tweets font 1 dégât de plus.</string>
+    <string name="mock_card_fausse_info_title">Fausse info</string>
+    <string name="mock_card_fausse_info_desc">+1 Popularité au début de chacun de ses tours.</string>
+    <string name="mock_card_fausse_info_cost">5</string>
+    <string name="mock_card_article_title">Article 49.3</string>
+    <string name="mock_card_article_desc">+3 Votes, sans débat</string>
+    <string name="mock_card_article_cost">6</string>
+    <string name="mock_card_cumul_title">Cumul des mandats</string>
+    <string name="mock_card_cumul_desc">Tu lances 7 dés au lieu de 6, à chaque tour, jusqu\'à la fin de la partie.</string>
+    <string name="mock_card_detail_paid">Payée 7 Fonds publics au tour 6</string>
+
+    <!-- Shop -->
+    <string name="mock_shop_fonds">5</string>
+    <string name="mock_shop_choice_title">Service de com’</string>
+    <string name="mock_shop_affordable">Achetable · il te restera 1 Fonds.</string>
+    <string name="mock_shop_renew_cost">2</string>
+
+    <!-- Mechancete dialog -->
+    <string name="mock_mechancete_value">2</string>
+    <string name="mock_mechancete_progress">/ 3 pour une carte</string>
+    <string name="mock_mechancete_reached">Ta méchanceté atteint 3. Choisis une carte, garde-la pour toi.</string>
+</resources>

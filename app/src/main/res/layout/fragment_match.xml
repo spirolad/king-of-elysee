@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/koe_screen_board_container"
+    android:paddingStart="@dimen/koe_board_edge"
+    android:paddingTop="@dimen/koe_space_s"
+    android:paddingEnd="@dimen/koe_board_edge"
+    android:paddingBottom="21dp"
+    tools:context=".match.MatchFragment">
+
+    <!-- TOP ROW: pause button and the three player chips -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_pause"
+        style="@style/Widget.Koe.IconButton.Outline"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:contentDescription="@string/cd_pause"
+        android:elevation="2dp"
+        app:icon="@drawable/ic_pause"
+        app:iconSize="22dp"
+        app:layout_constraintBottom_toBottomOf="@id/chip_lepen"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chip_lepen" />
+
+    <include
+        android:id="@+id/chip_melenchon"
+        layout="@layout/item_player_chip_melenchon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/koe_space_s"
+        app:layout_constraintEnd_toStartOf="@id/chip_lepen"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/btn_pause"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/chip_lepen"
+        layout="@layout/item_player_chip_lepen"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/koe_space_s"
+        app:layout_constraintEnd_toStartOf="@id/chip_poutou"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/chip_melenchon"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/chip_poutou"
+        layout="@layout/item_player_chip_poutou"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/koe_space_s"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/chip_lepen"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- TWEET BANNER: sits on the bottom edge of the king chip -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_tweet_banner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="3"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/koe_surface"
+        app:cardCornerRadius="@dimen/koe_radius_chip"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="@id/chip_lepen"
+        app:layout_constraintTop_toBottomOf="@id/chip_lepen"
+        app:strokeColor="@color/koe_action_outline"
+        app:strokeWidth="@dimen/koe_outline_thick"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/koe_space_l"
+            android:paddingTop="@dimen/koe_space_s"
+            android:paddingEnd="@dimen/koe_space_l"
+            android:paddingBottom="@dimen/koe_space_s">
+
+            <ImageView
+                android:layout_width="@dimen/koe_icon_l"
+                android:layout_height="@dimen/koe_icon_l"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_tweet"
+                app:tint="@color/koe_resource_tweet_container" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/koe_space_s"
+                android:text="@string/mock_tweet_banner"
+                android:textAppearance="@style/TextAppearance.Koe.Title"
+                android:textColor="@color/koe_text_danger" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- LEFT PANEL: the king, wrap height, top aligned under the chips -->
+    <LinearLayout
+        android:id="@+id/panel_king"
+        style="@style/Widget.Koe.Panel"
+        android:layout_width="148dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/koe_space_s"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chip_lepen">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/match_king_title"
+            android:textAppearance="@style/TextAppearance.Koe.Caption"
+            android:textColor="@color/koe_text_primary"
+            android:textSize="14sp"
+            android:lineHeight="28sp"
+            android:letterSpacing="0" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="@dimen/koe_space_xs"
+            android:background="@color/koe_candidate_lepen_container"
+            android:contentDescription="@string/cd_avatar"
+            android:scaleType="centerCrop"
+            android:src="@drawable/lepen"
+            app:shapeAppearanceOverlay="@style/CircleShapeAppearance"
+            app:strokeColor="@color/koe_status_warning_container"
+            app:strokeWidth="@dimen/koe_outline_thick" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/koe_space_xs"
+            android:text="@string/character_lepen_name"
+            android:textAppearance="@style/TextAppearance.Koe.Name"
+            android:textColor="@color/koe_text_primary"
+            android:lineHeight="20sp" />
+
+        <TextView
+            style="@style/Widget.Koe.Badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/koe_space_xs"
+            android:paddingStart="@dimen/koe_space_xs"
+            android:paddingTop="3dp"
+            android:paddingEnd="@dimen/koe_space_xs"
+            android:paddingBottom="3dp"
+            android:text="@string/match_badge_in_power" />
+
+        <TextView
+            android:layout_width="124dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/koe_space_xs"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/match_king_bonus"
+            android:textAppearance="@style/TextAppearance.Koe.CardDescription"
+            android:textColor="@color/koe_text_muted" />
+
+    </LinearLayout>
+
+    <!-- RIGHT PANEL: the local player, fixed 160 x 205, top aligned -->
+    <LinearLayout
+        android:id="@+id/panel_me"
+        style="@style/Widget.Koe.Panel"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/koe_space_m"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingTop="13dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chip_lepen">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@color/koe_candidate_macron_container"
+                android:contentDescription="@string/cd_avatar"
+                android:scaleType="centerCrop"
+                android:src="@drawable/macron"
+                app:shapeAppearanceOverlay="@style/CircleShapeAppearance" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/koe_space_xs"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/character_macron_name"
+                    android:textAppearance="@style/TextAppearance.Koe.Name"
+                    android:textColor="@color/koe_text_primary"
+                    android:lineHeight="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/match_me_label"
+                    android:textAppearance="@style/TextAppearance.Koe.Caption"
+                    android:textColor="@color/koe_text_muted" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <include
+            layout="@layout/item_stat_row_votes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="17dp" />
+
+        <include
+            layout="@layout/item_stat_row_popularite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/koe_space_s" />
+
+        <include
+            layout="@layout/item_stat_row_fonds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/koe_space_s" />
+
+        <include
+            layout="@layout/item_stat_row_mechancete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/koe_space_s" />
+
+    </LinearLayout>
+
+    <!-- CENTER: column centred between the two panels, top at 101 -->
+    <TextView
+        android:id="@+id/tv_votes_delta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/koe_space_xs"
+        android:text="@string/mock_votes_delta"
+        android:textAppearance="@style/TextAppearance.Koe.H1"
+        android:textColor="@color/koe_resource_votes_container"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tv_turn_title"
+        app:layout_constraintEnd_toStartOf="@id/tv_turn_title"
+        app:layout_constraintTop_toTopOf="@id/tv_turn_title"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/tv_turn_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="33dp"
+        android:gravity="center"
+        android:text="@string/mock_match_your_turn"
+        android:textAppearance="@style/TextAppearance.Koe.H1"
+        android:textColor="@color/koe_screen_board_content"
+        app:layout_constraintEnd_toStartOf="@id/panel_me"
+        app:layout_constraintStart_toEndOf="@id/panel_king"
+        app:layout_constraintTop_toBottomOf="@id/chip_lepen" />
+
+    <TextView
+        android:id="@+id/tv_turn_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/koe_space_s"
+        android:gravity="center"
+        android:text="@string/mock_match_roll_count"
+        android:textAppearance="@style/TextAppearance.Koe.BodySmall"
+        android:textColor="@color/koe_screen_board_content"
+        android:lineHeight="18sp"
+        app:layout_constraintEnd_toStartOf="@id/panel_me"
+        app:layout_constraintStart_toEndOf="@id/panel_king"
+        app:layout_constraintTop_toBottomOf="@id/tv_turn_title" />
+
+    <LinearLayout
+        android:id="@+id/layout_dice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/koe_space_m"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toStartOf="@id/panel_me"
+        app:layout_constraintStart_toEndOf="@id/panel_king"
+        app:layout_constraintTop_toBottomOf="@id/tv_turn_subtitle">
+
+        <include
+            android:id="@+id/die_1"
+            layout="@layout/item_die_three_kept"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="@dimen/koe_space_xs" />
+
+        <include
+            android:id="@+id/die_2"
+            layout="@layout/item_die_three_kept"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="@dimen/koe_space_xs" />
+
+        <include
+            android:id="@+id/die_3"
+            layout="@layout/item_die_popularite"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="@dimen/koe_space_xs" />
+
+        <include
+            android:id="@+id/die_4"
+            layout="@layout/item_die_tweet"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="@dimen/koe_space_xs" />
+
+        <include
+            android:id="@+id/die_5"
+            layout="@layout/item_die_three_kept"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="@dimen/koe_space_xs" />
+
+        <include
+            android:id="@+id/die_6"
+            layout="@layout/item_die_fonds"
+            android:layout_width="56dp"
+            android:layout_height="56dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_turn_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/koe_space_m"
+        android:background="@drawable/bg_pill_dark"
+        android:paddingStart="@dimen/koe_space_m"
+        android:paddingTop="@dimen/koe_space_xs"
+        android:paddingEnd="@dimen/koe_space_m"
+        android:paddingBottom="@dimen/koe_space_xs"
+        android:text="@string/mock_turn_result"
+        android:textAppearance="@style/TextAppearance.Koe.Body"
+        android:textColor="@color/koe_text_on_dark"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/panel_me"
+        app:layout_constraintStart_toEndOf="@id/panel_king"
+        app:layout_constraintTop_toBottomOf="@id/layout_dice"
+        tools:visibility="visible" />
+
+    <!-- BOTTOM ROW: 52 dp buttons, LANCER 64 dp, all bottom aligned -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_shop"
+        style="@style/Widget.Koe.Button.Secondary"
+        android:layout_width="159dp"
+        android:layout_height="52dp"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        android:minHeight="52dp"
+        android:paddingStart="@dimen/koe_space_s"
+        android:paddingEnd="@dimen/koe_space_s"
+        android:text="@string/btn_shop"
+        app:icon="@drawable/ic_shop"
+        app:iconGravity="textStart"
+        app:iconPadding="@dimen/koe_space_xs"
+        app:iconSize="22dp"
+        app:iconTint="@color/koe_action_secondary_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/frame_cards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/koe_space_s"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_shop">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cards"
+            style="@style/Widget.Koe.Button.Secondary"
+            android:layout_width="163dp"
+            android:layout_height="52dp"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            android:minHeight="52dp"
+            android:paddingStart="18dp"
+            android:paddingEnd="52dp"
+            android:text="@string/btn_cards"
+            app:icon="@drawable/ic_cards"
+            app:iconGravity="start"
+            app:iconPadding="@dimen/koe_space_xs"
+            app:iconSize="22dp"
+            app:iconTint="@color/koe_action_secondary_content" />
+
+        <TextView
+            android:id="@+id/tv_cards_count"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="18dp"
+            android:background="@drawable/bg_badge_count"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="@string/mock_cards_count"
+            android:textAppearance="@style/TextAppearance.Koe.Caption"
+            android:textColor="@color/koe_action_primary_content"
+            android:textSize="13sp" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frame_roll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_roll"
+            style="@style/Widget.Koe.Button.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            android:minHeight="64dp"
+            android:paddingStart="@dimen/koe_space_l"
+            android:paddingEnd="70dp"
+            android:text="@string/btn_roll" />
+
+        <LinearLayout
+            android:id="@+id/layout_roll_dots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="@dimen/koe_space_m"
+            android:elevation="4dp"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/bg_roll_dot" />
+
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginStart="@dimen/koe_space_xs"
+                android:backgroundTint="@color/koe_text_muted"
+                android:background="@drawable/bg_roll_dot" />
+
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginStart="@dimen/koe_space_xs"
+                android:backgroundTint="@color/koe_text_muted"
+                android:background="@drawable/bg_roll_dot" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Resolve phase: replaces LANCER once the dice are resolved -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_end_turn"
+        style="@style/Widget.Koe.Button.Large"
+        android:layout_width="216dp"
+        android:layout_height="64dp"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        android:minHeight="64dp"
+        android:paddingStart="@dimen/koe_space_s"
+        android:paddingEnd="@dimen/koe_space_s"
+        android:text="@string/btn_end_turn"
+        android:visibility="gone"
+        app:icon="@drawable/ic_arrow_forward"
+        app:iconGravity="textEnd"
+        app:iconPadding="@dimen/koe_space_xs"
+        app:iconSize="@dimen/koe_icon_m"
+        app:iconTint="@color/koe_action_primary_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_validate"
+        style="@style/Widget.Koe.Button.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:layout_marginEnd="14dp"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        android:minHeight="52dp"
+        android:paddingStart="@dimen/koe_space_s"
+        android:paddingEnd="@dimen/koe_space_s"
+        android:text="@string/btn_validate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/frame_roll" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

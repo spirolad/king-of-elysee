@@ -23,9 +23,41 @@
         <item name="colorOnError">@color/koe_text_on_dark</item>
         <item name="colorErrorContainer">@color/koe_status_danger_container</item>
         <item name="colorOnErrorContainer">@color/koe_status_danger_content</item>
-        <item name="android:fontFamily">@font/hanken_grotesk_semibold</item>
-        <item name="fontFamily">@font/hanken_grotesk_semibold</item>
+        <!--
+            Default font goes through the TextView style, not android:fontFamily: a theme-level
+            fontFamily outranks every textAppearance and would hide Anton on the display styles.
+        -->
+        <item name="android:textViewStyle">@style/Widget.Koe.TextView</item>
     </style>
 
     <style name="Theme.KingOfElysee" parent="Base.Theme.KingOfElysee" />
+
+    <!-- Dialogs float over the match: transparent window, dimmed scrim, fade transitions. -->
+    <!--
+        Plain overlay, not ThemeOverlay.Material3.Dialog: that one brings AppCompat dialog
+        defaults and a flush text button style that grey out the Koe white buttons.
+    -->
+    <style name="ThemeOverlay.Koe.Dialog" parent="ThemeOverlay.Material3">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Koe.Dialog</item>
+        <item name="android:windowMinWidthMajor">0dp</item>
+        <item name="android:windowMinWidthMinor">0dp</item>
+    </style>
+
+    <!-- Evil (Mechancete) dialogs darken the scrim further. -->
+    <style name="ThemeOverlay.Koe.Dialog.Evil" parent="ThemeOverlay.Koe.Dialog">
+        <item name="android:backgroundDimAmount">0.7</item>
+    </style>
+
+    <style name="Animation.Koe.Dialog" parent="">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
 </resources>

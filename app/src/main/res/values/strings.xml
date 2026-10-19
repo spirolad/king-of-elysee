@@ -1,10 +1,8 @@
 <resources>
+    <!-- Existing app strings -->
     <string name="app_name">King of Elysee</string>
     <string name="choose_character">Choisir votre politicien</string>
     <string name="btn_start_game">Commencer</string>
-    <string name="game_title">Écran du Jeu</string>
-    <string name="selected_character_format">Personnage sélectionné : %1$s</string>
-    <string name="btn_back_home">Retour au choix</string>
 
     <string name="character_macron_name">Macron</string>
     <string name="character_macron_quote">"Qu\'ils viennent me chercher !"</string>
@@ -17,4 +15,88 @@
 
     <string name="character_poutou_name">Poutou</string>
     <string name="character_poutou_quote">"Ce qui peut changer la société, ce sont les luttes sociales et populaires. !"</string>
+
+    <!-- Match screen -->
+    <string name="match_king_title">KING OF ÉLYSÉE</string>
+    <string name="match_badge_in_power">AU POUVOIR</string>
+    <string name="match_king_bonus">+2 Votes à chaque début de tour</string>
+    <string name="match_your_turn">À toi, %1$s</string>
+    <string name="match_roll_count">Lancer %1$d sur %2$d · touche un dé pour le garder</string>
+    <string name="match_roll_prompt">Lance les dés pour commencer ton tour.</string>
+    <string name="match_turn_result">Résultat du tour</string>
+    <string name="match_me_label">TOI</string>
+
+    <!-- Stats -->
+    <string name="stat_votes_max">/ 20 Votes</string>
+    <string name="stat_popularite_max">/ 10 Popularité</string>
+    <string name="stat_fonds">Fonds</string>
+    <string name="stat_mechancete">Méchanceté</string>
+
+    <!-- Buttons -->
+    <string name="btn_shop">BOUTIQUE</string>
+    <string name="btn_cards">CARTES</string>
+    <string name="btn_validate">VALIDER</string>
+    <string name="btn_roll">LANCER</string>
+    <string name="btn_end_turn">FIN DU TOUR</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">ANNULER</string>
+    <string name="btn_quit">QUITTER</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_pause">Pause</string>
+    <string name="cd_close">Fermer</string>
+    <string name="cd_die">Dé</string>
+    <string name="cd_avatar">Portrait</string>
+
+    <!-- Pause dialog -->
+    <string name="pause_title">PAUSE</string>
+    <string name="pause_turn">Tour %1$d · à %2$s de jouer</string>
+    <string name="btn_resume">REPRENDRE</string>
+    <string name="btn_rules">RÈGLES</string>
+    <string name="btn_settings">RÉGLAGES</string>
+
+    <!-- Quit confirmation dialog -->
+    <string name="quit_title">QUITTER LA PARTIE ?</string>
+    <string name="quit_message">La partie en cours sera perdue. %1$s garde l\'Élysée, par forfait.</string>
+
+    <!-- Yield dialog -->
+    <string name="yield_pass_phone">PASSE LE TÉLÉPHONE À %1$s</string>
+    <string name="yield_title">CÉDER L\'ÉLYSÉE ?</string>
+    <string name="yield_tweet_notice">%1$s t\'a tweeté dessus :</string>
+    <string name="yield_damage">−%1$d Popularité</string>
+    <string name="yield_remaining">. Il t\'en reste %1$d.</string>
+    <string name="btn_stay">RESTER</string>
+    <string name="btn_yield">CÉDER</string>
+    <string name="yield_stay_hint">+2 Votes à ton prochain tour, si tu tiens.</string>
+    <string name="yield_cede_hint">%1$s entre à l\'Élysée et gagne 1 Vote.</string>
+
+    <!-- Player details dialog -->
+    <string name="player_details_cards">Ses cartes</string>
+    <string name="player_details_number">Joueur %1$d</string>
+
+    <!-- Shop dialog -->
+    <string name="shop_title">BOUTIQUE</string>
+    <string name="shop_hint">Touche une carte pour la choisir. Appui long pour les détails.</string>
+    <string name="shop_your_choice">TON CHOIX</string>
+    <string name="shop_affordable">Achetable · il te restera %1$d Fonds.</string>
+    <string name="btn_buy">ACHETER</string>
+    <string name="btn_renew">RENOUVELER</string>
+
+    <!-- My cards dialog -->
+    <string name="my_cards_title">TES CARTES</string>
+    <string name="my_cards_hint">Les cartes Pouvoir restent en jeu. Appui long pour les détails.</string>
+    <string name="mechancete_progress">/ %1$d pour une carte</string>
+    <string name="mechancete_tiers_hint">Paliers à 3, 6 et 10. Chaque palier donne une carte Méchanceté.</string>
+
+    <!-- Card types and card detail -->
+    <string name="card_type_action">ACTION</string>
+    <string name="card_type_pouvoir">POUVOIR</string>
+    <string name="card_type_mechancete">MÉCHANCETÉ</string>
+    <string name="card_detail_badge_pouvoir">CARTE POUVOIR</string>
+    <string name="card_detail_paid">Payée %1$d Fonds publics au tour %2$d</string>
+    <string name="card_detail_permanent">Effet permanent</string>
+
+    <!-- Mechancete dialog -->
+    <string name="mechancete_title">MÉCHANCETÉ !</string>
+    <string name="mechancete_reached">Ta méchanceté atteint %1$d. Choisis une carte, garde-la pour toi.</string>
 </resources>

@@ -11,15 +11,14 @@
         android:label="Accueil"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_homeFragment_to_gameFragment"
-            app:destination="@id/gameFragment" />
+            android:id="@+id/action_homeFragment_to_matchFragment"
+            app:destination="@id/matchFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/gameFragment"
-        android:name="com.example.koe.GameFragment"
-        android:label="Jeu"
-        tools:layout="@layout/fragment_game">
+        android:id="@+id/matchFragment"
+        android:name="com.example.koe.match.MatchFragment"
+        tools:layout="@layout/fragment_match">
         <argument
             android:name="characterName"
             android:defaultValue="Macron"
