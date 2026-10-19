@@ -81,15 +81,17 @@
             android:layout_height="56dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_thumbnail_selected"
+            android:clipToOutline="true"
             android:padding="4dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_thumb_macron"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="Macron"
                 android:scaleType="fitCenter"
-                android:src="@drawable/macron" />
+                android:src="@drawable/macron"
+                app:shapeAppearanceOverlay="@style/ThumbnailShapeAppearance" />
         </FrameLayout>
 
         <FrameLayout
@@ -98,15 +100,17 @@
             android:layout_height="56dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_thumbnail_unselected"
+            android:clipToOutline="true"
             android:padding="4dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_thumb_lepen"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="Le Pen"
                 android:scaleType="fitCenter"
-                android:src="@drawable/lepen" />
+                android:src="@drawable/lepen"
+                app:shapeAppearanceOverlay="@style/ThumbnailShapeAppearance" />
         </FrameLayout>
 
         <FrameLayout
@@ -115,15 +119,17 @@
             android:layout_height="56dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_thumbnail_unselected"
+            android:clipToOutline="true"
             android:padding="4dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_thumb_melenchon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="Mélenchon"
                 android:scaleType="fitCenter"
-                android:src="@drawable/melanchon" />
+                android:src="@drawable/melanchon"
+                app:shapeAppearanceOverlay="@style/ThumbnailShapeAppearance" />
         </FrameLayout>
 
         <FrameLayout
@@ -131,15 +137,17 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="@drawable/bg_thumbnail_unselected"
+            android:clipToOutline="true"
             android:padding="4dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_thumb_poutou"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="Poutou"
                 android:scaleType="fitCenter"
-                android:src="@drawable/poutou" />
+                android:src="@drawable/poutou"
+                app:shapeAppearanceOverlay="@style/ThumbnailShapeAppearance" />
         </FrameLayout>
 
     </LinearLayout>
