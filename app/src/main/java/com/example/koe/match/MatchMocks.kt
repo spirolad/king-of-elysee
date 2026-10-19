@@ -13,7 +13,8 @@ fun mockMatchUiState(): MatchUiState = MatchUiState(
         votes = 20,
         popularite = 7,
         fonds = 5,
-        mechancete = 2,
+        // Figma shows 2; 3 reaches the first tier so FIN DU TOUR opens the Méchanceté dialog.
+        mechancete = 3,
     ),
     dice = listOf(
         DieUi(DieFace.Number(3), highlighted = true),

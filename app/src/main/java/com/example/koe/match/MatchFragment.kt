@@ -21,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.koe.R
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.MatchDialogActions
+import com.example.koe.match.dialog.mockMechanceteDialog
 import com.example.koe.match.dialog.mockMyCardsDialog
 import com.example.koe.match.dialog.mockPauseDialog
 import com.example.koe.match.dialog.mockPlayerDetailsDialog
@@ -46,6 +47,18 @@ class MatchFragment : Fragment() {
         dialogs = dialogs.dropLast(1) + dialog
     }
 
+    // Highest Méchanceté tier already rewarded with a card.
+    private var rewardedMechanceteTier = 0
+
+    /** FIN DU TOUR: a newly reached Méchanceté tier is rewarded before the phone is handed over. */
+    private fun endTurn() {
+        val mechancete = state.me.mechancete
+        if (unrewardedMechanceteTier(mechancete, rewardedMechanceteTier) != null) {
+            push(mockMechanceteDialog().copy(level = mechancete))
+        } else {
+            push(mockYieldDialog())
+        }
+    }
 
     private val dialogActions = MatchDialogActions(
         onDismiss = { pop() },
@@ -61,7 +74,12 @@ class MatchFragment : Fragment() {
         },
         onStay = { pop() },
         onYield = { pop() },
-        onMechanceteValidate = { pop() },
+        onMechanceteValidate = {
+            rewardedMechanceteTier =
+                unrewardedMechanceteTier(state.me.mechancete, rewardedMechanceteTier) ?: rewardedMechanceteTier
+            // The end of turn goes on with the hand-over.
+            replaceTop(mockYieldDialog())
+        },
         onBuy = { pop() },
         onRenew = {},
         onCardDetails = { push(MatchDialog.CardDetail(it)) },
@@ -99,8 +117,11 @@ class MatchFragment : Fragment() {
                     )
                 },
                 onShopClick = { push(mockShopDialog()) },
-                onCardsClick = { push(mockMyCardsDialog()) },
-                onEndTurnClick = { push(mockYieldDialog()) },
+                onCardsClick = {
+                    val mechancete = state.me.mechancete
+                    push(mockMyCardsDialog().copy(mechancete = mechancete, nextTier = nextMechanceteTier(mechancete)))
+                },
+                onEndTurnClick = ::endTurn,
                 dialogActions = dialogActions,
                 contentPadding = PaddingValues(start = start, top = 12.dp, end = end, bottom = 21.dp),
             )
