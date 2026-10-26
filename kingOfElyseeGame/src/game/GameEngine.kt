@@ -209,6 +209,9 @@ class GameEngine(
 
         // Apply Points & Energy
         player.addVictoryPoints(finalVp)
+        if (summary.wickednessPoints > 0) {
+            player.addWickednessPoints(summary.wickednessPoints)
+        }
         if (!player.noEnergyNextTurn && finalEnergy > 0) {
             player.addEnergy(finalEnergy)
             alivePlayers.filter { it.id != player.id && it.hasCard("detournement") }.forEach {

@@ -240,6 +240,9 @@ class AutomaticTester(
             if (p.victoryPoints < 0) {
                 failureReasons.add("Player ${p.name} has negative VP (${p.victoryPoints})")
             }
+            if (p.wickednessPoints < 0) {
+                failureReasons.add("Player ${p.name} has negative Wickedness points (${p.wickednessPoints})")
+            }
             if (!p.isAlive && p.health > 0) {
                 failureReasons.add("Dead player ${p.name} has positive health (${p.health})")
             }

@@ -71,6 +71,25 @@ fun main() {
         check(player.victoryPoints == 10)
     }
 
+    test("Player Wickedness points mutations and bounds") {
+        val player = Player(id = PlayerId("p1"), name = "Giga", monster = Monster.GIGA_ZAUR, initialWickednessPoints = 2)
+        check(player.wickednessPoints == 2)
+
+        player.addWickednessPoints(5)
+        check(player.wickednessPoints == 7)
+
+        // Capped at MAX_WICKEDNESS_POINTS (10)
+        player.addWickednessPoints(6)
+        check(player.wickednessPoints == Player.MAX_WICKEDNESS_POINTS)
+        check(player.wickednessPoints == 10)
+
+        val deducted = player.deductWickednessPoints(4)
+        check(deducted == 4 && player.wickednessPoints == 6)
+
+        val overDeducted = player.deductWickednessPoints(10)
+        check(overDeducted == 6 && player.wickednessPoints == 0)
+    }
+
     // 2. Dice Resolver Tests
     test("DiceResolver 3-of-a-kind scoring") {
         // Three 1s -> 1 VP
@@ -84,6 +103,11 @@ fun main() {
         // Five 3s -> 3 + 2 = 5 VP
         val res3 = DiceResolver.resolve(listOf(DieFace.THREE, DieFace.THREE, DieFace.THREE, DieFace.THREE, DieFace.THREE, DieFace.ATTACK), isInTokyo = false)
         check(res3.victoryPoints == 5 && res3.attackDamage == 1)
+
+        // Wickedness points from 1s and 2s
+        check(res1.wickednessPoints == 2) // Three 1s -> 2 Wickedness
+        check(res2.wickednessPoints == 2) // Four 2s -> 1 + 1 = 2 Wickedness
+        check(res3.wickednessPoints == 0) // No 1s or 2s >= 3
     }
 
     test("DiceResolver Tokyo heal restriction") {

@@ -28,7 +28,7 @@ class ConsoleGameEventListener : GameEventListener {
 
     override fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) {
         println("\n>>> [Round $roundNumber] Turn of ${player.name} (${player.monster.displayName}) <<<")
-        println("    Stats: ❤️ HP=${player.health}/${player.maxHealth} | ⚡ Energy=${player.energy} | 🏆 VP=${player.victoryPoints}")
+        println("    Stats: ❤️ HP=${player.health}/${player.maxHealth} | ⚡ Energy=${player.energy} | 🏆 VP=${player.victoryPoints} | 😈 Wickedness=${player.wickednessPoints}")
         if (isInTokyo) {
             println("    📍 Position: INSIDE TOKYO (+2 VP awarded for holding Tokyo!)")
         } else {
@@ -47,6 +47,7 @@ class ConsoleGameEventListener : GameEventListener {
     override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {
         println("    --- Dice Results Resolved ---")
         if (summary.victoryPoints > 0) println("    +${summary.victoryPoints} 🏆 Victory Points")
+        if (summary.wickednessPoints > 0) println("    +${summary.wickednessPoints} 😈 Wickedness Points")
         if (summary.energy > 0) println("    +${summary.energy} ⚡ Energy")
         if (summary.attackDamage > 0) println("    ⚔️ ${summary.attackDamage} Attack Damage dealt")
         if (summary.actualHeal > 0) println("    +${summary.actualHeal} ❤️ Health healed")
@@ -91,7 +92,7 @@ class ConsoleGameEventListener : GameEventListener {
             is WinReason.VictoryPointsReached -> println("Victory Condition: Reached ${reason.points} Victory Points!")
             is WinReason.LastMonsterStanding -> println("Victory Condition: Last monster left standing!")
         }
-        println("Final Stats: ❤️ ${winner.health} HP | ⚡ ${winner.energy} Energy | 🏆 ${winner.victoryPoints} VP")
+        println("Final Stats: ❤️ ${winner.health} HP | ⚡ ${winner.energy} Energy | 🏆 ${winner.victoryPoints} VP | 😈 ${winner.wickednessPoints} Wickedness")
         println("=".repeat(60))
     }
 }

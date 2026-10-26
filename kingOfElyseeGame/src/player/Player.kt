@@ -14,7 +14,8 @@ class Player(
     maxHealth: Int = DEFAULT_MAX_HEALTH,
     initialHealth: Int = maxHealth,
     initialEnergy: Int = 0,
-    initialVictoryPoints: Int = 0
+    initialVictoryPoints: Int = 0,
+    initialWickednessPoints: Int = 0
 ) {
     var maxHealth: Int = maxHealth
         private set
@@ -26,6 +27,9 @@ class Player(
         private set
 
     var victoryPoints: Int = initialVictoryPoints.coerceAtLeast(0)
+        private set
+
+    var wickednessPoints: Int = initialWickednessPoints.coerceIn(0, MAX_WICKEDNESS_POINTS)
         private set
 
     var noEnergyNextTurn: Boolean = false
@@ -113,6 +117,19 @@ class Player(
         return deducted
     }
 
+    fun addWickednessPoints(amount: Int) {
+        if (amount > 0) {
+            wickednessPoints = minOf(MAX_WICKEDNESS_POINTS, wickednessPoints + amount)
+        }
+    }
+
+    fun deductWickednessPoints(amount: Int): Int {
+        if (amount <= 0) return 0
+        val deducted = minOf(wickednessPoints, amount)
+        wickednessPoints -= deducted
+        return deducted
+    }
+
     fun addCard(card: PowerCard) {
         if (card.type == CardType.KEEP) {
             _cards.add(card)
@@ -122,10 +139,11 @@ class Player(
     fun removeCard(card: PowerCard): Boolean = _cards.remove(card)
 
     override fun toString(): String =
-        "$name [${monster.displayName}] (❤️ $health/$maxHealth, ⚡ $energy, 🏆 $victoryPoints)"
+        "$name [${monster.displayName}] (❤️ $health/$maxHealth, ⚡ $energy, 🏆 $victoryPoints, 😈 $wickednessPoints)"
 
     companion object {
         const val DEFAULT_MAX_HEALTH = 10
         const val WINNING_VICTORY_POINTS = 20
+        const val MAX_WICKEDNESS_POINTS = 10
     }
 }
