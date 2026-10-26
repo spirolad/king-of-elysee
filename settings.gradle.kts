@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "King of Elysee"
 include(":app")
+include(":game")
  
