@@ -168,9 +168,8 @@ class MatchViewModel(
 
     fun onEndTurnClick() {
         val decision = pending as? HumanDecision.Shop ?: return
-        complete(decision.answer, ShopAction.Pass, "pass")
-        pending = null
         requests = requests.filterNot { it == DialogRequest.Shop }
+        complete(decision.answer, ShopAction.Pass, "pass")
         refresh()
     }
 
@@ -188,7 +187,6 @@ class MatchViewModel(
             is HumanDecision.KeepDice -> keepDice(decision, keptSelection.sorted())
             else -> return
         }
-        pending = null
         refresh()
     }
 
@@ -196,7 +194,6 @@ class MatchViewModel(
     fun onValidateDiceClick() {
         val decision = pending as? HumanDecision.KeepDice ?: return
         keepDice(decision, shownDice.indices.toList())
-        pending = null
         refresh()
     }
 
@@ -220,39 +217,38 @@ class MatchViewModel(
 
     fun onStay() {
         val decision = pending as? HumanDecision.Yield ?: return
+        dropTopRequest()
         complete(decision.answer, false, "yield:false")
-        pending = null
-        pop()
+        refresh()
     }
 
     fun onYield() {
         val decision = pending as? HumanDecision.Yield ?: return
+        dropTopRequest()
         complete(decision.answer, true, "yield:true")
-        pending = null
-        pop()
+        refresh()
     }
 
     fun onMechanceteValidate(card: PowerCardUi) {
         val decision = pending as? HumanDecision.Mechancete ?: return
         val choice = decision.choices.firstOrNull { it.id.value == card.id } ?: return
+        dropTopRequest()
         complete(decision.answer, choice, "mechancete:${choice.id.value}")
-        pending = null
-        pop()
+        refresh()
     }
 
     fun onBuy(card: PowerCardUi) {
         val decision = pending as? HumanDecision.Shop ?: return
         val offer = decision.offers.firstOrNull { it.card.id.value == card.id } ?: return
+        dropTopRequest()
         complete(decision.answer, ShopAction.Buy(offer.card), "buy:${offer.card.id.value}")
-        pending = null
-        pop()
+        refresh()
     }
 
     fun onRenew() {
         val decision = pending as? HumanDecision.Shop ?: return
-        complete(decision.answer, ShopAction.Sweep, "sweep")
-        pending = null
         // The shop stays open; the engine asks again with the new offers.
+        complete(decision.answer, ShopAction.Sweep, "sweep")
         refresh()
     }
 
@@ -282,11 +278,17 @@ class MatchViewModel(
         refresh()
     }
 
-    /** Completes the human's [deferred] and logs the encoded answer so a restored match can replay it. */
+    /**
+     * Completes the human's [deferred] and logs the encoded answer so a restored match can replay it.
+     *
+     * Completing resumes the engine at once on Main.immediate, and it may ask the next decision before this call
+     * returns, so every state change comes first and [deferred] is completed last.
+     */
     private fun <T> complete(deferred: CompletableDeferred<T>, value: T, entry: String) {
-        deferred.complete(value)
+        pending = null
         answers += entry
         savedState[KEY_ANSWERS] = ArrayList(answers)
+        deferred.complete(value)
     }
 
     private fun keepDice(decision: HumanDecision.KeepDice, kept: List<Int>) {
@@ -334,6 +336,12 @@ class MatchViewModel(
         if (outcome != null) return
         requests = requests + request
         refresh()
+    }
+
+    /** Drops the visible dialog without refreshing; the caller completes its decision and then refreshes. */
+    private fun dropTopRequest() {
+        if (outcome != null) return
+        requests = requests.dropLast(1)
     }
 
     private fun pop() {

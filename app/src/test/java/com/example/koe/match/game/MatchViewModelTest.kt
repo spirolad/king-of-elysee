@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -423,5 +424,26 @@ class MatchViewModelTest {
         restored.onPauseClick()
         assertEquals(2, (first.dialogs.value.last() as MatchDialog.Pause).turn)
         assertEquals(2, (restored.dialogs.value.last() as MatchDialog.Pause).turn)
+    }
+
+    @Test
+    fun answersSurviveImmediateDispatch() {
+        // Main.immediate resumes the engine inside the intent that answers it, so the engine's next request must survive.
+        val dispatcher = UnconfinedTestDispatcher()
+        Dispatchers.setMain(dispatcher)
+        runTest(dispatcher) {
+            val viewModel = viewModel()
+            viewModel.start()
+
+            viewModel.onRollClick()
+            assertEquals(RollUi(1, 3), viewModel.uiState.value.roll)
+
+            viewModel.onValidateDiceClick()
+            assertTrue(viewModel.uiState.value.canEndTurn)
+
+            viewModel.onEndTurnClick()
+            advanceUntilIdle()
+            assertEquals(RollUi(0, 3), viewModel.uiState.value.roll)
+        }
     }
 }
