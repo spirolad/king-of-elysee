@@ -34,6 +34,20 @@ class GameHistory(private val limit: Int = 100) {
 
     fun eliminated(player: Player, round: Int) = add(player, round, HistoryKind.ELIMINATED)
 
+    /** What [player]'s dice brought; ignored when they brought nothing visible. */
+    fun diceResult(player: Player, votes: Int, fonds: Int, popularite: Int, tweets: Int, round: Int) {
+        if (votes == 0 && fonds == 0 && popularite == 0 && tweets == 0) return
+        add(
+            player,
+            round,
+            HistoryKind.DICE_RESULT,
+            amount = tweets.takeIf { it > 0 },
+            votes = votes,
+            fonds = fonds,
+            popularite = popularite,
+        )
+    }
+
     private fun add(
         player: Player,
         round: Int,
@@ -41,6 +55,9 @@ class GameHistory(private val limit: Int = 100) {
         target: Candidate? = null,
         amount: Int? = null,
         cardName: String? = null,
+        votes: Int = 0,
+        fonds: Int = 0,
+        popularite: Int = 0,
     ) {
         val entry = HistoryEntryUi(
             round = round,
@@ -49,6 +66,9 @@ class GameHistory(private val limit: Int = 100) {
             target = target,
             amount = amount,
             cardName = cardName,
+            votes = votes,
+            fonds = fonds,
+            popularite = popularite,
         )
         log = (listOf(entry) + log).take(limit)
     }

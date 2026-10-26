@@ -7,7 +7,7 @@ enum class CardKind { POUVOIR, ACTION, MECHANCETE }
 
 enum class GameOverReason { VOTES, LAST_STANDING, ELIMINATED }
 
-enum class HistoryKind { TURN_STARTED, TURN_SKIPPED, TWEET, ENTERED_ELYSEE, YIELDED_ELYSEE, BOUGHT_CARD, MECHANCETE_CARD, ELIMINATED }
+enum class HistoryKind { TURN_STARTED, TURN_SKIPPED, DICE_RESULT, TWEET, ENTERED_ELYSEE, YIELDED_ELYSEE, BOUGHT_CARD, MECHANCETE_CARD, ELIMINATED }
 
 @Immutable
 data class PowerCardUi(
@@ -45,6 +45,10 @@ data class HistoryEntryUi(
     val target: Candidate? = null,
     val amount: Int? = null,
     val cardName: String? = null,
+    // DICE_RESULT only; `amount` holds the tweet count there.
+    val votes: Int = 0,
+    val fonds: Int = 0,
+    val popularite: Int = 0,
 )
 
 sealed interface MatchDialog {

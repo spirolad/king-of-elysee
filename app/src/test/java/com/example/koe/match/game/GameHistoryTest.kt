@@ -64,6 +64,37 @@ class GameHistoryTest {
     }
 
     @Test
+    fun diceResultKeepsWhatTheDiceBrought() {
+        val history = GameHistory()
+
+        history.diceResult(macron, votes = 2, fonds = 3, popularite = 1, tweets = 4, round = 5)
+
+        assertEquals(
+            listOf(
+                HistoryEntryUi(
+                    5,
+                    Candidate.MACRON,
+                    HistoryKind.DICE_RESULT,
+                    amount = 4,
+                    votes = 2,
+                    fonds = 3,
+                    popularite = 1,
+                ),
+            ),
+            history.entries,
+        )
+    }
+
+    @Test
+    fun diceResultWithNothingVisibleIsIgnored() {
+        val history = GameHistory()
+
+        history.diceResult(macron, votes = 0, fonds = 0, popularite = 0, tweets = 0, round = 1)
+
+        assertTrue(history.entries.isEmpty())
+    }
+
+    @Test
     fun limitDropsTheOldestEntries() {
         val history = GameHistory(limit = 3)
 

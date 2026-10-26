@@ -275,7 +275,7 @@ class MatchViewModelTest {
         throwAndKeepAll(viewModel)
 
         viewModel.onEndTurnClick()
-        // The AI throws after 1 000 ms and keeps all after another 1 000 ms; its shop waits 2 000 ms more.
+        // The AI throws after 1 000 ms and keeps all after another 1 000 ms; its shop waits 3 000 ms more.
         advanceTimeBy(2_500)
         runCurrent()
 
@@ -515,12 +515,17 @@ class MatchViewModelTest {
         val history = viewModel.dialogs.value.last() as MatchDialog.History
         val entries = history.entries
         val elysee = entries.indexOfFirst { it.kind == HistoryKind.ENTERED_ELYSEE }
+        val dice = entries.indexOfFirst { it.kind == HistoryKind.DICE_RESULT }
         val turnStart = entries.indexOfFirst { it.kind == HistoryKind.TURN_STARTED }
         assertEquals(Candidate.MACRON, entries[elysee].actor)
+        assertEquals(Candidate.MACRON, entries[dice].actor)
+        assertEquals(6, entries[dice].fonds)
+        assertEquals(0, entries[dice].votes)
         assertEquals(Candidate.MACRON, entries[turnStart].actor)
         assertEquals(1, entries[turnStart].round)
-        // Newest first: entering the Élysée happened after the turn started.
-        assertTrue(elysee < turnStart)
+        // Newest first: the dice are resolved before the human enters the Élysée, which comes after the turn starts.
+        assertTrue(elysee < dice)
+        assertTrue(dice < turnStart)
     }
 
     @Test

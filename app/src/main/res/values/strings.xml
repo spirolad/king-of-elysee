@@ -147,12 +147,19 @@
     <string name="history_round">Tour %1$d</string>
     <string name="history_turn_started">%1$s commence son tour</string>
     <string name="history_turn_skipped">%1$s passe son tour</string>
-    <string name="history_tweet">%1$s tweete sur %2$s : −%3$d Popularité</string>
+    <string name="history_dice_result">%1$s lance les dés</string>
+    <string name="history_tweet">%1$s tweete sur %2$s</string>
     <string name="history_entered">%1$s entre à l\'Élysée</string>
     <string name="history_yielded">%1$s cède l\'Élysée</string>
-    <string name="history_bought">%1$s achète %2$s (%3$d Fonds)</string>
+    <string name="history_bought">%1$s achète %2$s</string>
     <string name="history_mechancete">%1$s gagne la carte Méchanceté %2$s</string>
     <string name="history_eliminated">%1$s est éliminé</string>
+    <string name="history_cd_popularite_loss">−%1$d Popularité</string>
+    <string name="history_cd_fonds">%1$d Fonds</string>
+    <string name="history_cd_votes">+%1$d Votes</string>
+    <string name="history_cd_popularite">+%1$d Popularité</string>
+    <string name="history_cd_mechancete">Niveau %1$d</string>
+    <string name="history_cd_tweets">%1$d Tweets</string>
 
     <!-- Card types and card detail -->
     <string name="card_type_action">ACTION</string>

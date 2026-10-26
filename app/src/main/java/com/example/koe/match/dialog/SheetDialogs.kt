@@ -34,10 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.koe.R
 import com.example.koe.match.Avatar
@@ -366,12 +369,25 @@ private fun HistoryRow(entry: HistoryEntryUi) {
                 .background(colorResource(entry.actor.avatarColor), CircleShape),
         )
         Spacer(Modifier.width(10.dp))
+        val icon = historyIcon(entry.kind)
+        Image(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            colorFilter = if (icon in LightHistoryIcons) {
+                ColorFilter.tint(colorResource(R.color.koe_text_primary))
+            } else {
+                null
+            },
+        )
+        Spacer(Modifier.width(10.dp))
         KoeText(
             text = historySentence(entry),
             style = KoeTextStyles.Body,
             color = colorResource(R.color.koe_text_primary),
             modifier = Modifier.weight(1f),
         )
+        HistoryChips(entry = entry)
         Spacer(Modifier.width(10.dp))
         KoeText(
             text = stringResource(R.string.history_round, entry.round),
@@ -381,19 +397,128 @@ private fun HistoryRow(entry: HistoryEntryUi) {
     }
 }
 
+// Drawables drawn white for the black buttons; tinted so they stay visible on the white sheet.
+private val LightHistoryIcons = setOf(R.drawable.ic_dialog_play)
+
+private fun historyIcon(kind: HistoryKind): Int = when (kind) {
+    HistoryKind.TURN_STARTED -> R.drawable.ic_dialog_play
+    HistoryKind.TURN_SKIPPED -> R.drawable.ic_dialog_clock
+    // No die drawable exists; the card stack is the closest.
+    HistoryKind.DICE_RESULT -> R.drawable.ic_board_cards
+    HistoryKind.TWEET -> R.drawable.ic_board_tweet
+    HistoryKind.ENTERED_ELYSEE, HistoryKind.YIELDED_ELYSEE -> R.drawable.ic_board_crown
+    HistoryKind.BOUGHT_CARD -> R.drawable.ic_board_shop
+    HistoryKind.MECHANCETE_CARD -> R.drawable.ic_board_stat_mechancete
+    HistoryKind.ELIMINATED -> R.drawable.ic_dialog_close
+}
+
+// Numbers live in chips, so the sentence itself stays free of them.
+@Composable
+private fun HistoryChips(entry: HistoryEntryUi) {
+    val amount = entry.amount ?: 0
+    when (entry.kind) {
+        HistoryKind.TWEET -> HistoryChip(
+            icon = R.drawable.ic_board_stat_popularite,
+            colorRes = R.color.koe_text_popularite,
+            text = "−$amount",
+            description = stringResource(R.string.history_cd_popularite_loss, amount),
+        )
+        HistoryKind.BOUGHT_CARD -> HistoryChip(
+            icon = R.drawable.ic_board_stat_fonds,
+            colorRes = R.color.koe_text_warning,
+            text = amount.toString(),
+            description = stringResource(R.string.history_cd_fonds, amount),
+        )
+        HistoryKind.MECHANCETE_CARD -> HistoryChip(
+            icon = R.drawable.ic_board_stat_mechancete,
+            colorRes = R.color.koe_text_mechancete,
+            text = amount.toString(),
+            description = stringResource(R.string.history_cd_mechancete, amount),
+        )
+        HistoryKind.DICE_RESULT -> {
+            if (entry.votes > 0) {
+                HistoryChip(
+                    icon = R.drawable.ic_board_stat_vote,
+                    colorRes = R.color.koe_text_votes,
+                    text = "+${entry.votes}",
+                    description = stringResource(R.string.history_cd_votes, entry.votes),
+                )
+            }
+            if (entry.fonds > 0) {
+                HistoryChip(
+                    icon = R.drawable.ic_board_stat_fonds,
+                    colorRes = R.color.koe_text_warning,
+                    text = "+${entry.fonds}",
+                    description = stringResource(R.string.history_cd_fonds, entry.fonds),
+                )
+            }
+            if (entry.popularite > 0) {
+                HistoryChip(
+                    icon = R.drawable.ic_board_stat_popularite,
+                    colorRes = R.color.koe_text_popularite,
+                    text = "+${entry.popularite}",
+                    description = stringResource(R.string.history_cd_popularite, entry.popularite),
+                )
+            }
+            if (amount > 0) {
+                HistoryChip(
+                    icon = R.drawable.ic_board_tweet,
+                    colorRes = R.color.koe_text_primary,
+                    text = amount.toString(),
+                    description = stringResource(R.string.history_cd_tweets, amount),
+                )
+            }
+        }
+        HistoryKind.TURN_STARTED,
+        HistoryKind.TURN_SKIPPED,
+        HistoryKind.ENTERED_ELYSEE,
+        HistoryKind.YIELDED_ELYSEE,
+        HistoryKind.ELIMINATED,
+        -> Unit
+    }
+}
+
+@Composable
+private fun HistoryChip(
+    icon: Int,
+    colorRes: Int,
+    text: String,
+    description: String,
+) {
+    Row(
+        Modifier
+            .padding(start = 8.dp)
+            // Merged so the chip reads as one node for accessibility and tests.
+            .semantics(mergeDescendants = true) { contentDescription = description },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+        )
+        Spacer(Modifier.width(4.dp))
+        KoeText(
+            text = text,
+            style = KoeTextStyles.ChipStat,
+            color = colorResource(colorRes),
+        )
+    }
+}
+
 @Composable
 private fun historySentence(entry: HistoryEntryUi): String {
     val actor = stringResource(entry.actor.nameRes)
     val target = entry.target?.let { stringResource(it.nameRes) }.orEmpty()
     val card = entry.cardName.orEmpty()
-    val amount = entry.amount ?: 0
     return when (entry.kind) {
         HistoryKind.TURN_STARTED -> stringResource(R.string.history_turn_started, actor)
         HistoryKind.TURN_SKIPPED -> stringResource(R.string.history_turn_skipped, actor)
-        HistoryKind.TWEET -> stringResource(R.string.history_tweet, actor, target, amount)
+        HistoryKind.DICE_RESULT -> stringResource(R.string.history_dice_result, actor)
+        HistoryKind.TWEET -> stringResource(R.string.history_tweet, actor, target)
         HistoryKind.ENTERED_ELYSEE -> stringResource(R.string.history_entered, actor)
         HistoryKind.YIELDED_ELYSEE -> stringResource(R.string.history_yielded, actor)
-        HistoryKind.BOUGHT_CARD -> stringResource(R.string.history_bought, actor, card, amount)
+        HistoryKind.BOUGHT_CARD -> stringResource(R.string.history_bought, actor, card)
         HistoryKind.MECHANCETE_CARD -> stringResource(R.string.history_mechancete, actor, card)
         HistoryKind.ELIMINATED -> stringResource(R.string.history_eliminated, actor)
     }

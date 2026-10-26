@@ -103,6 +103,9 @@ class MatchViewModel(
         }
         override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {
             tally.resolved(player, summary)
+            tally.result?.let {
+                history.diceResult(player, it.votes, it.fonds, it.popularite, it.tweets, engine.roundNumber)
+            }
             refresh()
         }
         override fun onMechanceteGained(player: Player, amount: Int, total: Int) = refresh()
@@ -479,10 +482,11 @@ class MatchViewModel(
     }
 
     companion object {
-        const val AI_DELAY_MILLIS = 700L
+        // Each AI decision waits this long, so the player can follow the AI turns.
+        const val AI_DELAY_MILLIS = 1_200L
 
-        // The turn result stays up longer than a single decision.
-        private const val AI_RESULT_FACTOR = 2
+        // The turn result stays up longer than a single decision: 3 x 1 200 ms = 3.6 s.
+        private const val AI_RESULT_FACTOR = 3
 
         private const val KEY_SEED = "match.seed"
         private const val KEY_ANSWERS = "match.answers"

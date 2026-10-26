@@ -20,6 +20,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -548,7 +549,20 @@ class MatchDialogsTest {
         setDialogs(listOf(mockHistoryDialog()))
 
         composeTestRule.onNodeWithText("HISTORIQUE").assertExists()
-        composeTestRule.onNodeWithText("Le Pen tweete sur Macron : −2 Popularité").assertExists()
+        composeTestRule.onNodeWithText("Le Pen tweete sur Macron").assertExists()
+        composeTestRule.onNodeWithText("Le Pen lance les dés").assertExists()
+        composeTestRule.onNodeWithText("Macron achète Fausse info").assertExists()
+    }
+
+    @Test
+    fun historyChipsShowNumbers() {
+        setDialogs(listOf(mockHistoryDialog()))
+
+        composeTestRule.onNodeWithContentDescription("−2 Popularité").assertExists()
+        composeTestRule.onNodeWithContentDescription("+3 Votes").assertExists()
+        composeTestRule.onNodeWithContentDescription("1 Fonds").assertExists()
+        composeTestRule.onNodeWithContentDescription("3 Fonds").assertExists()
+        composeTestRule.onNodeWithContentDescription("2 Tweets").assertExists()
     }
 
     @Test

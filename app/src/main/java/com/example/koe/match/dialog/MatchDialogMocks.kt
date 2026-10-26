@@ -151,7 +151,8 @@ fun mockMyCardsDialog(): MatchDialog.MyCards = MatchDialog.MyCards(
 
 fun mockHistoryDialog(): MatchDialog.History = MatchDialog.History(
     entries = listOf(
-        HistoryEntryUi(round = 2, actor = Candidate.MACRON, kind = HistoryKind.BOUGHT_CARD, amount = 5, cardName = "Fausse info"),
+        HistoryEntryUi(round = 2, actor = Candidate.MACRON, kind = HistoryKind.BOUGHT_CARD, amount = 3, cardName = "Fausse info"),
+        HistoryEntryUi(round = 2, actor = Candidate.LEPEN, kind = HistoryKind.DICE_RESULT, amount = 2, votes = 3, fonds = 1),
         HistoryEntryUi(round = 2, actor = Candidate.LEPEN, kind = HistoryKind.TWEET, target = Candidate.MACRON, amount = 2),
         HistoryEntryUi(round = 2, actor = Candidate.LEPEN, kind = HistoryKind.TURN_STARTED),
         HistoryEntryUi(round = 1, actor = Candidate.MELENCHON, kind = HistoryKind.ENTERED_ELYSEE),
