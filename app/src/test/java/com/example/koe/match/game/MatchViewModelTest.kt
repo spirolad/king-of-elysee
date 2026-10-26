@@ -1,5 +1,6 @@
 package com.example.koe.match.game
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.koe.game.dice.DiceRoller
 import com.example.koe.game.dice.DieFace as RolledFace
 import com.example.koe.game.shop.Shop
@@ -334,5 +335,93 @@ class MatchViewModelTest {
 
         advanceUntilIdle()
         assertEquals(dialogs, viewModel.dialogs.value)
+    }
+
+    /** The human's first throw, then three AI throws; the AIs use the same dice whether a match is live or replayed. */
+    private fun savedMatchScript() = arrayOf(
+        listOf(RolledFace.ONE, RolledFace.ONE, RolledFace.ONE, RolledFace.ENERGY, RolledFace.ENERGY, RolledFace.ENERGY),
+        energyRoll(),
+        energyRoll(),
+        energyRoll(),
+    )
+
+    /** The human throws, keeps three ones, rerolls the rest, keeps every die and ends the turn. */
+    private fun TestScope.playFirstTurn(viewModel: MatchViewModel) {
+        viewModel.onRollClick()
+        advanceUntilIdle()
+        viewModel.onDieClick(0)
+        viewModel.onDieClick(1)
+        viewModel.onDieClick(2)
+        viewModel.onRollClick()
+        advanceUntilIdle()
+        viewModel.onValidateDiceClick()
+        advanceUntilIdle()
+        viewModel.onEndTurnClick()
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun answersAreLoggedPerDecision() = runTest {
+        val handle = SavedStateHandle()
+        val viewModel = MatchViewModel(
+            Candidate.MACRON,
+            handle,
+            diceRoller = QueueDiceRoller(*savedMatchScript()),
+            shop = Shop(initialCards = emptyList()),
+            aiDelayMillis = 0,
+        )
+        viewModel.start()
+        advanceUntilIdle()
+
+        playFirstTurn(viewModel)
+
+        assertEquals(
+            listOf("roll", "keep:0,1,2", "keep:0,1,2,3,4,5", "pass"),
+            handle.get<ArrayList<String>>("match.answers"),
+        )
+    }
+
+    @Test
+    fun matchIsRestoredFromSavedState() = runTest {
+        val handle = SavedStateHandle()
+        val first = MatchViewModel(
+            Candidate.MACRON,
+            handle,
+            diceRoller = QueueDiceRoller(*savedMatchScript()),
+            shop = Shop(initialCards = emptyList()),
+            aiDelayMillis = 0,
+        )
+        first.start()
+        advanceUntilIdle()
+        playFirstTurn(first)
+
+        // A new process gets only the seed and the answers; the engine is rebuilt and replays them.
+        val restored = MatchViewModel(
+            Candidate.MACRON,
+            SavedStateHandle(
+                mapOf(
+                    "match.seed" to handle.get<Long>("match.seed"),
+                    "match.answers" to handle.get<ArrayList<String>>("match.answers"),
+                ),
+            ),
+            diceRoller = QueueDiceRoller(*savedMatchScript()),
+            shop = Shop(initialCards = emptyList()),
+            aiDelayMillis = 0,
+        )
+        restored.start()
+        advanceUntilIdle()
+
+        val expected = first.uiState.value
+        val state = restored.uiState.value
+        assertEquals(expected.me, state.me)
+        assertEquals(expected.opponents, state.opponents)
+        assertEquals(expected.king, state.king)
+        assertEquals(RollUi(0, 3), state.roll)
+        assertEquals(expected.roll, state.roll)
+
+        first.onPauseClick()
+        restored.onPauseClick()
+        assertEquals(2, (first.dialogs.value.last() as MatchDialog.Pause).turn)
+        assertEquals(2, (restored.dialogs.value.last() as MatchDialog.Pause).turn)
     }
 }

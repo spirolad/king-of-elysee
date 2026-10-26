@@ -1,5 +1,6 @@
 package com.example.koe.match
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,8 @@ fun MatchScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = MatchBoardDefaultPadding,
 ) {
+    // Back on the bare board pauses instead of leaving the match; QUITTER in the pause dialog is the way out.
+    BackHandler(enabled = dialogs.isEmpty(), onBack = onPauseClick)
     // The dialogs sit on the full frame, so they are not padded by the board's cutout insets.
     Box(modifier.fillMaxSize()) {
         MatchBoard(

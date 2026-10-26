@@ -13,18 +13,20 @@ import kotlinx.coroutines.delay
  * Wraps an AI controller so the player can follow AI turns. Each decision waits [thinkMillis], except the
  * first shop decision of a turn, which waits [resultMillis] so the turn's result stays readable.
  * The first shop decision is detected from the start of the turn, [awaitFirstRoll].
+ * While [skipDelays] is true, as when a restored match replays the human's answers, no decision waits.
  */
 class PacedAiController(
     private val delegate: PlayerController = AiPlayerController(),
     private val thinkMillis: Long,
     private val resultMillis: Long,
+    private val skipDelays: () -> Boolean = { false },
 ) : PlayerController {
 
     private var isFirstShopDecision = true
 
     override suspend fun awaitFirstRoll(player: Player, maxRolls: Int) {
         isFirstShopDecision = true
-        delay(thinkMillis)
+        if (!skipDelays()) delay(thinkMillis)
         delegate.awaitFirstRoll(player, maxRolls)
     }
 
@@ -35,7 +37,7 @@ class PacedAiController(
         currentDice: List<DieFace>,
         currentlyKept: List<Boolean>,
     ): List<Int> {
-        delay(thinkMillis)
+        if (!skipDelays()) delay(thinkMillis)
         return delegate.chooseDiceToKeep(player, rollNumber, maxRolls, currentDice, currentlyKept)
     }
 
@@ -44,7 +46,7 @@ class PacedAiController(
         attacker: Player,
         damage: Int,
     ): Boolean {
-        delay(thinkMillis)
+        if (!skipDelays()) delay(thinkMillis)
         return delegate.shouldYieldTokyo(player, attacker, damage)
     }
 
@@ -55,7 +57,7 @@ class PacedAiController(
     ): ShopAction {
         val wait = if (isFirstShopDecision) resultMillis else thinkMillis
         isFirstShopDecision = false
-        delay(wait)
+        if (!skipDelays()) delay(wait)
         return delegate.chooseShopAction(player, offers, sweepCost)
     }
 
@@ -64,7 +66,7 @@ class PacedAiController(
         tier: Int,
         choices: List<PowerCard>,
     ): PowerCard {
-        delay(thinkMillis)
+        if (!skipDelays()) delay(thinkMillis)
         return delegate.chooseMechanceteCard(player, tier, choices)
     }
 }

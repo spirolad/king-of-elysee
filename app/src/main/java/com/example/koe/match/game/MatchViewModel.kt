@@ -1,7 +1,9 @@
 package com.example.koe.match.game
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -17,6 +19,7 @@ import com.example.koe.game.engine.WinReason
 import com.example.koe.game.player.Player
 import com.example.koe.game.player.PlayerController
 import com.example.koe.game.player.ShopAction
+import com.example.koe.game.shop.CardCatalog
 import com.example.koe.game.shop.CardEffectResult
 import com.example.koe.game.shop.PowerCard
 import com.example.koe.game.shop.Shop
@@ -25,19 +28,32 @@ import com.example.koe.match.MatchUiState
 import com.example.koe.match.RollUi
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.PowerCardUi
+import kotlin.random.Random
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** Plays one match for the [human] candidate; the AI opponents are paced by [aiDelayMillis]. */
+/**
+ * Plays one match for the [human] candidate; the AI opponents are paced by [aiDelayMillis].
+ *
+ * The match is reproducible: the engine is seeded from [KEY_SEED] and the human's answers are logged under
+ * [KEY_ANSWERS]. A restored match replays those answers before it waits for the human again.
+ */
 class MatchViewModel(
     private val human: Candidate,
-    diceRoller: DiceRoller = RandomDiceRoller(),
-    shop: Shop = Shop(),
+    private val savedState: SavedStateHandle = SavedStateHandle(),
+    diceRoller: DiceRoller? = null,
+    shop: Shop? = null,
     aiDelayMillis: Long = AI_DELAY_MILLIS,
 ) : ViewModel() {
+
+    private val seed: Long = savedState.get<Long>(KEY_SEED) ?: Random.nextLong().also { savedState[KEY_SEED] = it }
+    private val answers: MutableList<String> =
+        savedState.get<ArrayList<String>>(KEY_ANSWERS)?.toMutableList() ?: mutableListOf()
+    private val replay = ArrayDeque(answers)
 
     private val players: List<Player> = (listOf(human) + Candidate.entries.filter { it != human })
         .map { it.toPlayer() }
@@ -111,13 +127,14 @@ class MatchViewModel(
                 PacedAiController(
                     thinkMillis = aiDelayMillis,
                     resultMillis = aiDelayMillis * AI_RESULT_FACTOR,
+                    skipDelays = { replay.isNotEmpty() },
                 )
             }
             player.id to controller
         },
         config = GameConfig(),
-        diceRoller = diceRoller,
-        shop = shop,
+        diceRoller = diceRoller ?: RandomDiceRoller(java.util.Random(seed)),
+        shop = shop ?: Shop(initialCards = CardCatalog.createStandardDeck().shuffled(Random(seed))),
         eventListener = listener,
     )
 
@@ -151,7 +168,7 @@ class MatchViewModel(
 
     fun onEndTurnClick() {
         val decision = pending as? HumanDecision.Shop ?: return
-        decision.answer.complete(ShopAction.Pass)
+        complete(decision.answer, ShopAction.Pass, "pass")
         pending = null
         requests = requests.filterNot { it == DialogRequest.Shop }
         refresh()
@@ -167,8 +184,8 @@ class MatchViewModel(
     /** Throws the dice, or rerolls the dice not kept. */
     fun onRollClick() {
         when (val decision = pending) {
-            is HumanDecision.Roll -> decision.answer.complete(Unit)
-            is HumanDecision.KeepDice -> decision.answer.complete(keptSelection.sorted())
+            is HumanDecision.Roll -> complete(decision.answer, Unit, "roll")
+            is HumanDecision.KeepDice -> keepDice(decision, keptSelection.sorted())
             else -> return
         }
         pending = null
@@ -178,7 +195,7 @@ class MatchViewModel(
     /** Keeps every die, which ends the rolls. */
     fun onValidateDiceClick() {
         val decision = pending as? HumanDecision.KeepDice ?: return
-        decision.answer.complete(shownDice.indices.toList())
+        keepDice(decision, shownDice.indices.toList())
         pending = null
         refresh()
     }
@@ -203,14 +220,14 @@ class MatchViewModel(
 
     fun onStay() {
         val decision = pending as? HumanDecision.Yield ?: return
-        decision.answer.complete(false)
+        complete(decision.answer, false, "yield:false")
         pending = null
         pop()
     }
 
     fun onYield() {
         val decision = pending as? HumanDecision.Yield ?: return
-        decision.answer.complete(true)
+        complete(decision.answer, true, "yield:true")
         pending = null
         pop()
     }
@@ -218,7 +235,7 @@ class MatchViewModel(
     fun onMechanceteValidate(card: PowerCardUi) {
         val decision = pending as? HumanDecision.Mechancete ?: return
         val choice = decision.choices.firstOrNull { it.id.value == card.id } ?: return
-        decision.answer.complete(choice)
+        complete(decision.answer, choice, "mechancete:${choice.id.value}")
         pending = null
         pop()
     }
@@ -226,14 +243,14 @@ class MatchViewModel(
     fun onBuy(card: PowerCardUi) {
         val decision = pending as? HumanDecision.Shop ?: return
         val offer = decision.offers.firstOrNull { it.card.id.value == card.id } ?: return
-        decision.answer.complete(ShopAction.Buy(offer.card))
+        complete(decision.answer, ShopAction.Buy(offer.card), "buy:${offer.card.id.value}")
         pending = null
         pop()
     }
 
     fun onRenew() {
         val decision = pending as? HumanDecision.Shop ?: return
-        decision.answer.complete(ShopAction.Sweep)
+        complete(decision.answer, ShopAction.Sweep, "sweep")
         pending = null
         // The shop stays open; the engine asks again with the new offers.
         refresh()
@@ -244,6 +261,14 @@ class MatchViewModel(
     private fun onHumanDecision(decision: HumanDecision?) {
         // The engine may ask once more before its job stops; the board takes no input after the game over.
         if (outcome != null && decision != null) return
+        if (decision != null && replay.isNotEmpty()) {
+            if (replayAnswer(decision, replay.removeFirst())) {
+                refresh()
+                return
+            }
+            // The log does not fit the match any more, so the rest of the match is played live.
+            replay.clear()
+        }
         pending = decision
         when (decision) {
             is HumanDecision.KeepDice -> keptSelection = decision.currentlyKept.withIndex()
@@ -255,6 +280,54 @@ class MatchViewModel(
             else -> Unit
         }
         refresh()
+    }
+
+    /** Completes the human's [deferred] and logs the encoded answer so a restored match can replay it. */
+    private fun <T> complete(deferred: CompletableDeferred<T>, value: T, entry: String) {
+        deferred.complete(value)
+        answers += entry
+        savedState[KEY_ANSWERS] = ArrayList(answers)
+    }
+
+    private fun keepDice(decision: HumanDecision.KeepDice, kept: List<Int>) {
+        complete(decision.answer, kept, "keep:" + kept.joinToString(","))
+    }
+
+    /** Completes [decision] with a logged [entry] without logging it again; false when the entry does not fit it. */
+    private fun replayAnswer(decision: HumanDecision, entry: String): Boolean {
+        val value = entry.substringAfter(':', "")
+        when (decision) {
+            is HumanDecision.Roll -> {
+                if (entry != "roll") return false
+                decision.answer.complete(Unit)
+            }
+            is HumanDecision.KeepDice -> {
+                if (!entry.startsWith("keep:")) return false
+                decision.answer.complete(if (value.isEmpty()) emptyList() else value.split(",").map { it.toInt() })
+            }
+            is HumanDecision.Shop -> {
+                val action = when {
+                    entry == "pass" -> ShopAction.Pass
+                    entry == "sweep" -> ShopAction.Sweep
+                    entry.startsWith("buy:") -> {
+                        val card = decision.offers.firstOrNull { it.card.id.value == value }?.card ?: return false
+                        ShopAction.Buy(card)
+                    }
+                    else -> return false
+                }
+                decision.answer.complete(action)
+            }
+            is HumanDecision.Yield -> {
+                if (entry != "yield:true" && entry != "yield:false") return false
+                decision.answer.complete(entry == "yield:true")
+            }
+            is HumanDecision.Mechancete -> {
+                if (!entry.startsWith("mechancete:")) return false
+                val choice = decision.choices.firstOrNull { it.id.value == value } ?: return false
+                decision.answer.complete(choice)
+            }
+        }
+        return true
     }
 
     private fun push(request: DialogRequest) {
@@ -355,8 +428,11 @@ class MatchViewModel(
         // The turn result stays up longer than a single decision.
         private const val AI_RESULT_FACTOR = 2
 
+        private const val KEY_SEED = "match.seed"
+        private const val KEY_ANSWERS = "match.answers"
+
         fun factory(human: Candidate): ViewModelProvider.Factory = viewModelFactory {
-            initializer { MatchViewModel(human) }
+            initializer { MatchViewModel(human, createSavedStateHandle()) }
         }
     }
 }

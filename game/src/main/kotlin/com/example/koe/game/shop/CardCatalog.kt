@@ -175,7 +175,7 @@ object CardCatalog {
             name = "Dénonciation",
             cost = 3,
             type = CardType.DISCARD,
-            description = "Oblige un adversaire au choix à défausser l'une de ses cartes Pouvoir au hasard.",
+            description = "Oblige un adversaire au choix à défausser sa carte Pouvoir acquise en dernier.",
             effect = { buyer, allPlayers ->
                 val opponentsWithCards = allPlayers.filter { it.id != buyer.id && it.isAlive && it.cards.isNotEmpty() }
                 val target = opponentsWithCards.maxByOrNull { it.victoryPoints } ?: opponentsWithCards.firstOrNull()
@@ -184,7 +184,8 @@ object CardCatalog {
                         target.hasActionImmunity = false
                         CardEffectResult("${target.name} a été protégé par Immunité parlementaire !")
                     } else {
-                        val cardToDiscard = target.cards.randomOrNull()
+                        // The last card gained, not a random one, so a match replays identically from its seed.
+                        val cardToDiscard = target.cards.lastOrNull()
                         if (cardToDiscard != null) {
                             target.removeCard(cardToDiscard)
                             CardEffectResult("${target.name} a défaussé la carte ${cardToDiscard.name}")

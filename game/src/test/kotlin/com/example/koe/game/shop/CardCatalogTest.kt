@@ -50,6 +50,21 @@ class CardCatalogTest {
     }
 
     @Test
+    fun `Dénonciation discards the target's most recently acquired card`() {
+        val buyer = Player(id = PlayerId("b"), name = "Buyer", monster = Monster.GIGA_ZAUR)
+        val target = Player(id = PlayerId("t"), name = "Target", monster = Monster.ALIENOID, initialVictoryPoints = 5)
+        val first = CardCatalog.createPowerCards().first { it.id == CardId("affichage") }
+        val last = CardCatalog.createPowerCards().first { it.id == CardId("censure") }
+        target.addCard(first)
+        target.addCard(last)
+
+        val denonciation = CardCatalog.createActionCards().first { it.id == CardId("denonciation") }
+        denonciation.effect.apply(buyer, listOf(buyer, target))
+
+        assertEquals(listOf(first.id), target.cards.map { it.id })
+    }
+
+    @Test
     fun `Power and Wickedness effects - Censure damage reduction and Rayon antimatière`() {
         val p = Player(id = PlayerId("p"), name = "Player", monster = Monster.CYBER_BUNNY, initialVictoryPoints = 7)
         val censure = CardCatalog.createPowerCards().first { it.id == CardId("censure") }

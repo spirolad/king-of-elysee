@@ -112,4 +112,19 @@ class PacedAiControllerTest {
 
         assertEquals(listOf("awaitFirstRoll", "chooseShopAction"), delegate.calls)
     }
+
+    @Test
+    fun `skipped delays make a shop decision take no time`() = runTest {
+        val controller = PacedAiController(
+            FakeController(),
+            thinkMillis = 100,
+            resultMillis = 500,
+            skipDelays = { true },
+        )
+        controller.awaitFirstRoll(player, maxRolls = 3)
+
+        val start = currentTime
+        controller.chooseShopAction(player, offers = emptyList(), sweepCost = 2)
+        assertEquals(0, currentTime - start)
+    }
 }
