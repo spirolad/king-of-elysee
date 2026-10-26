@@ -14,8 +14,11 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -66,10 +69,12 @@ class MatchBoardTest {
         onOpponentClick: (Candidate) -> Unit = {},
         onShopClick: () -> Unit = {},
         onCardsClick: () -> Unit = {},
+        onHistoryClick: () -> Unit = {},
         onEndTurnClick: () -> Unit = {},
         onDieClick: (Int) -> Unit = {},
         onRollClick: () -> Unit = {},
         onValidateDiceClick: () -> Unit = {},
+        onElyseeBannerDismiss: () -> Unit = {},
     ) {
         setFrame {
             MatchBoard(
@@ -78,10 +83,12 @@ class MatchBoardTest {
                 onOpponentClick = onOpponentClick,
                 onShopClick = onShopClick,
                 onCardsClick = onCardsClick,
+                onHistoryClick = onHistoryClick,
                 onEndTurnClick = onEndTurnClick,
                 onDieClick = onDieClick,
                 onRollClick = onRollClick,
                 onValidateDiceClick = onValidateDiceClick,
+                onElyseeBannerDismiss = onElyseeBannerDismiss,
             )
         }
     }
@@ -164,8 +171,14 @@ class MatchBoardTest {
     fun bottomRowMatchesFigma() {
         setBoard()
 
-        frame(MatchBoardTags.SHOP).assertFrame(MatchBoardTags.SHOP, 47f, 317f, 158.6f, 52f)
-        frame(MatchBoardTags.CARDS).assertFrame(MatchBoardTags.CARDS, 217.6f, 317f, 162.9f, 52f)
+        // Widths hug the labels, so each button starts 12 dp after the previous one.
+        frame(MatchBoardTags.SHOP).assertFrame(MatchBoardTags.SHOP, 47f, 321f, height = 48f)
+        val shop = frame(MatchBoardTags.SHOP).frameBounds()
+        frame(MatchBoardTags.CARDS).assertFrame(MatchBoardTags.CARDS, shop.right + 12f, 321f, height = 48f)
+        val cards = frame(MatchBoardTags.CARDS).frameBounds()
+        frame(MatchBoardTags.HISTORY).assertFrame(MatchBoardTags.HISTORY, cards.right + 12f, 321f, height = 48f)
+        val history = frame(MatchBoardTags.HISTORY).frameBounds()
+        assertTrue("history clears the end turn slot", history.right <= 580.7f)
         frame(MatchBoardTags.END_TURN).assertFrame(MatchBoardTags.END_TURN, 580.7f, 305f, 216.3f, 64f)
     }
 
@@ -241,10 +254,12 @@ class MatchBoardTest {
                 onOpponentClick = {},
                 onShopClick = {},
                 onCardsClick = {},
+                onHistoryClick = {},
                 onEndTurnClick = {},
                 onDieClick = {},
                 onRollClick = {},
                 onValidateDiceClick = {},
+                onElyseeBannerDismiss = {},
             )
         }
         composeTestRule.onNodeWithTag(MatchBoardTags.END_TURN).assertDoesNotExist()
@@ -311,6 +326,16 @@ class MatchBoardTest {
         composeTestRule.onNodeWithTag(MatchBoardTags.CARDS).performClick()
 
         assertEquals("cards clicks", 1, cardsCount)
+    }
+
+    @Test
+    fun historyButtonInvokesCallback() {
+        var historyCount = 0
+        setBoard(onHistoryClick = { historyCount++ })
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.HISTORY).performClick()
+
+        assertEquals("history clicks", 1, historyCount)
     }
 
     @Test
@@ -381,6 +406,92 @@ class MatchBoardTest {
         composeTestRule.onNodeWithTag(MatchBoardTags.VALIDATE_DICE).performClick()
 
         assertEquals("validate clicks", 1, validateCount)
+    }
+
+    // Turn guidance
+
+    @Test
+    fun stepBarShowsShopStepOnPlayersTurn() {
+        setBoard()
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.STEP_BAR).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Boutique")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "étape en cours"))
+    }
+
+    @Test
+    fun stepBarHiddenOnOpponentTurn() {
+        setBoard(state = mockMatchUiState().copy(currentPlayer = Candidate.LEPEN))
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.STEP_BAR).assertDoesNotExist()
+    }
+
+    @Test
+    fun keptDiceAreTaggedAndCountedInSubtitle() {
+        val base = mockRollingUiState(rollNumber = 1)
+        setBoard(
+            state = base.copy(dice = base.dice.mapIndexed { index, die -> die.copy(highlighted = index < 2) }),
+        )
+
+        composeTestRule.onAllNodesWithText("GARDÉ").assertCountEquals(2)
+        composeTestRule.onNodeWithText("Lancer 1 sur 3 · 2 dés gardés").assertIsDisplayed()
+    }
+
+    @Test
+    fun shopLockBadgeShownWhileLocked() {
+        setBoard(state = mockMatchUiState().copy(shopAvailability = ShopAvailability.LOCKED))
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.SHOP_LOCK, useUnmergedTree = true).assertExists()
+        composeTestRule.onNodeWithTag(MatchBoardTags.SHOP_AFFORDABLE, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun shopDotShownWhenACardIsAffordable() {
+        setBoard(state = mockMatchUiState().copy(shopAvailability = ShopAvailability.AFFORDABLE))
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.SHOP_AFFORDABLE, useUnmergedTree = true).assertExists()
+        composeTestRule.onNodeWithTag(MatchBoardTags.SHOP_LOCK, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun shopHasNoBadgeWhenOpen() {
+        setBoard(state = mockMatchUiState().copy(shopAvailability = ShopAvailability.OPEN))
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.SHOP_LOCK, useUnmergedTree = true).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(MatchBoardTags.SHOP_AFFORDABLE, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun diceLegendOpensAndClosesFromItsButton() {
+        setBoard()
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND).assertIsDisplayed()
+        composeTestRule.onNodeWithText(
+            "Tweet : attaque. Dehors tu vises l'Élysée, à l'Élysée tu vises tous les autres",
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND_BUTTON).performClick()
+        composeTestRule.waitUntil(timeoutMillis = 2_000) {
+            composeTestRule.onAllNodesWithTag(MatchBoardTags.DICE_LEGEND, useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
+        }
+    }
+
+    @Test
+    fun elyseeBannerShownAndTapDismisses() {
+        var dismissed = false
+        setBoard(
+            state = mockElyseeBannerUiState(),
+            onElyseeBannerDismiss = { dismissed = true },
+        )
+
+        composeTestRule.onNodeWithText("TU PRENDS L'ÉLYSÉE !").assertIsDisplayed()
+        composeTestRule.onNodeWithTag(MatchBoardTags.ELYSEE_BANNER).performClick()
+
+        assertTrue("banner tap dismisses", dismissed)
     }
 
     @Test

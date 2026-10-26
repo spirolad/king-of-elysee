@@ -33,7 +33,9 @@ import com.example.koe.match.dialog.GameOverReason
 import com.example.koe.match.dialog.MatchDialogTags
 import com.example.koe.match.dialog.PowerCardUi
 import com.example.koe.match.dialog.mockCardDetailDialog
+import com.example.koe.match.dialog.mockHistoryDialog
 import com.example.koe.match.dialog.mockGameOverDialog
+import com.example.koe.match.dialog.mockLockedShopDialog
 import com.example.koe.match.dialog.mockMechanceteDialog
 import com.example.koe.match.dialog.mockMyCardsDialog
 import com.example.koe.match.dialog.mockPauseDialog
@@ -480,6 +482,37 @@ class MatchDialogsTest {
         assertEquals("detailed card id", "meeting", detailed?.id)
     }
 
+    @Test
+    fun lockedShopShowsHint() {
+        setDialogs(listOf(mockLockedShopDialog()))
+
+        composeTestRule.onNodeWithText("Tu pourras acheter après tes lancers, pendant ton tour.").assertExists()
+    }
+
+    @Test
+    fun lockedShopRenewDoesNotInvokeCallback() {
+        var renewCount = 0
+        setDialogs(listOf(mockLockedShopDialog()), MatchDialogActions(onRenew = { renewCount++ }))
+
+        composeTestRule.onNodeWithText("RENOUVELER").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("RENOUVELER").performTouchInput { click() }
+
+        assertEquals("renew clicks", 0, renewCount)
+    }
+
+    @Test
+    fun lockedShopCardTapSelectsNothing() {
+        setDialogs(listOf(mockLockedShopDialog()))
+
+        composeTestRule.onNodeWithTag(MatchDialogTags.card("fausse_info")).performClick()
+
+        composeTestRule.onNode(
+            hasText("Fausse info") and hasAnyAncestor(hasTestTag(MatchDialogTags.CHOICE)),
+            useUnmergedTree = true,
+        ).assertDoesNotExist()
+        composeTestRule.onNodeWithText("Tu pourras acheter après tes lancers, pendant ton tour.").assertExists()
+    }
+
     // My cards
 
     @Test
@@ -494,6 +527,41 @@ class MatchDialogsTest {
     fun myCardsCloseDismisses() {
         var dismissCount = 0
         setDialogs(listOf(mockMyCardsDialog()), MatchDialogActions(onDismiss = { dismissCount++ }))
+
+        composeTestRule.onNodeWithTag(MatchDialogTags.CLOSE).performClick()
+
+        assertEquals("close dismiss calls", 1, dismissCount)
+    }
+
+    // History
+
+    @Test
+    fun historyPanelMatchesFigma() {
+        setDialogs(listOf(mockHistoryDialog()))
+
+        frame(MatchDialogTags.HISTORY).assertFrame(MatchDialogTags.HISTORY, 47f, 86f, 750f, 304f)
+        frame(MatchDialogTags.CLOSE).assertFrame(MatchDialogTags.CLOSE, 729f, 104f, 44f, 44f)
+    }
+
+    @Test
+    fun historyTextsAreShown() {
+        setDialogs(listOf(mockHistoryDialog()))
+
+        composeTestRule.onNodeWithText("HISTORIQUE").assertExists()
+        composeTestRule.onNodeWithText("Le Pen tweete sur Macron : −2 Popularité").assertExists()
+    }
+
+    @Test
+    fun emptyHistoryShowsPlaceholder() {
+        setDialogs(listOf(MatchDialog.History(entries = emptyList())))
+
+        composeTestRule.onNodeWithText("Rien ne s'est encore passé.").assertExists()
+    }
+
+    @Test
+    fun historyCloseDismisses() {
+        var dismissCount = 0
+        setDialogs(listOf(mockHistoryDialog()), MatchDialogActions(onDismiss = { dismissCount++ }))
 
         composeTestRule.onNodeWithTag(MatchDialogTags.CLOSE).performClick()
 

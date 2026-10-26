@@ -50,10 +50,12 @@ class MatchBoardPopupsTest {
                         onOpponentClick = {},
                         onShopClick = {},
                         onCardsClick = {},
+                        onHistoryClick = {},
                         onEndTurnClick = {},
                         onDieClick = {},
                         onRollClick = {},
                         onValidateDiceClick = {},
+                        onElyseeBannerDismiss = {},
                     )
                 }
             }

@@ -3,11 +3,16 @@ package com.example.koe.match.game
 import androidx.lifecycle.SavedStateHandle
 import com.example.koe.game.dice.DiceRoller
 import com.example.koe.game.dice.DieFace as RolledFace
+import com.example.koe.game.shop.CardId
+import com.example.koe.game.shop.CardType
+import com.example.koe.game.shop.PowerCard
 import com.example.koe.game.shop.Shop
 import com.example.koe.match.Candidate
 import com.example.koe.match.DieFace
 import com.example.koe.match.RollUi
+import com.example.koe.match.ShopAvailability
 import com.example.koe.match.dialog.GameOverReason
+import com.example.koe.match.dialog.HistoryKind
 import com.example.koe.match.dialog.MatchDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -445,5 +450,90 @@ class MatchViewModelTest {
             advanceUntilIdle()
             assertEquals(RollUi(0, 3), viewModel.uiState.value.roll)
         }
+    }
+
+    @Test
+    fun shopIsLockedUntilTheDiceAreScored() = runTest {
+        val viewModel = viewModel(energyRoll())
+        viewModel.start()
+        advanceUntilIdle()
+        assertEquals(ShopAvailability.LOCKED, viewModel.uiState.value.shopAvailability)
+
+        viewModel.onShopClick()
+        assertFalse((viewModel.dialogs.value.last() as MatchDialog.Shop).canBuy)
+        viewModel.onDismiss()
+
+        viewModel.onRollClick()
+        advanceUntilIdle()
+        assertEquals(ShopAvailability.LOCKED, viewModel.uiState.value.shopAvailability)
+
+        viewModel.onValidateDiceClick()
+        advanceUntilIdle()
+        assertEquals(ShopAvailability.OPEN, viewModel.uiState.value.shopAvailability)
+
+        viewModel.onShopClick()
+        assertTrue((viewModel.dialogs.value.last() as MatchDialog.Shop).canBuy)
+    }
+
+    @Test
+    fun affordableWhenACardFitsTheFonds() = runTest {
+        val card = PowerCard(CardId("c"), "C", 2, CardType.KEEP, "test")
+        val viewModel = MatchViewModel(
+            Candidate.MACRON,
+            diceRoller = QueueDiceRoller(energyRoll()),
+            shop = Shop(initialCards = listOf(card), marketSize = 3, sweepCost = 2),
+            aiDelayMillis = 0,
+        )
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+
+        assertEquals(ShopAvailability.AFFORDABLE, viewModel.uiState.value.shopAvailability)
+    }
+
+    @Test
+    fun elyseeBannerWhenTakingTheElysee() = runTest {
+        val viewModel = viewModel(energyRoll())
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+        assertTrue(viewModel.uiState.value.elyseeBanner)
+
+        viewModel.onElyseeBannerDismiss()
+        assertFalse(viewModel.uiState.value.elyseeBanner)
+    }
+
+    @Test
+    fun historyListsTheTurnEvents() = runTest {
+        val viewModel = viewModel(energyRoll())
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+
+        viewModel.onHistoryClick()
+
+        val history = viewModel.dialogs.value.last() as MatchDialog.History
+        val entries = history.entries
+        val elysee = entries.indexOfFirst { it.kind == HistoryKind.ENTERED_ELYSEE }
+        val turnStart = entries.indexOfFirst { it.kind == HistoryKind.TURN_STARTED }
+        assertEquals(Candidate.MACRON, entries[elysee].actor)
+        assertEquals(Candidate.MACRON, entries[turnStart].actor)
+        assertEquals(1, entries[turnStart].round)
+        // Newest first: entering the Élysée happened after the turn started.
+        assertTrue(elysee < turnStart)
+    }
+
+    @Test
+    fun elyseeBannerClearsWhenTheHumansTurnEnds() = runTest {
+        val viewModel = viewModel(energyRoll())
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+        assertTrue(viewModel.uiState.value.elyseeBanner)
+
+        viewModel.onEndTurnClick()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.elyseeBanner)
     }
 }

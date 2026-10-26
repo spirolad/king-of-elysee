@@ -134,6 +134,11 @@ fun mockShopDialog(): MatchDialog.Shop = MatchDialog.Shop(
     renewCost = 2,
 )
 
+fun mockLockedShopDialog(): MatchDialog.Shop = mockShopDialog().copy(
+    canBuy = false,
+    cards = mockShopDialog().cards.map { it.copy(enabled = false) },
+)
+
 fun mockMyCardsDialog(): MatchDialog.MyCards = MatchDialog.MyCards(
     cards = listOf(
         mockMeetingGeant(id = "meeting_1", cost = 5),
@@ -142,4 +147,15 @@ fun mockMyCardsDialog(): MatchDialog.MyCards = MatchDialog.MyCards(
     ),
     mechancete = 2,
     nextTier = 3,
+)
+
+fun mockHistoryDialog(): MatchDialog.History = MatchDialog.History(
+    entries = listOf(
+        HistoryEntryUi(round = 2, actor = Candidate.MACRON, kind = HistoryKind.BOUGHT_CARD, amount = 5, cardName = "Fausse info"),
+        HistoryEntryUi(round = 2, actor = Candidate.LEPEN, kind = HistoryKind.TWEET, target = Candidate.MACRON, amount = 2),
+        HistoryEntryUi(round = 2, actor = Candidate.LEPEN, kind = HistoryKind.TURN_STARTED),
+        HistoryEntryUi(round = 1, actor = Candidate.MELENCHON, kind = HistoryKind.ENTERED_ELYSEE),
+        HistoryEntryUi(round = 1, actor = Candidate.POUTOU, kind = HistoryKind.TURN_SKIPPED),
+        HistoryEntryUi(round = 1, actor = Candidate.MACRON, kind = HistoryKind.TURN_STARTED),
+    ),
 )

@@ -8,6 +8,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -19,8 +20,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,9 +59,9 @@ internal fun ShopDialog(
     actions: MatchDialogActions,
 ) {
     var selectedId by rememberSaveable {
-        mutableStateOf(dialog.cards.firstOrNull { it.enabled && !it.owned }?.id)
+        mutableStateOf(if (dialog.canBuy) dialog.cards.firstOrNull { it.enabled && !it.owned }?.id else null)
     }
-    val selected = dialog.cards.firstOrNull { it.id == selectedId }
+    val selected = if (dialog.canBuy) dialog.cards.firstOrNull { it.id == selectedId } else null
     val remaining = selected?.cost?.let { dialog.fonds - it }
     val affordable = remaining != null && remaining >= 0
 
@@ -105,7 +109,7 @@ internal fun ShopDialog(
                         card = card,
                         selected = card.id == selectedId,
                         onClick = {
-                            if (card.enabled && !card.owned) {
+                            if (dialog.canBuy && card.enabled && !card.owned) {
                                 selectedId = card.id
                             }
                         },
@@ -128,7 +132,14 @@ internal fun ShopDialog(
                         color = colorResource(R.color.koe_text_muted),
                     )
                     Spacer(Modifier.height(4.dp))
-                    if (selected != null) {
+                    if (!dialog.canBuy) {
+                        KoeText(
+                            text = stringResource(R.string.shop_locked_hint),
+                            style = KoeTextStyles.StatLabelLarge,
+                            color = colorResource(R.color.koe_text_muted),
+                            modifier = Modifier.testTag(MatchDialogTags.SHOP_LOCKED_HINT),
+                        )
+                    } else if (selected != null) {
                         KoeText(
                             text = selected.title,
                             style = KoeTextStyles.BodyStrong,
@@ -174,6 +185,7 @@ internal fun ShopDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(44.dp),
+                    enabled = dialog.canBuy,
                     trailing = {
                         Image(
                             painter = painterResource(R.drawable.ic_board_fonds),
@@ -299,6 +311,91 @@ internal fun MyCardsDialog(
                 )
             }
         }
+    }
+}
+
+@Composable
+internal fun HistoryDialog(
+    dialog: MatchDialog.History,
+    actions: MatchDialogActions,
+) {
+    Column(
+        Modifier
+            .size(750.dp, 304.dp)
+            .background(colorResource(R.color.koe_surface), SheetShape)
+            .testTag(MatchDialogTags.HISTORY),
+    ) {
+        SheetHeader(
+            icon = R.drawable.ic_dialog_clock,
+            title = stringResource(R.string.history_title),
+            actions = actions,
+        )
+        Spacer(Modifier.height(12.dp))
+        if (dialog.entries.isEmpty()) {
+            KoeText(
+                text = stringResource(R.string.history_empty),
+                style = KoeTextStyles.Body,
+                color = colorResource(R.color.koe_text_muted),
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+        } else {
+            LazyColumn(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(dialog.entries) { entry ->
+                    HistoryRow(entry = entry)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HistoryRow(entry: HistoryEntryUi) {
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(20.dp)
+                .background(colorResource(entry.actor.avatarColor), CircleShape),
+        )
+        Spacer(Modifier.width(10.dp))
+        KoeText(
+            text = historySentence(entry),
+            style = KoeTextStyles.Body,
+            color = colorResource(R.color.koe_text_primary),
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(10.dp))
+        KoeText(
+            text = stringResource(R.string.history_round, entry.round),
+            style = KoeTextStyles.Caption,
+            color = colorResource(R.color.koe_text_muted),
+        )
+    }
+}
+
+@Composable
+private fun historySentence(entry: HistoryEntryUi): String {
+    val actor = stringResource(entry.actor.nameRes)
+    val target = entry.target?.let { stringResource(it.nameRes) }.orEmpty()
+    val card = entry.cardName.orEmpty()
+    val amount = entry.amount ?: 0
+    return when (entry.kind) {
+        HistoryKind.TURN_STARTED -> stringResource(R.string.history_turn_started, actor)
+        HistoryKind.TURN_SKIPPED -> stringResource(R.string.history_turn_skipped, actor)
+        HistoryKind.TWEET -> stringResource(R.string.history_tweet, actor, target, amount)
+        HistoryKind.ENTERED_ELYSEE -> stringResource(R.string.history_entered, actor)
+        HistoryKind.YIELDED_ELYSEE -> stringResource(R.string.history_yielded, actor)
+        HistoryKind.BOUGHT_CARD -> stringResource(R.string.history_bought, actor, card, amount)
+        HistoryKind.MECHANCETE_CARD -> stringResource(R.string.history_mechancete, actor, card)
+        HistoryKind.ELIMINATED -> stringResource(R.string.history_eliminated, actor)
     }
 }
 
@@ -537,7 +634,7 @@ internal fun PlayerDetailsDialog(
 private fun SheetHeader(
     icon: Int,
     title: String,
-    hint: String,
+    hint: String? = null,
     actions: MatchDialogActions,
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
@@ -560,12 +657,14 @@ private fun SheetHeader(
             color = colorResource(R.color.koe_text_primary),
         )
         Spacer(Modifier.width(16.dp))
-        KoeText(
-            text = hint,
-            style = KoeTextStyles.Subtitle,
-            color = colorResource(R.color.koe_text_muted),
-            maxLines = 1,
-        )
+        if (hint != null) {
+            KoeText(
+                text = hint,
+                style = KoeTextStyles.Subtitle,
+                color = colorResource(R.color.koe_text_muted),
+                maxLines = 1,
+            )
+        }
         Spacer(Modifier.weight(1f))
         trailing()
         KoeCloseButton(

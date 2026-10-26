@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@color/koe_palette_ink"
+        android:fillType="evenOdd"
+        android:pathData="M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2ZM12 3.5A8.5 8.5 0 1 1 12 20.5A8.5 8.5 0 1 1 12 3.5Z" />
+    <path
+        android:fillColor="@color/koe_palette_ink"
+        android:pathData="M12 6.5A1.25 1.25 0 1 0 12 9A1.25 1.25 0 1 0 12 6.5ZM11 10.5H13V17.5H11Z" />
+</vector>

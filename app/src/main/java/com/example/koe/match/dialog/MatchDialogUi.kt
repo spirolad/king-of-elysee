@@ -7,6 +7,8 @@ enum class CardKind { POUVOIR, ACTION, MECHANCETE }
 
 enum class GameOverReason { VOTES, LAST_STANDING, ELIMINATED }
 
+enum class HistoryKind { TURN_STARTED, TURN_SKIPPED, TWEET, ENTERED_ELYSEE, YIELDED_ELYSEE, BOUGHT_CARD, MECHANCETE_CARD, ELIMINATED }
+
 @Immutable
 data class PowerCardUi(
     val id: String,
@@ -33,6 +35,16 @@ data class CardPaymentUi(
 data class RankingRowUi(
     val candidate: Candidate,
     val votes: Int,
+)
+
+@Immutable
+data class HistoryEntryUi(
+    val round: Int,
+    val actor: Candidate,
+    val kind: HistoryKind,
+    val target: Candidate? = null,
+    val amount: Int? = null,
+    val cardName: String? = null,
 )
 
 sealed interface MatchDialog {
@@ -88,6 +100,8 @@ sealed interface MatchDialog {
         val fonds: Int,
         val cards: List<PowerCardUi>,
         val renewCost: Int,
+        // false while the player cannot buy yet; the market is shown read-only.
+        val canBuy: Boolean = true,
     ) : MatchDialog {
         override val dismissible = true
     }
@@ -97,6 +111,10 @@ sealed interface MatchDialog {
         val mechancete: Int,
         val nextTier: Int,
     ) : MatchDialog {
+        override val dismissible = true
+    }
+
+    data class History(val entries: List<HistoryEntryUi>) : MatchDialog {
         override val dismissible = true
     }
 
@@ -142,7 +160,9 @@ object MatchDialogTags {
     const val CARD_DETAIL = "dialog:cardDetail"
     const val PLAYER = "dialog:player"
     const val SHOP = "dialog:shop"
+    const val SHOP_LOCKED_HINT = "dialog:shopLockedHint"
     const val MY_CARDS = "dialog:myCards"
+    const val HISTORY = "dialog:history"
     const val CLOSE = "dialog:close"
     // Shop TON CHOIX panel.
     const val CHOICE = "dialog:choice"

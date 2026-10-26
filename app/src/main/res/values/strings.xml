@@ -45,6 +45,25 @@
     <string name="match_result_tweets_on">%1$s sur %2$s</string>
     <string name="match_result_nothing">Rien ce tour</string>
     <string name="match_me_label">TOI</string>
+    <string name="match_step_roll">Lancer</string>
+    <string name="match_step_keep">Garder</string>
+    <string name="match_step_shop">Boutique</string>
+    <string name="match_step_end">Fin du tour</string>
+    <string name="match_step_current">étape en cours</string>
+    <plurals name="match_roll_count_kept">
+        <item quantity="one">Lancer %1$d sur %2$d · %3$d dé gardé</item>
+        <item quantity="other">Lancer %1$d sur %2$d · %3$d dés gardés</item>
+    </plurals>
+    <string name="match_die_kept">GARDÉ</string>
+    <string name="match_shop_locked">fermée pour l\'instant</string>
+    <string name="match_shop_affordable">une carte est à ta portée</string>
+    <string name="match_legend_title">LES DÉS</string>
+    <string name="match_legend_numbers">1 · 2 · 3 : trois identiques ou plus rapportent des Votes</string>
+    <string name="match_legend_tweet">Tweet : attaque. Dehors tu vises l\'Élysée, à l\'Élysée tu vises tous les autres</string>
+    <string name="match_legend_fonds">Fonds : pour acheter des cartes à la boutique</string>
+    <string name="match_legend_popularite">Popularité : te soigne, sauf à l\'Élysée</string>
+    <string name="match_elysee_banner_title">TU PRENDS L\'ÉLYSÉE !</string>
+    <string name="match_elysee_banner_body">+1 Vote maintenant, +2 à chaque début de tour. Pas de soin ici, et tu encaisses les tweets des autres.</string>
 
     <!-- Stats -->
     <string name="stat_votes_max">/ 20 Votes</string>
@@ -55,6 +74,7 @@
     <!-- Buttons -->
     <string name="btn_shop">BOUTIQUE</string>
     <string name="btn_cards">CARTES</string>
+    <string name="btn_history">HISTORIQUE</string>
     <string name="btn_validate">VALIDER</string>
     <string name="btn_roll">LANCER</string>
     <string name="btn_end_turn">FIN DU TOUR</string>
@@ -67,6 +87,7 @@
     <string name="cd_close">Fermer</string>
     <string name="cd_die">Dé</string>
     <string name="cd_avatar">Portrait</string>
+    <string name="cd_dice_legend">Que font les dés ?</string>
 
     <!-- Pause dialog -->
     <string name="pause_title">PAUSE</string>
@@ -112,12 +133,26 @@
     <string name="btn_renew">RENOUVELER</string>
     <string name="shop_unaffordable">Pas assez de Fonds.</string>
     <string name="shop_no_choice">Touche une carte pour la choisir.</string>
+    <string name="shop_locked_hint">Tu pourras acheter après tes lancers, pendant ton tour.</string>
 
     <!-- My cards dialog -->
     <string name="my_cards_title">TES CARTES</string>
     <string name="my_cards_hint">Les cartes Pouvoir restent en jeu. Appui long pour les détails.</string>
     <string name="mechancete_progress">/ %1$d pour une carte</string>
     <string name="mechancete_tiers_hint">Paliers à 3, 6 et 10. Chaque palier donne une carte Méchanceté.</string>
+
+    <!-- History dialog -->
+    <string name="history_title">HISTORIQUE</string>
+    <string name="history_empty">Rien ne s\'est encore passé.</string>
+    <string name="history_round">Tour %1$d</string>
+    <string name="history_turn_started">%1$s commence son tour</string>
+    <string name="history_turn_skipped">%1$s passe son tour</string>
+    <string name="history_tweet">%1$s tweete sur %2$s : −%3$d Popularité</string>
+    <string name="history_entered">%1$s entre à l\'Élysée</string>
+    <string name="history_yielded">%1$s cède l\'Élysée</string>
+    <string name="history_bought">%1$s achète %2$s (%3$d Fonds)</string>
+    <string name="history_mechancete">%1$s gagne la carte Méchanceté %2$s</string>
+    <string name="history_eliminated">%1$s est éliminé</string>
 
     <!-- Card types and card detail -->
     <string name="card_type_action">ACTION</string>

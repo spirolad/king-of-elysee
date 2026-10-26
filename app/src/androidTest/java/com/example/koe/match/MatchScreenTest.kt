@@ -29,10 +29,12 @@ class MatchScreenTest {
                 onOpponentClick = {},
                 onShopClick = {},
                 onCardsClick = {},
+                onHistoryClick = {},
                 onEndTurnClick = {},
                 onDieClick = {},
                 onRollClick = {},
                 onValidateDiceClick = {},
+                onElyseeBannerDismiss = {},
                 dialogActions = MatchDialogActions(),
             )
         }

@@ -73,6 +73,10 @@ data class MatchUiState(
     val tweetBanner: TweetBannerUi? = null,
     // Non-null while the human rolls; the dice are tappable once thrown.
     val roll: RollUi? = null,
+    // LOCKED until the human's dice are scored.
+    val shopAvailability: ShopAvailability = ShopAvailability.LOCKED,
+    // Explains the Élysée the moment the player takes it.
+    val elyseeBanner: Boolean = false,
 )
 
 @Immutable
@@ -87,6 +91,10 @@ data class RollUi(
     val rollNumber: Int,
     val maxRolls: Int,
 )
+
+/** What the current player's dice did this turn. */
+/** Whether the market can be used right now, and whether a card is affordable. */
+enum class ShopAvailability { LOCKED, OPEN, AFFORDABLE }
 
 /** What the current player's dice did this turn. */
 @Immutable

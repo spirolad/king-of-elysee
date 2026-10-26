@@ -26,6 +26,7 @@ import com.example.koe.game.shop.Shop
 import com.example.koe.match.Candidate
 import com.example.koe.match.MatchUiState
 import com.example.koe.match.RollUi
+import com.example.koe.match.ShopAvailability
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.PowerCardUi
 import kotlin.random.Random
@@ -67,10 +68,13 @@ class MatchViewModel(
     private var gameJob: Job? = null
     private var outcome: Outcome? = null
     private val tally = TurnTally()
+    private val history = GameHistory()
+    private var elyseeBanner = false
 
-    private val listener = object : GameEventListener {
+    private val listener: GameEventListener = object : GameEventListener {
         override fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) {
             tally.start(player)
+            history.turnStarted(player, roundNumber)
             shownDice = emptyList()
             keptDice = emptyList()
             refresh()
@@ -93,7 +97,10 @@ class MatchViewModel(
             refresh()
         }
 
-        override fun onTurnSkipped(player: Player) = refresh()
+        override fun onTurnSkipped(player: Player) {
+            history.turnSkipped(player, engine.roundNumber)
+            refresh()
+        }
         override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {
             tally.resolved(player, summary)
             refresh()
@@ -101,24 +108,45 @@ class MatchViewModel(
         override fun onMechanceteGained(player: Player, amount: Int, total: Int) = refresh()
         override fun onPlayerDamaged(target: Player, attacker: Player, damage: Int, remainingHealth: Int) {
             tally.hit(attacker, target, damage)
+            history.tweet(attacker, target, damage, engine.roundNumber)
             refresh()
         }
         override fun onPlayerHealed(player: Player, amount: Int, currentHealth: Int) = refresh()
-        override fun onPlayerEnteredTokyo(player: Player, zone: TokyoZone) = refresh()
-        override fun onPlayerYieldedTokyo(player: Player, zone: TokyoZone) = refresh()
-        override fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult, cost: Int) = refresh()
-        override fun onShopSwept(player: Player) = refresh()
-        override fun onMechanceteCardChosen(player: Player, tier: Int, card: PowerCard, result: CardEffectResult) =
+        override fun onPlayerEnteredTokyo(player: Player, zone: TokyoZone) {
+            // A replayed match has already shown the banner, so it stays hidden while the log replays.
+            if (player.id == humanPlayer.id && replay.isEmpty()) elyseeBanner = true
+            history.enteredElysee(player, engine.roundNumber)
             refresh()
-        override fun onTurnEnded(player: Player) = refresh()
-        override fun onPlayerEliminated(player: Player, reason: String) = refresh()
+        }
+        override fun onPlayerYieldedTokyo(player: Player, zone: TokyoZone) {
+            if (player.id == humanPlayer.id) elyseeBanner = false
+            history.yieldedElysee(player, engine.roundNumber)
+            refresh()
+        }
+        override fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult, cost: Int) {
+            history.boughtCard(player, card.name, cost, engine.roundNumber)
+            refresh()
+        }
+        override fun onShopSwept(player: Player) = refresh()
+        override fun onMechanceteCardChosen(player: Player, tier: Int, card: PowerCard, result: CardEffectResult) {
+            history.mechanceteCard(player, card.name, tier, engine.roundNumber)
+            refresh()
+        }
+        override fun onTurnEnded(player: Player) {
+            if (player.id == humanPlayer.id) elyseeBanner = false
+            refresh()
+        }
+        override fun onPlayerEliminated(player: Player, reason: String) {
+            history.eliminated(player, engine.roundNumber)
+            refresh()
+        }
         override fun onGameOver(winner: Player, reason: WinReason) {
             endMatch(Outcome(winner, reason))
             refresh()
         }
     }
 
-    private val engine = GameEngine(
+    private val engine: GameEngine = GameEngine(
         players = players,
         controllers = players.associate { player ->
             val controller: PlayerController = if (player.id == humanPlayer.id) {
@@ -166,6 +194,8 @@ class MatchViewModel(
 
     fun onCardsClick() = push(DialogRequest.MyCards)
 
+    fun onHistoryClick() = push(DialogRequest.History)
+
     fun onEndTurnClick() {
         val decision = pending as? HumanDecision.Shop ?: return
         requests = requests.filterNot { it == DialogRequest.Shop }
@@ -194,6 +224,11 @@ class MatchViewModel(
     fun onValidateDiceClick() {
         val decision = pending as? HumanDecision.KeepDice ?: return
         keepDice(decision, shownDice.indices.toList())
+        refresh()
+    }
+
+    fun onElyseeBannerDismiss() {
+        elyseeBanner = false
         refresh()
     }
 
@@ -360,6 +395,7 @@ class MatchViewModel(
     private fun endMatch(result: Outcome) {
         outcome = result
         pending = null
+        elyseeBanner = false
         requests = listOf(DialogRequest.GameOver)
     }
 
@@ -382,6 +418,15 @@ class MatchViewModel(
             is HumanDecision.KeepDice -> RollUi(decision.rollNumber, decision.maxRolls)
             else -> null
         }
+        // The shop button says whether the human can buy something now, before the shop is opened.
+        val shopAvailability = when (decision) {
+            is HumanDecision.Shop -> if (decision.offers.any { it.cost <= humanPlayer.energy }) {
+                ShopAvailability.AFFORDABLE
+            } else {
+                ShopAvailability.OPEN
+            }
+            else -> ShopAvailability.LOCKED
+        }
         _uiState.value = boardState(
             engine,
             humanPlayer.id,
@@ -392,6 +437,8 @@ class MatchViewModel(
             turnResult = tally.result,
             votesDelta = tally.votesDelta,
             tweetBanner = tally.tweetBanner(humanPlayer.id),
+            shopAvailability = shopAvailability,
+            elyseeBanner = elyseeBanner,
         )
         _dialogs.value = requests.map { buildDialog(it, decision) }
     }
@@ -415,6 +462,7 @@ class MatchViewModel(
             }
         }
         DialogRequest.MyCards -> myCardsDialog(humanPlayer)
+        DialogRequest.History -> MatchDialog.History(history.entries)
         DialogRequest.GameOver -> {
             val result = checkNotNull(outcome)
             gameOverDialog(engine, humanPlayer.id, result.winner, result.reason)
@@ -452,6 +500,7 @@ private sealed interface DialogRequest {
     data class PlayerDetails(val candidate: Candidate) : DialogRequest
     data object Shop : DialogRequest
     data object MyCards : DialogRequest
+    data object History : DialogRequest
     data class CardDetail(val card: PowerCardUi) : DialogRequest
     data object Yield : DialogRequest
     data object Mechancete : DialogRequest

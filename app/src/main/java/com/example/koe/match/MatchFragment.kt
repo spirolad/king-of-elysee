@@ -84,10 +84,12 @@ class MatchFragment : Fragment() {
                 onOpponentClick = viewModel::onOpponentClick,
                 onShopClick = viewModel::onShopClick,
                 onCardsClick = viewModel::onCardsClick,
+                onHistoryClick = viewModel::onHistoryClick,
                 onEndTurnClick = viewModel::onEndTurnClick,
                 onDieClick = viewModel::onDieClick,
                 onRollClick = viewModel::onRollClick,
                 onValidateDiceClick = viewModel::onValidateDiceClick,
+                onElyseeBannerDismiss = viewModel::onElyseeBannerDismiss,
                 dialogActions = dialogActions,
                 contentPadding = PaddingValues(start = start, top = 12.dp, end = end, bottom = 21.dp),
             )

@@ -40,6 +40,7 @@ fun MatchDialogHost(
     val playerDetails = dialogs.lastOrNull { it is MatchDialog.PlayerDetails } as MatchDialog.PlayerDetails?
     val shop = dialogs.lastOrNull { it is MatchDialog.Shop } as MatchDialog.Shop?
     val myCards = dialogs.lastOrNull { it is MatchDialog.MyCards } as MatchDialog.MyCards?
+    val history = dialogs.lastOrNull { it is MatchDialog.History } as MatchDialog.History?
     val pause = dialogs.lastOrNull { it is MatchDialog.Pause } as MatchDialog.Pause?
     val quit = dialogs.lastOrNull { it is MatchDialog.QuitConfirm } as MatchDialog.QuitConfirm?
     val yieldElysee = dialogs.lastOrNull { it is MatchDialog.YieldElysee } as MatchDialog.YieldElysee?
@@ -75,6 +76,15 @@ fun MatchDialogHost(
             onScrimClick = actions.onDismiss,
         ) {
             MyCardsDialog(dialog = it, actions = actions)
+        }
+        DialogLayer(
+            entry = history,
+            isTop = isTop(history, top),
+            sheet = true,
+            scrim = scrim,
+            onScrimClick = actions.onDismiss,
+        ) {
+            HistoryDialog(dialog = it, actions = actions)
         }
         DialogLayer(
             entry = pause,

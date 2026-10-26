@@ -39,3 +39,5 @@ fun mockRollingUiState(rollNumber: Int = 1): MatchUiState = mockMatchUiState().c
     votesDelta = null,
     tweetBanner = null,
 )
+
+fun mockElyseeBannerUiState(): MatchUiState = mockMatchUiState().copy(elyseeBanner = true)

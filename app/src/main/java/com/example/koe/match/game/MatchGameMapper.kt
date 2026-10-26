@@ -18,6 +18,7 @@ import com.example.koe.match.MatchUiState
 import com.example.koe.match.MeUi
 import com.example.koe.match.OpponentUi
 import com.example.koe.match.RollUi
+import com.example.koe.match.ShopAvailability
 import com.example.koe.match.TurnResultUi
 import com.example.koe.match.TweetBannerUi
 import com.example.koe.match.dialog.CardKind
@@ -89,6 +90,8 @@ fun boardState(
     turnResult: TurnResultUi? = null,
     votesDelta: Int? = null,
     tweetBanner: TweetBannerUi? = null,
+    shopAvailability: ShopAvailability = ShopAvailability.LOCKED,
+    elyseeBanner: Boolean = false,
 ): MatchUiState {
     val player = engine.players.first { it.id == me }
     return MatchUiState(
@@ -120,6 +123,8 @@ fun boardState(
         votesDelta = votesDelta,
         tweetBanner = tweetBanner,
         roll = roll,
+        shopAvailability = shopAvailability,
+        elyseeBanner = elyseeBanner,
     )
 }
 
@@ -186,6 +191,7 @@ fun shopDialog(
             offer.card.toUi(cost = offer.cost, enabled = canBuy && offer.cost <= me.energy)
         },
         renewCost = sweepCost,
+        canBuy = canBuy,
     )
 
 /** Choice of Méchanceté cards for [tier]. */

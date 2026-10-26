@@ -3,6 +3,10 @@ package com.example.koe.match
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -42,6 +46,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -52,6 +59,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -77,6 +85,7 @@ import com.example.koe.ui.components.AnimatedCount
 import com.example.koe.ui.components.KoeText
 import com.example.koe.ui.components.PressableSurface
 import com.example.koe.ui.theme.KoeTextStyles
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 object MatchBoardTags {
@@ -87,11 +96,18 @@ object MatchBoardTags {
     const val RESULT = "match:result"
     const val SHOP = "match:shop"
     const val CARDS = "match:cards"
+    const val HISTORY = "match:history"
     const val END_TURN = "match:endTurn"
     const val ROLL = "match:roll"
     const val VALIDATE_DICE = "match:validateDice"
     const val VOTES_DELTA = "match:votesDelta"
     const val TWEET_BANNER = "match:tweetBanner"
+    const val STEP_BAR = "match:stepBar"
+    const val SHOP_LOCK = "match:shopLock"
+    const val SHOP_AFFORDABLE = "match:shopAffordable"
+    const val DICE_LEGEND_BUTTON = "match:diceLegendButton"
+    const val DICE_LEGEND = "match:diceLegend"
+    const val ELYSEE_BANNER = "match:elyseeBanner"
     fun chip(candidate: Candidate) = "match:chip:${candidate.name}"
     fun die(index: Int) = "match:die:$index"
 }
@@ -106,13 +122,22 @@ fun MatchBoard(
     onOpponentClick: (Candidate) -> Unit,
     onShopClick: () -> Unit,
     onCardsClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     onEndTurnClick: () -> Unit,
     onDieClick: (Int) -> Unit,
     onRollClick: () -> Unit,
     onValidateDiceClick: () -> Unit,
+    onElyseeBannerDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = MatchBoardDefaultPadding,
 ) {
+    val step = turnStepOf(state)
+    val pulseReady = rememberPulseReady(step = step, rollNumber = state.roll?.rollNumber)
+    val shopState = when (state.shopAvailability) {
+        ShopAvailability.LOCKED -> stringResource(R.string.match_shop_locked)
+        ShopAvailability.AFFORDABLE -> stringResource(R.string.match_shop_affordable)
+        ShopAvailability.OPEN -> null
+    }
     Column(
         modifier
             .fillMaxSize()
@@ -156,7 +181,9 @@ fun MatchBoard(
             KingPanel(king = state.king)
             CenterColumn(
                 state = state,
+                step = step,
                 onDieClick = onDieClick,
+                onElyseeBannerDismiss = onElyseeBannerDismiss,
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 18.dp),
@@ -167,6 +194,7 @@ fun MatchBoard(
             )
         }
         Spacer(Modifier.weight(1f))
+        StepBar(step = step)
         Row(
             Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Bottom,
@@ -176,7 +204,8 @@ fun MatchBoard(
                 icon = R.drawable.ic_board_shop,
                 label = R.string.btn_shop,
                 tag = MatchBoardTags.SHOP,
-                modifier = Modifier.size(158.6.dp, BoardMetrics.BottomButtonHeight),
+                stateText = shopState,
+                badge = { ShopBadge(availability = state.shopAvailability) },
             )
             Spacer(Modifier.width(BoardMetrics.Gap))
             SecondaryButton(
@@ -184,8 +213,14 @@ fun MatchBoard(
                 icon = R.drawable.ic_board_cards,
                 label = R.string.btn_cards,
                 tag = MatchBoardTags.CARDS,
-                modifier = Modifier.size(162.9.dp, BoardMetrics.BottomButtonHeight),
                 badgeCount = state.cardsCount,
+            )
+            Spacer(Modifier.width(BoardMetrics.Gap))
+            SecondaryButton(
+                onClick = onHistoryClick,
+                icon = R.drawable.ic_dialog_clock,
+                label = R.string.btn_history,
+                tag = MatchBoardTags.HISTORY,
             )
             Spacer(Modifier.weight(1f))
             val roll = state.roll
@@ -195,7 +230,7 @@ fun MatchBoard(
                     icon = null,
                     label = R.string.btn_validate,
                     tag = MatchBoardTags.VALIDATE_DICE,
-                    modifier = Modifier.size(162.9.dp, BoardMetrics.BottomButtonHeight),
+                    pulse = pulseReady && step == TurnStep.KEEP,
                 )
                 Spacer(Modifier.width(BoardMetrics.Gap))
             }
@@ -206,11 +241,13 @@ fun MatchBoard(
                         label = R.string.btn_roll,
                         tag = MatchBoardTags.ROLL,
                         onClick = onRollClick,
+                        pulse = pulseReady && step == TurnStep.ROLL,
                     )
                 } else {
                     EndTurnButton(
                         visible = state.canEndTurn,
                         onClick = onEndTurnClick,
+                        pulse = pulseReady && step == TurnStep.SHOP,
                     )
                 }
             }
@@ -407,7 +444,9 @@ private fun KingPanel(king: Candidate?) {
 @Composable
 private fun CenterColumn(
     state: MatchUiState,
+    step: TurnStep?,
     onDieClick: (Int) -> Unit,
+    onElyseeBannerDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val myName = stringResource(state.me.candidate.nameRes)
@@ -417,50 +456,54 @@ private fun CenterColumn(
         stringResource(R.string.match_their_turn, stringResource(state.currentPlayer.nameRes))
     }
     val roll = state.roll
+    val kept = state.dice.count { it.highlighted }
+    val keeping = step == TurnStep.KEEP
     val subtitle = when {
         roll == null -> stringResource(R.string.match_turn_result)
         roll.rollNumber == 0 -> stringResource(R.string.match_roll_prompt)
+        keeping && kept > 0 -> pluralStringResource(
+            R.plurals.match_roll_count_kept,
+            kept,
+            roll.rollNumber,
+            roll.maxRolls,
+            kept,
+        )
         else -> stringResource(R.string.match_roll_count, roll.rollNumber, roll.maxRolls)
     }
     // Dice only lock in once the human has thrown at least once.
     val diceTappable = roll != null && roll.rollNumber >= 1
-    Column(
-        modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Box(contentAlignment = Alignment.Center) {
+    // The box gives the Élysée banner an anchor on the column's top edge without adding to the column.
+    Box(modifier) {
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                KoeText(
+                    text = title.uppercase(),
+                    style = KoeTextStyles.Display,
+                    color = colorResource(R.color.koe_screen_board_content),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+                VotesDelta(delta = state.votesDelta)
+            }
             KoeText(
-                text = title.uppercase(),
-                style = KoeTextStyles.Display,
+                text = subtitle,
+                style = KoeTextStyles.Subtitle,
                 color = colorResource(R.color.koe_screen_board_content),
                 textAlign = TextAlign.Center,
-                maxLines = 1,
             )
-            VotesDelta(delta = state.votesDelta)
+            DiceTray(
+                dice = state.dice,
+                tappable = diceTappable,
+                keeping = keeping,
+                onDieClick = onDieClick,
+            )
+            ResultPill(turnResult = state.turnResult)
         }
-        KoeText(
-            text = subtitle,
-            style = KoeTextStyles.Subtitle,
-            color = colorResource(R.color.koe_screen_board_content),
-            textAlign = TextAlign.Center,
-        )
-        Row(
-            Modifier
-                .testTag(MatchBoardTags.DICE_ROW)
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            state.dice.forEachIndexed { index, die ->
-                Die(
-                    die = die,
-                    index = index,
-                    tappable = diceTappable,
-                    onClick = { onDieClick(index) },
-                )
-            }
-        }
-        ResultPill(turnResult = state.turnResult)
+        ElyseeBanner(visible = state.elyseeBanner, onDismiss = onElyseeBannerDismiss)
     }
 }
 
@@ -627,6 +670,7 @@ private fun Die(
     die: DieUi,
     index: Int,
     tappable: Boolean,
+    kept: Boolean,
     onClick: () -> Unit,
 ) {
     val ring by animateColorAsState(
@@ -650,63 +694,80 @@ private fun Die(
     )
     // No ripple: the highlight ring is the feedback.
     val interactionSource = remember { MutableInteractionSource() }
-    Box(
-        Modifier
-            .testTag(MatchBoardTags.die(index))
-            .semantics { contentDescription = description }
-            .size(BoardMetrics.DieSize)
-            .toggleable(
-                value = die.highlighted,
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = tappable,
-                role = Role.Checkbox,
-                onValueChange = { onClick() },
-            )
-            .background(colorResource(R.color.koe_surface), RoundedCornerShape(16.dp))
-            .drawWithContent {
-                drawContent()
-                val stroke = 3.dp.toPx()
-                drawRoundRect(
-                    color = ring,
-                    topLeft = Offset(stroke / 2, stroke / 2),
-                    size = Size(size.width - stroke, size.height - stroke),
-                    cornerRadius = CornerRadius(16.dp.toPx() - stroke / 2),
-                    style = Stroke(stroke),
+    // The tag is a sibling of the die, not a child of its background, so it is not cut by the die's edge.
+    Box(Modifier.size(BoardMetrics.DieSize)) {
+        Box(
+            Modifier
+                .testTag(MatchBoardTags.die(index))
+                .semantics { contentDescription = description }
+                .size(BoardMetrics.DieSize)
+                .toggleable(
+                    value = die.highlighted,
+                    interactionSource = interactionSource,
+                    indication = null,
+                    enabled = tappable,
+                    role = Role.Checkbox,
+                    onValueChange = { onClick() },
                 )
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        AnimatedContent(
-            targetState = die.face,
-            transitionSpec = {
-                (fadeIn(tween(180)) + scaleIn(initialScale = 0.6f)) togetherWith
-                    (fadeOut(tween(120)) + scaleOut(targetScale = 1.2f))
-            },
-            label = "dieFace",
-        ) { face ->
-            when (face) {
-                is DieFace.Number -> KoeText(
-                    text = face.value.toString(),
-                    style = KoeTextStyles.DieNumber,
-                    color = colorResource(R.color.koe_text_primary),
-                )
-                DieFace.Tweet -> Image(
-                    painter = painterResource(R.drawable.ic_board_tweet),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                )
-                DieFace.Fonds -> Image(
-                    painter = painterResource(R.drawable.ic_board_fonds),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                )
-                DieFace.Popularite -> Image(
-                    painter = painterResource(R.drawable.ic_board_stat_popularite),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                )
+                .background(colorResource(R.color.koe_surface), RoundedCornerShape(16.dp))
+                .drawWithContent {
+                    drawContent()
+                    val stroke = 3.dp.toPx()
+                    drawRoundRect(
+                        color = ring,
+                        topLeft = Offset(stroke / 2, stroke / 2),
+                        size = Size(size.width - stroke, size.height - stroke),
+                        cornerRadius = CornerRadius(16.dp.toPx() - stroke / 2),
+                        style = Stroke(stroke),
+                    )
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            AnimatedContent(
+                targetState = die.face,
+                transitionSpec = {
+                    (fadeIn(tween(180)) + scaleIn(initialScale = 0.6f)) togetherWith
+                        (fadeOut(tween(120)) + scaleOut(targetScale = 1.2f))
+                },
+                label = "dieFace",
+            ) { face ->
+                when (face) {
+                    is DieFace.Number -> KoeText(
+                        text = face.value.toString(),
+                        style = KoeTextStyles.DieNumber,
+                        color = colorResource(R.color.koe_text_primary),
+                    )
+                    DieFace.Tweet -> Image(
+                        painter = painterResource(R.drawable.ic_board_tweet),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                    )
+                    DieFace.Fonds -> Image(
+                        painter = painterResource(R.drawable.ic_board_fonds),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                    )
+                    DieFace.Popularite -> Image(
+                        painter = painterResource(R.drawable.ic_board_stat_popularite),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                    )
+                }
             }
+        }
+        // Overlaps the top edge and draws above the ring; the die keeps its 56 dp box.
+        if (kept) {
+            KoeText(
+                text = stringResource(R.string.match_die_kept),
+                style = KoeTextStyles.CardBadge,
+                color = colorResource(R.color.koe_text_primary),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .zIndex(1f)
+                    .offset(y = (-7).dp)
+                    .background(colorResource(R.color.koe_status_highlight), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 6.dp, vertical = 1.dp),
+            )
         }
     }
 }
@@ -818,48 +879,58 @@ private fun SecondaryButton(
     icon: Int?,
     label: Int,
     tag: String,
-    modifier: Modifier = Modifier,
     badgeCount: Int? = null,
+    pulse: Boolean = false,
+    stateText: String? = null,
+    badge: @Composable BoxScope.() -> Unit = {},
 ) {
-    PressableSurface(
-        onClick = onClick,
-        shape = RoundedCornerShape(26.dp),
-        color = colorResource(R.color.koe_action_secondary_container),
-        border = BorderStroke(3.dp, colorResource(R.color.koe_action_outline)),
-        modifier = modifier.testTag(tag),
-    ) {
-        Row(
-            Modifier.padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    // The badge sits beside the surface, not inside it: the surface clips to its rounded shape.
+    Box {
+        PressableSurface(
+            onClick = onClick,
+            shape = RoundedCornerShape(20.dp),
+            color = colorResource(R.color.koe_action_secondary_container),
+            border = BorderStroke(3.dp, colorResource(R.color.koe_action_outline)),
+            modifier = Modifier
+                .height(BoardMetrics.BottomButtonHeight)
+                .testTag(tag)
+                .pulsing(pulse)
+                .semantics { stateText?.let { stateDescription = it } },
         ) {
-            if (icon != null) {
-                Image(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
-            KoeText(
-                text = stringResource(label),
-                style = KoeTextStyles.Button,
-                color = colorResource(R.color.koe_action_secondary_content),
-            )
-            if (badgeCount != null) {
-                Box(
-                    Modifier
-                        .size(26.dp)
-                        .background(colorResource(R.color.koe_action_primary_container), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AnimatedCount(
-                        value = badgeCount,
-                        style = KoeTextStyles.BadgeCount,
-                        color = colorResource(R.color.koe_action_primary_content),
+            Row(
+                Modifier.padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (icon != null) {
+                    Image(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
                     )
+                }
+                KoeText(
+                    text = stringResource(label),
+                    style = KoeTextStyles.CardTitle,
+                    color = colorResource(R.color.koe_action_secondary_content),
+                )
+                if (badgeCount != null) {
+                    Box(
+                        Modifier
+                            .size(22.dp)
+                            .background(colorResource(R.color.koe_action_primary_container), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AnimatedCount(
+                            value = badgeCount,
+                            style = KoeTextStyles.BadgeCount,
+                            color = colorResource(R.color.koe_action_primary_content),
+                        )
+                    }
                 }
             }
         }
+        badge()
     }
 }
 
@@ -867,6 +938,7 @@ private fun SecondaryButton(
 private fun EndTurnButton(
     visible: Boolean,
     onClick: () -> Unit,
+    pulse: Boolean = false,
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -878,6 +950,7 @@ private fun EndTurnButton(
             label = R.string.btn_end_turn,
             tag = MatchBoardTags.END_TURN,
             onClick = onClick,
+            pulse = pulse,
         )
     }
 }
@@ -887,6 +960,7 @@ private fun PrimaryPillButton(
     label: Int,
     tag: String,
     onClick: () -> Unit,
+    pulse: Boolean = false,
 ) {
     PressableSurface(
         onClick = onClick,
@@ -894,7 +968,8 @@ private fun PrimaryPillButton(
         color = colorResource(R.color.koe_action_primary_container),
         modifier = Modifier
             .testTag(tag)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .pulsing(pulse),
     ) {
         Row(
             Modifier.padding(horizontal = 12.dp),
@@ -911,6 +986,348 @@ private fun PrimaryPillButton(
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
             )
+        }
+    }
+}
+
+/** The human's step this turn; null during AI turns, which show no step. */
+private enum class TurnStep { ROLL, KEEP, SHOP }
+
+private fun turnStepOf(state: MatchUiState): TurnStep? {
+    if (state.currentPlayer != state.me.candidate) return null
+    val roll = state.roll
+    return when {
+        roll != null && roll.rollNumber == 0 -> TurnStep.ROLL
+        roll != null -> TurnStep.KEEP
+        state.canEndTurn -> TurnStep.SHOP
+        else -> null
+    }
+}
+
+/** True once the same step and roll have sat on screen long enough for the next action to pulse. */
+@Composable
+private fun rememberPulseReady(step: TurnStep?, rollNumber: Int?): Boolean {
+    var ready by remember { mutableStateOf(false) }
+    LaunchedEffect(step, rollNumber) {
+        ready = false
+        if (step != null) {
+            delay(BoardMetrics.PulseDelayMs)
+            ready = true
+        }
+    }
+    return ready
+}
+
+/** Gentle scale on the next action; graphicsLayer leaves the layout size alone. */
+@Composable
+private fun Modifier.pulsing(enabled: Boolean): Modifier {
+    if (!enabled) return this
+    val transition = rememberInfiniteTransition(label = "pulse")
+    val scale by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+        label = "pulseScale",
+    )
+    return graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+    }
+}
+
+/** Four labels in turn order; a zero-size anchor puts the bar in the gap above the bottom buttons. */
+@Composable
+private fun StepBar(step: TurnStep?) {
+    if (step == null) return
+    val current = step.ordinal
+    val currentDescription = stringResource(R.string.match_step_current)
+    val labels = listOf(
+        R.string.match_step_roll,
+        R.string.match_step_keep,
+        R.string.match_step_shop,
+        R.string.match_step_end,
+    )
+    // The bottom buttons start 16 dp below this anchor; the bar sits above them.
+    Box(
+        Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(Constraints())
+            layout(0, 0) {
+                placeable.place(
+                    ((constraints.maxWidth - placeable.width) / 2f).roundToInt(),
+                    -12.dp.roundToPx(),
+                )
+            }
+        },
+    ) {
+        Row(
+            Modifier.testTag(MatchBoardTags.STEP_BAR),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            labels.forEachIndexed { index, label ->
+                if (index > 0) {
+                    KoeText(
+                        text = "›",
+                        style = KoeTextStyles.Caption,
+                        color = colorResource(R.color.koe_screen_board_content),
+                    )
+                }
+                val isCurrent = index == current
+                KoeText(
+                    text = stringResource(label),
+                    style = KoeTextStyles.Caption,
+                    color = when {
+                        isCurrent -> colorResource(R.color.koe_text_primary)
+                        index < current -> colorResource(R.color.koe_text_muted)
+                        else -> colorResource(R.color.koe_screen_board_content)
+                    },
+                    modifier = Modifier
+                        .background(
+                            if (isCurrent) colorResource(R.color.koe_status_highlight) else Color.Transparent,
+                            RoundedCornerShape(10.dp),
+                        )
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                        .semantics { if (isCurrent) stateDescription = currentDescription },
+                )
+            }
+        }
+    }
+}
+
+/** Lock or affordability marker on the corner of BOUTIQUE; it overhangs the corner, so the button keeps its size. */
+@Composable
+private fun BoxScope.ShopBadge(availability: ShopAvailability) {
+    when (availability) {
+        ShopAvailability.LOCKED -> Box(
+            Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 6.dp, y = (-8).dp)
+                .size(22.dp)
+                .testTag(MatchBoardTags.SHOP_LOCK)
+                .background(colorResource(R.color.koe_surface), CircleShape)
+                .border(BorderStroke(2.dp, colorResource(R.color.koe_action_outline)), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_board_lock),
+                contentDescription = null,
+                modifier = Modifier.size(12.dp),
+            )
+        }
+        ShopAvailability.AFFORDABLE -> Box(
+            Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 4.dp, y = (-4).dp)
+                .size(14.dp)
+                .testTag(MatchBoardTags.SHOP_AFFORDABLE)
+                .background(colorResource(R.color.koe_status_highlight), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_board_fonds),
+                contentDescription = null,
+                modifier = Modifier.size(10.dp),
+            )
+        }
+        ShopAvailability.OPEN -> Unit
+    }
+}
+
+/** The dice row, with the legend button on its right edge and the legend card under it. */
+@Composable
+private fun DiceTray(
+    dice: List<DieUi>,
+    tappable: Boolean,
+    keeping: Boolean,
+    onDieClick: (Int) -> Unit,
+) {
+    var legendOpen by rememberSaveable { mutableStateOf(false) }
+    val legendDescription = stringResource(R.string.cd_dice_legend)
+    // The legend may cover the result pill below, so the tray draws above it.
+    Box(Modifier.zIndex(1f)) {
+        Row(
+            Modifier
+                .testTag(MatchBoardTags.DICE_ROW)
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            dice.forEachIndexed { index, die ->
+                Die(
+                    die = die,
+                    index = index,
+                    tappable = tappable,
+                    kept = keeping && die.highlighted,
+                    onClick = { onDieClick(index) },
+                )
+            }
+        }
+        // Zero-size anchor on the row's bottom right: the info button tucks under the last die, clear of the MePanel.
+        Box(
+            Modifier
+                .align(Alignment.BottomEnd)
+                .layout { measurable, _ ->
+                    val placeable = measurable.measure(Constraints())
+                    layout(0, 0) {
+                        placeable.place(-placeable.width, 4.dp.roundToPx())
+                    }
+                },
+        ) {
+            PressableSurface(
+                onClick = { legendOpen = !legendOpen },
+                shape = CircleShape,
+                color = colorResource(R.color.koe_surface),
+                border = BorderStroke(3.dp, colorResource(R.color.koe_action_outline)),
+                modifier = Modifier
+                    .size(32.dp)
+                    .testTag(MatchBoardTags.DICE_LEGEND_BUTTON)
+                    .semantics { contentDescription = legendDescription },
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_board_info),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+        }
+        // Zero-size anchor on the row's bottom centre: the legend card hangs 8 dp below the dice.
+        Box(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .layout { measurable, _ ->
+                    val placeable = measurable.measure(Constraints())
+                    layout(0, 0) {
+                        placeable.place(-placeable.width / 2, 8.dp.roundToPx())
+                    }
+                },
+        ) {
+            AnimatedVisibility(
+                visible = legendOpen,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                label = "diceLegend",
+            ) {
+                DiceLegendCard(onClick = { legendOpen = false })
+            }
+        }
+    }
+}
+
+@Composable
+private fun DiceLegendCard(onClick: () -> Unit) {
+    PressableSurface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = colorResource(R.color.koe_surface),
+        border = BorderStroke(3.dp, colorResource(R.color.koe_action_outline)),
+        modifier = Modifier
+            .testTag(MatchBoardTags.DICE_LEGEND)
+            .width(340.dp),
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            KoeText(
+                text = stringResource(R.string.match_legend_title),
+                style = KoeTextStyles.CardTitle,
+                color = colorResource(R.color.koe_text_primary),
+            )
+            KoeText(
+                text = stringResource(R.string.match_legend_numbers),
+                style = KoeTextStyles.Description,
+                color = colorResource(R.color.koe_text_primary),
+            )
+            KoeText(
+                text = stringResource(R.string.match_legend_tweet),
+                style = KoeTextStyles.Description,
+                color = colorResource(R.color.koe_text_primary),
+            )
+            KoeText(
+                text = stringResource(R.string.match_legend_fonds),
+                style = KoeTextStyles.Description,
+                color = colorResource(R.color.koe_text_primary),
+            )
+            KoeText(
+                text = stringResource(R.string.match_legend_popularite),
+                style = KoeTextStyles.Description,
+                color = colorResource(R.color.koe_text_primary),
+            )
+        }
+    }
+}
+
+/** Explains the Élysée the moment the player takes it, then clears itself. */
+@Composable
+private fun BoxScope.ElyseeBanner(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+) {
+    val dismiss by rememberUpdatedState(onDismiss)
+    LaunchedEffect(visible) {
+        if (visible) {
+            delay(BoardMetrics.ElyseeBannerMs)
+            dismiss()
+        }
+    }
+    // Zero-size anchor on the column's top centre: the banner rises over the title without moving it.
+    Box(
+        Modifier
+            .align(Alignment.TopCenter)
+            .layout { measurable, _ ->
+                val placeable = measurable.measure(Constraints())
+                layout(0, 0) {
+                    placeable.place(-placeable.width / 2, -4.dp.roundToPx())
+                }
+            },
+    ) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn() + scaleIn(initialScale = 0.6f, animationSpec = spring(dampingRatio = 0.5f)),
+            exit = fadeOut() + scaleOut(targetScale = 0.8f),
+            label = "elyseeBanner",
+        ) {
+            ElyseeBannerContent(onClick = dismiss)
+        }
+    }
+}
+
+@Composable
+private fun ElyseeBannerContent(onClick: () -> Unit) {
+    PressableSurface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = colorResource(R.color.koe_surface),
+        border = BorderStroke(3.dp, colorResource(R.color.koe_status_highlight)),
+        modifier = Modifier
+            .testTag(MatchBoardTags.ELYSEE_BANNER)
+            .width(340.dp),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_board_crown),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp, 14.dp),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                KoeText(
+                    text = stringResource(R.string.match_elysee_banner_title),
+                    style = KoeTextStyles.BodyStrong,
+                    color = colorResource(R.color.koe_text_primary),
+                )
+                KoeText(
+                    text = stringResource(R.string.match_elysee_banner_body),
+                    style = KoeTextStyles.Description,
+                    color = colorResource(R.color.koe_text_primary),
+                )
+            }
         }
     }
 }
@@ -961,15 +1378,20 @@ private fun MatchBoardPreview() {
         onOpponentClick = {},
         onShopClick = {},
         onCardsClick = {},
+        onHistoryClick = {},
         onEndTurnClick = {},
         onDieClick = {},
         onRollClick = {},
         onValidateDiceClick = {},
+        onElyseeBannerDismiss = {},
     )
 }
 
 private object BoardMetrics {
     val Gap = 12.dp
     val DieSize = 56.dp
-    val BottomButtonHeight = 52.dp
+    val BottomButtonHeight = 48.dp
+    // Idle time before the next action pulses; the Élysée banner clears itself after its own delay.
+    const val PulseDelayMs = 4_000L
+    const val ElyseeBannerMs = 6_000L
 }

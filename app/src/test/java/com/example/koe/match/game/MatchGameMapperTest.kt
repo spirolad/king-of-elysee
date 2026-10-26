@@ -13,6 +13,7 @@ import com.example.koe.game.shop.ShopOffer
 import com.example.koe.match.Candidate
 import com.example.koe.match.DieFace
 import com.example.koe.match.RollUi
+import com.example.koe.match.ShopAvailability
 import com.example.koe.match.TurnResultUi
 import com.example.koe.match.TweetBannerUi
 import com.example.koe.match.dialog.CardKind
@@ -242,6 +243,28 @@ class MatchGameMapperTest {
     }
 
     @Test
+    fun `board state passes the shop availability and the elysee banner through`() {
+        val engine = newEngine()
+        val lepen = engine.player(Candidate.LEPEN)
+
+        val state = boardState(
+            engine,
+            lepen.id,
+            emptyList(),
+            emptyList(),
+            canEndTurn = true,
+            shopAvailability = ShopAvailability.AFFORDABLE,
+            elyseeBanner = true,
+        )
+        assertEquals(ShopAvailability.AFFORDABLE, state.shopAvailability)
+        assertTrue(state.elyseeBanner)
+
+        val defaults = boardState(engine, lepen.id, emptyList(), emptyList(), canEndTurn = false)
+        assertEquals(ShopAvailability.LOCKED, defaults.shopAvailability)
+        assertFalse(defaults.elyseeBanner)
+    }
+
+    @Test
     fun `pause ranking sorts by votes with ties in engine order`() {
         val engine = newEngine()
         engine.player(Candidate.POUTOU).addVictoryPoints(7)
@@ -326,6 +349,8 @@ class MatchGameMapperTest {
 
         val closed = shopDialog(me, offers, sweepCost = 2, canBuy = false)
         assertEquals(listOf(false, false), closed.cards.map { it.enabled })
+        assertFalse(closed.canBuy)
+        assertTrue(open.canBuy)
     }
 
     @Test
