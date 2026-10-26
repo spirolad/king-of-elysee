@@ -15,6 +15,7 @@ import com.example.koe.game.shop.CardCatalog
 import com.example.koe.game.shop.CardEffectResult
 import com.example.koe.game.shop.PowerCard
 import com.example.koe.game.shop.Shop
+import kotlinx.coroutines.runBlocking
 import java.util.Random
 
 /**
@@ -167,7 +168,7 @@ class AutomaticTester(
         var totalCardsBought = 0
 
         val trackingListener = object : GameEventListener {
-            override fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult) {
+            override fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult, cost: Int) {
                 totalCardsBought++
             }
 
@@ -188,7 +189,7 @@ class AutomaticTester(
         engine.start()
         var roundsCounter = 0
         while (!engine.isGameOver && roundsCounter < generatorConfig.maxRoundsPerGame) {
-            engine.playTurn()
+            runBlocking { engine.playTurn() }
             roundsCounter = engine.roundNumber
         }
 

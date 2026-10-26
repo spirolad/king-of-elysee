@@ -33,6 +33,15 @@ class Player(
     var nextCardDiscount: Int = 0
     var hasActionImmunity: Boolean = false
 
+    var mechancete: Int = 0
+        private set
+
+    // Highest Méchanceté tier already rewarded with a card; 0 before the first.
+    var rewardedMechanceteTier: Int = 0
+
+    private val _purchases = mutableListOf<CardPurchase>()
+    val purchases: List<CardPurchase> get() = _purchases.toList()
+
     private val _cards = mutableListOf<PowerCard>()
     val cards: List<PowerCard> get() = _cards.toList()
 
@@ -109,6 +118,16 @@ class Player(
         val deducted = minOf(victoryPoints, amount)
         victoryPoints -= deducted
         return deducted
+    }
+
+    fun addMechancete(amount: Int) {
+        if (amount > 0) {
+            mechancete += amount
+        }
+    }
+
+    fun recordPurchase(purchase: CardPurchase) {
+        _purchases.add(purchase)
     }
 
     fun addCard(card: PowerCard) {

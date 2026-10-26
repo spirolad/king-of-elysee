@@ -3,6 +3,14 @@ package com.example.koe.game.shop
 import com.example.koe.game.player.Player
 
 /**
+ * A face-up card with the price a given player would pay for it right now.
+ */
+data class ShopOffer(
+    val card: PowerCard,
+    val cost: Int
+)
+
+/**
  * Manages the power card shop, deck, and face-up market in King of Tokyo.
  * Adheres to SRP by handling card distribution, sweeping, and transaction validations.
  */
@@ -42,6 +50,9 @@ class Shop(
         return maxOf(1, cost - discount)
     }
 
+    fun offers(player: Player, allPlayers: List<Player>): List<ShopOffer> =
+        faceUpCards.map { ShopOffer(it, calculateCardCost(player, it, allPlayers)) }
+
     fun sweepFree() {
         _faceUpCards.clear()
         refillMarket()
@@ -76,15 +87,7 @@ class Shop(
         refillMarket()
 
         // Apply card effect
-        val result = card.effect.apply(player, allPlayers)
-        player.addEnergy(result.energyDelta)
-        if (result.healthDelta > 0) player.heal(result.healthDelta)
-        if (result.healthDelta < 0) player.damage(-result.healthDelta)
-        player.addVictoryPoints(result.victoryPointsDelta)
-
-        if (card.type == CardType.KEEP) {
-            player.addCard(card)
-        }
+        val result = card.grantTo(player, allPlayers)
 
         if (card.id.value == "changement_d_assemblee") {
             sweepFree()
@@ -102,4 +105,19 @@ class Shop(
         const val DEFAULT_MARKET_SIZE = 3
         const val DEFAULT_SWEEP_COST = 2
     }
+}
+
+/**
+ * Applies this card's effect to [player] and keeps it when it is a KEEP card.
+ */
+fun PowerCard.grantTo(player: Player, allPlayers: List<Player>): CardEffectResult {
+    val result = effect.apply(player, allPlayers)
+    player.addEnergy(result.energyDelta)
+    if (result.healthDelta > 0) player.heal(result.healthDelta)
+    if (result.healthDelta < 0) player.damage(-result.healthDelta)
+    player.addVictoryPoints(result.victoryPointsDelta)
+    if (type == CardType.KEEP) {
+        player.addCard(this)
+    }
+    return result
 }

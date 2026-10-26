@@ -1,7 +1,9 @@
 package com.example.koe.game.player
 
 import com.example.koe.game.dice.DieFace
+import com.example.koe.game.shop.CardType
 import com.example.koe.game.shop.PowerCard
+import com.example.koe.game.shop.ShopOffer
 
 /**
  * An automated AI controller for King of Tokyo players.
@@ -11,9 +13,10 @@ class AiPlayerController(
     private val healthThresholdToYield: Int = 4
 ) : PlayerController {
 
-    override fun chooseDiceToKeep(
+    override suspend fun chooseDiceToKeep(
         player: Player,
         rollNumber: Int,
+        maxRolls: Int,
         currentDice: List<DieFace>,
         currentlyKept: List<Boolean>
     ): List<Int> {
@@ -34,7 +37,7 @@ class AiPlayerController(
         return keptIndices
     }
 
-    override fun shouldYieldTokyo(
+    override suspend fun shouldYieldTokyo(
         player: Player,
         attacker: Player,
         damage: Int
@@ -43,23 +46,32 @@ class AiPlayerController(
         return player.health <= healthThresholdToYield
     }
 
-    override fun chooseShopAction(
+    override suspend fun chooseShopAction(
         player: Player,
-        availableCards: List<PowerCard>,
+        offers: List<ShopOffer>,
         sweepCost: Int
     ): ShopAction {
-        // Prioritize buying affordable cards
-        val affordable = availableCards.filter { it.cost <= player.energy }
+        // Prioritize buying the most expensive card the player can afford
+        val affordable = offers.filter { it.cost <= player.energy }
         if (affordable.isNotEmpty()) {
-            val bestCard = affordable.maxByOrNull { it.cost } ?: affordable.first()
-            return ShopAction.Buy(bestCard)
+            val best = affordable.maxByOrNull { it.cost } ?: affordable.first()
+            return ShopAction.Buy(best.card)
         }
 
         // If player has abundant energy and no good cards, sweep
-        if (player.energy >= sweepCost + 4 && availableCards.isNotEmpty()) {
+        if (player.energy >= sweepCost + 4 && offers.isNotEmpty()) {
             return ShopAction.Sweep
         }
 
         return ShopAction.Pass
+    }
+
+    override suspend fun chooseMechanceteCard(
+        player: Player,
+        tier: Int,
+        choices: List<PowerCard>
+    ): PowerCard {
+        // Kept cards keep paying off every turn, so prefer them over one-shot cards
+        return choices.firstOrNull { it.type == CardType.KEEP } ?: choices.first()
     }
 }

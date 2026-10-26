@@ -4,20 +4,23 @@ import com.example.koe.game.player.Monster
 import com.example.koe.game.player.Player
 import com.example.koe.game.player.PlayerId
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CardCatalogTest {
 
     @Test
-    fun `CardCatalog deck contains all 42 specified cards`() {
+    fun `CardCatalog market deck has 32 cards and Méchanceté cards apart`() {
         val deck = CardCatalog.createStandardDeck()
-        assertEquals("Expected 42 cards in standard deck, found ${deck.size}", 42, deck.size)
+        assertEquals("Expected 32 cards in the market deck, found ${deck.size}", 32, deck.size)
         val actions = CardCatalog.createActionCards()
         val powers = CardCatalog.createPowerCards()
         val wickedness = CardCatalog.createWickednessTiles()
         assertEquals("Expected 11 action cards, found ${actions.size}", 11, actions.size)
         assertEquals("Expected 21 power cards, found ${powers.size}", 21, powers.size)
         assertEquals("Expected 10 wickedness tiles, found ${wickedness.size}", 10, wickedness.size)
+        val wickednessIds = wickedness.map { it.id }.toSet()
+        assertTrue(deck.none { it.id in wickednessIds })
     }
 
     @Test

@@ -21,14 +21,18 @@ sealed interface WinReason {
 interface GameEventListener {
     fun onGameStarted(players: List<Player>) {}
     fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) {}
-    fun onDiceRolled(player: Player, rollNumber: Int, dice: List<DieFace>, keptIndices: List<Int>) {}
+    fun onTurnSkipped(player: Player) {}
+    fun onDiceRolled(player: Player, rollNumber: Int, maxRolls: Int, dice: List<DieFace>, keptIndices: List<Int>) {}
     fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {}
+    fun onMechanceteGained(player: Player, amount: Int, total: Int) {}
     fun onPlayerDamaged(target: Player, attacker: Player, damage: Int, remainingHealth: Int) {}
     fun onPlayerHealed(player: Player, amount: Int, currentHealth: Int) {}
     fun onPlayerEnteredTokyo(player: Player, zone: TokyoZone) {}
     fun onPlayerYieldedTokyo(player: Player, zone: TokyoZone) {}
-    fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult) {}
+    fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult, cost: Int) {}
     fun onShopSwept(player: Player) {}
+    fun onMechanceteCardChosen(player: Player, tier: Int, card: PowerCard, result: CardEffectResult) {}
+    fun onTurnEnded(player: Player) {}
     fun onPlayerEliminated(player: Player, reason: String) {}
     fun onGameOver(winner: Player, reason: WinReason) {}
 }
@@ -54,11 +58,17 @@ class CompositeGameEventListener(
     override fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) =
         listeners.forEach { it.onTurnStarted(player, roundNumber, isInTokyo) }
 
-    override fun onDiceRolled(player: Player, rollNumber: Int, dice: List<DieFace>, keptIndices: List<Int>) =
-        listeners.forEach { it.onDiceRolled(player, rollNumber, dice, keptIndices) }
+    override fun onTurnSkipped(player: Player) =
+        listeners.forEach { it.onTurnSkipped(player) }
+
+    override fun onDiceRolled(player: Player, rollNumber: Int, maxRolls: Int, dice: List<DieFace>, keptIndices: List<Int>) =
+        listeners.forEach { it.onDiceRolled(player, rollNumber, maxRolls, dice, keptIndices) }
 
     override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) =
         listeners.forEach { it.onDiceResolved(player, summary) }
+
+    override fun onMechanceteGained(player: Player, amount: Int, total: Int) =
+        listeners.forEach { it.onMechanceteGained(player, amount, total) }
 
     override fun onPlayerDamaged(target: Player, attacker: Player, damage: Int, remainingHealth: Int) =
         listeners.forEach { it.onPlayerDamaged(target, attacker, damage, remainingHealth) }
@@ -72,11 +82,17 @@ class CompositeGameEventListener(
     override fun onPlayerYieldedTokyo(player: Player, zone: TokyoZone) =
         listeners.forEach { it.onPlayerYieldedTokyo(player, zone) }
 
-    override fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult) =
-        listeners.forEach { it.onCardPurchased(player, card, result) }
+    override fun onCardPurchased(player: Player, card: PowerCard, result: CardEffectResult, cost: Int) =
+        listeners.forEach { it.onCardPurchased(player, card, result, cost) }
 
     override fun onShopSwept(player: Player) =
         listeners.forEach { it.onShopSwept(player) }
+
+    override fun onMechanceteCardChosen(player: Player, tier: Int, card: PowerCard, result: CardEffectResult) =
+        listeners.forEach { it.onMechanceteCardChosen(player, tier, card, result) }
+
+    override fun onTurnEnded(player: Player) =
+        listeners.forEach { it.onTurnEnded(player) }
 
     override fun onPlayerEliminated(player: Player, reason: String) =
         listeners.forEach { it.onPlayerEliminated(player, reason) }

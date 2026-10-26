@@ -3,11 +3,14 @@ package com.example.koe.game.engine
 import com.example.koe.game.dice.DiceRoller
 import com.example.koe.game.dice.DieFace
 import com.example.koe.game.dice.RandomDiceRoller
+import com.example.koe.game.player.CardPurchase
 import com.example.koe.game.player.Player
 import com.example.koe.game.player.PlayerController
 import com.example.koe.game.player.PlayerId
 import com.example.koe.game.player.ShopAction
+import com.example.koe.game.shop.MechanceteDeck
 import com.example.koe.game.shop.Shop
+import com.example.koe.game.shop.grantTo
 
 /**
  * Core game engine orchestrating the rules and flow of King of Tokyo.
@@ -18,6 +21,7 @@ class GameEngine(
     private val controllers: Map<PlayerId, PlayerController>,
     val config: GameConfig = GameConfig(hasTokyoBay = players.size >= 5),
     val shop: Shop = Shop(),
+    val mechanceteDeck: MechanceteDeck = MechanceteDeck(),
     private val diceRoller: DiceRoller = RandomDiceRoller(),
     val eventListener: GameEventListener = CompositeGameEventListener()
 ) {
@@ -60,7 +64,7 @@ class GameEngine(
      * Executes a single turn for the current player.
      * Returns true if turn completed and game continues, or false if game is over.
      */
-    fun playTurn(): Boolean {
+    suspend fun playTurn(): Boolean {
         if (isGameOver) return false
 
         val active = currentPlayer
@@ -71,6 +75,7 @@ class GameEngine(
 
         if (active.skipNextTurn) {
             active.skipNextTurn = false
+            eventListener.onTurnSkipped(active)
             advanceTurn()
             return !isGameOver
         }
@@ -108,6 +113,9 @@ class GameEngine(
 
         // 4. End Turn Effects
         executeEndTurnPhase(active)
+        if (!isGameOver) {
+            eventListener.onTurnEnded(active)
+        }
 
         // 5. Advance Turn
         advanceTurn()
@@ -117,7 +125,7 @@ class GameEngine(
     /**
      * Runs the entire game loop until a winner emerges.
      */
-    fun runGame(): Player {
+    suspend fun runGame(): Player {
         start()
         while (!isGameOver) {
             playTurn()
@@ -125,24 +133,28 @@ class GameEngine(
         return winner!!
     }
 
-    private fun executeDiceRollPhase(player: Player): List<DieFace> {
+    private suspend fun executeDiceRollPhase(player: Player): List<DieFace> {
         val controller = controllers[player.id] ?: error("No controller registered for player ${player.name}")
         val diceCount = config.baseDiceCount + player.extraDiceCount
-        var currentDice = diceRoller.roll(diceCount)
-        var keptIndices = mutableListOf<Int>()
 
         var extraRerolls = 0
         if (player.hasCard("phrase_culte")) extraRerolls++
         if (player.hasCard("sournois")) extraRerolls++
         var rollsLeft = config.maxRerolls + extraRerolls
+        val maxRolls = 1 + rollsLeft
         var rollNumber = 1
 
-        eventListener.onDiceRolled(player, rollNumber, currentDice, keptIndices)
+        controller.awaitFirstRoll(player)
+        var currentDice = diceRoller.roll(diceCount)
+        var keptIndices = mutableListOf<Int>()
+
+        eventListener.onDiceRolled(player, rollNumber, maxRolls, currentDice, keptIndices)
 
         while (rollsLeft > 0) {
             val keptChoices = controller.chooseDiceToKeep(
                 player = player,
                 rollNumber = rollNumber,
+                maxRolls = maxRolls,
                 currentDice = currentDice,
                 currentlyKept = List(currentDice.size) { it in keptIndices }
             ).distinct().filter { it in currentDice.indices }
@@ -165,13 +177,13 @@ class GameEngine(
             rollNumber++
             rollsLeft--
 
-            eventListener.onDiceRolled(player, rollNumber, currentDice, keptIndices)
+            eventListener.onDiceRolled(player, rollNumber, maxRolls, currentDice, keptIndices)
         }
 
         return currentDice
     }
 
-    private fun executeResolveDicePhase(player: Player, dice: List<DieFace>) {
+    private suspend fun executeResolveDicePhase(player: Player, dice: List<DieFace>) {
         val isInTokyo = tokyoBoard.isInsideTokyo(player)
         val summary = DiceResolver.resolve(dice, isInTokyo)
 
@@ -214,6 +226,12 @@ class GameEngine(
             alivePlayers.filter { it.id != player.id && it.hasCard("detournement") }.forEach {
                 it.addEnergy(1)
             }
+        }
+
+        // Méchanceté: three 1s or more give 1, three 2s or more give 2.
+        if (summary.mechanceteGained > 0) {
+            player.addMechancete(summary.mechanceteGained)
+            eventListener.onMechanceteGained(player, summary.mechanceteGained, player.mechancete)
         }
 
         // Apply Heal
@@ -306,7 +324,7 @@ class GameEngine(
         }
     }
 
-    private fun executeEndTurnPhase(player: Player) {
+    private suspend fun executeEndTurnPhase(player: Player) {
         if (!player.isAlive || isGameOver) return
 
         if (player.hasCard("affichage") && player.energy >= 3) {
@@ -317,15 +335,32 @@ class GameEngine(
             player.addEnergy(1)
         }
 
+        // A newly reached Méchanceté tier grants one card of that tier.
+        val tier = MechanceteDeck.unrewardedTier(player.mechancete, player.rewardedMechanceteTier)
+        if (tier != null && !isGameOver) {
+            player.rewardedMechanceteTier = tier
+            val choices = mechanceteDeck.choicesFor(tier)
+            if (choices.isNotEmpty()) {
+                val controller = controllers[player.id] ?: error("No controller registered for player ${player.name}")
+                val picked = controller.chooseMechanceteCard(player, tier, choices)
+                val card = choices.firstOrNull { it.id == picked.id } ?: choices.first()
+                mechanceteDeck.take(card)
+                val result = card.grantTo(player, alivePlayers)
+                eventListener.onMechanceteCardChosen(player, tier, card, result)
+                checkWinConditions(player)
+            }
+        }
+
         player.noEnergyNextTurn = false
     }
 
-    private fun executeShopPhase(player: Player) {
+    private suspend fun executeShopPhase(player: Player) {
         val controller = controllers[player.id] ?: return
         var keepShopping = true
 
         while (keepShopping && player.isAlive && !isGameOver) {
-            when (val action = controller.chooseShopAction(player, shop.faceUpCards, shop.sweepCost)) {
+            val offers = shop.offers(player, alivePlayers)
+            when (val action = controller.chooseShopAction(player, offers, shop.sweepCost)) {
                 is ShopAction.Pass -> keepShopping = false
                 is ShopAction.Sweep -> {
                     val success = shop.sweep(player)
@@ -336,9 +371,12 @@ class GameEngine(
                     }
                 }
                 is ShopAction.Buy -> {
+                    val cost = offers.firstOrNull { it.card.id == action.card.id }?.cost
+                        ?: shop.calculateCardCost(player, action.card, alivePlayers)
                     val result = shop.buyCard(player, action.card, alivePlayers)
                     if (result != null) {
-                        eventListener.onCardPurchased(player, action.card, result)
+                        player.recordPurchase(CardPurchase(action.card, cost, roundNumber))
+                        eventListener.onCardPurchased(player, action.card, result, cost)
                         checkWinConditions(player)
                     } else {
                         keepShopping = false

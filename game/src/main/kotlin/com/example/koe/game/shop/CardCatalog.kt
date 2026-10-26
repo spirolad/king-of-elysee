@@ -13,7 +13,7 @@ object CardCatalog {
             name = "Bracelet électronique",
             cost = 3,
             type = CardType.DISCARD,
-            description = "Le joueur ciblé ne peut pas gagner d'énergie au prochain tour. (Stocke un boolean noEnergyNextTurn = true sur le joueur).",
+            description = "Le joueur ciblé ne peut pas gagner d'énergie au prochain tour.",
             effect = { buyer, allPlayers ->
                 val opponents = allPlayers.filter { it.id != buyer.id && it.isAlive }
                 val target = opponents.maxByOrNull { it.victoryPoints } ?: opponents.firstOrNull()
@@ -35,7 +35,7 @@ object CardCatalog {
             name = "Carte France Travail",
             cost = 4,
             type = CardType.DISCARD,
-            description = "Le joueur ciblé passe son prochain tour. (Set skipNextTurn = true).",
+            description = "Le joueur ciblé passe son prochain tour.",
             effect = { buyer, allPlayers ->
                 val opponents = allPlayers.filter { it.id != buyer.id && it.isAlive }
                 val target = opponents.maxByOrNull { it.victoryPoints } ?: opponents.firstOrNull()
@@ -122,7 +122,7 @@ object CardCatalog {
             name = "Vote utile",
             cost = 1,
             type = CardType.DISCARD,
-            description = "Donne 1 PV pour chaque tranche de 3 énergies dépensées lors de cet achat. (Cout de 1 mais peut donner autant que vouloir)",
+            description = "Donne 1 PV pour chaque tranche de 3 énergies dépensées lors de cet achat.",
             effect = { buyer, _ ->
                 val chunks = buyer.energy / 3
                 val spent = chunks * 3
@@ -233,7 +233,7 @@ object CardCatalog {
             name = "Campagne",
             cost = 4,
             type = CardType.KEEP,
-            description = "Tes attaques infligent +1 dégât tant que tu n'es pas au pouvoir (hors de Tokyo / de la Mairie).",
+            description = "Tes attaques infligent +1 dégât tant que tu n'es pas au pouvoir (hors de l'Élysée).",
             effect = { _, _ -> CardEffectResult("Effet passif Campagne actif") }
         ),
         PowerCard(
@@ -249,7 +249,7 @@ object CardCatalog {
             name = "49.3",
             cost = 3,
             type = CardType.KEEP,
-            description = "Une fois par tour, tu peux payer 3 énergies pour forcer ton entrée au pouvoir (prendre Tokyo / la Mairie) sans attaquer.",
+            description = "Une fois par tour, tu peux payer 3 énergies pour forcer ton entrée au pouvoir (prendre l'Élysée) sans attaquer.",
             effect = { _, _ -> CardEffectResult("Effet passif 49.3 actif") }
         ),
         PowerCard(
@@ -257,7 +257,7 @@ object CardCatalog {
             name = "Vu à la TV",
             cost = 3,
             type = CardType.KEEP,
-            description = "Gagne +1 PV chaque fois que tu entres au pouvoir (à Tokyo / la Mairie).",
+            description = "Gagne +1 PV chaque fois que tu entres au pouvoir (à l'Élysée).",
             effect = { _, _ -> CardEffectResult("Effet passif Vu à la TV actif") }
         ),
         PowerCard(
@@ -329,7 +329,7 @@ object CardCatalog {
             name = "Campagne d'invectives",
             cost = 4,
             type = CardType.KEEP,
-            description = "Quand vous quittez le pouvoir (Tokyo / la Mairie), le joueur qui vous remplace subit immédiatement 2 dégâts.",
+            description = "Quand vous quittez le pouvoir (l'Élysée), le joueur qui vous remplace subit immédiatement 2 dégâts.",
             effect = { _, _ -> CardEffectResult("Effet passif Campagne d'invectives actif") }
         ),
         PowerCard(
@@ -337,7 +337,7 @@ object CardCatalog {
             name = "Monopole médiatique",
             cost = 3,
             type = CardType.KEEP,
-            description = "À la fin de votre tour, si vous êtes au pouvoir (à Tokyo / la Mairie), gagnez +1 énergie.",
+            description = "À la fin de votre tour, si vous êtes au pouvoir (à l'Élysée), gagnez +1 énergie.",
             effect = { _, _ -> CardEffectResult("Effet passif Monopole médiatique actif") }
         ),
         PowerCard(
@@ -345,7 +345,7 @@ object CardCatalog {
             name = "Privatisation",
             cost = 4,
             type = CardType.KEEP,
-            description = "Tant que vous êtes au pouvoir (à Tokyo / la Mairie), gagner des points de victoire par les dés vous rapporte +1 PV bonus à chaque fois.",
+            description = "Tant que vous êtes au pouvoir (à l'Élysée), gagner des points de victoire par les dés vous rapporte +1 PV bonus à chaque fois.",
             effect = { _, _ -> CardEffectResult("Effet passif Privatisation actif") }
         ),
         PowerCard(
@@ -385,6 +385,9 @@ object CardCatalog {
         )
     )
 
+    /**
+     * Méchanceté cards, handed out by [MechanceteDeck] when a player reaches a tier instead of being sold at the market.
+     */
     fun createWickednessTiles(): List<PowerCard> = listOf(
         // Niveau 3
         PowerCard(
@@ -485,6 +488,9 @@ object CardCatalog {
         )
     )
 
+    /**
+     * Market deck: action and power cards. Méchanceté cards are kept apart, see [createWickednessTiles].
+     */
     fun createStandardDeck(): List<PowerCard> =
-        createActionCards() + createPowerCards() + createWickednessTiles()
+        createActionCards() + createPowerCards()
 }

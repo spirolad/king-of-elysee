@@ -34,4 +34,22 @@ class DiceResolverTest {
         assertEquals(2, resInside.heartsRolled)
         assertEquals(0, resInside.actualHeal)
     }
+
+    @Test
+    fun `Méchanceté from three ones and three twos`() {
+        val oneTrio = DiceResolver.resolve(listOf(DieFace.ONE, DieFace.ONE, DieFace.ONE, DieFace.ENERGY, DieFace.ENERGY, DieFace.ENERGY), isInTokyo = false)
+        assertEquals(1, oneTrio.mechanceteGained)
+
+        val twoTrio = DiceResolver.resolve(listOf(DieFace.TWO, DieFace.TWO, DieFace.TWO, DieFace.ENERGY, DieFace.ENERGY, DieFace.ENERGY), isInTokyo = false)
+        assertEquals(2, twoTrio.mechanceteGained)
+
+        val both = DiceResolver.resolve(listOf(DieFace.ONE, DieFace.ONE, DieFace.ONE, DieFace.TWO, DieFace.TWO, DieFace.TWO), isInTokyo = false)
+        assertEquals(3, both.mechanceteGained)
+
+        val fourOnes = DiceResolver.resolve(listOf(DieFace.ONE, DieFace.ONE, DieFace.ONE, DieFace.ONE, DieFace.ENERGY, DieFace.ENERGY), isInTokyo = false)
+        assertEquals(1, fourOnes.mechanceteGained)
+
+        val pairs = DiceResolver.resolve(listOf(DieFace.ONE, DieFace.ONE, DieFace.TWO, DieFace.TWO, DieFace.ENERGY, DieFace.ATTACK), isInTokyo = false)
+        assertEquals(0, pairs.mechanceteGained)
+    }
 }

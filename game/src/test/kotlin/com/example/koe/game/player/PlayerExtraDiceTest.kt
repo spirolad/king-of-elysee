@@ -11,13 +11,13 @@ class PlayerExtraDiceTest {
     private fun newPlayer(): Player =
         Player(id = PlayerId("p1"), name = "P1", monster = Monster.GIGA_ZAUR)
 
-    private fun standardCard(id: String) =
-        CardCatalog.createStandardDeck().first { it.id == CardId(id) }
+    private fun catalogCard(id: String) =
+        (CardCatalog.createStandardDeck() + CardCatalog.createWickednessTiles()).first { it.id == CardId(id) }
 
     @Test
     fun `cybercerveau grants exactly one extra die`() {
         val player = newPlayer()
-        player.addCard(standardCard("cybercerveau"))
+        player.addCard(catalogCard("cybercerveau"))
         assertEquals(1, player.extraDiceCount)
 
         assertEquals(0, newPlayer().extraDiceCount)
@@ -27,7 +27,7 @@ class PlayerExtraDiceTest {
     fun `reading extraDiceCount does not heal through regeneration_totale`() {
         val player = newPlayer()
         assertEquals(10, player.maxHealth)
-        player.addCard(standardCard("regeneration_totale"))
+        player.addCard(catalogCard("regeneration_totale"))
         player.damage(4)
         assertEquals(6, player.health)
 
@@ -41,7 +41,7 @@ class PlayerExtraDiceTest {
     @Test
     fun `reading extraDiceCount does not re-arm immunite_parlementaire`() {
         val player = newPlayer()
-        player.addCard(standardCard("immunite_parlementaire"))
+        player.addCard(catalogCard("immunite_parlementaire"))
         player.hasActionImmunity = false
 
         player.extraDiceCount

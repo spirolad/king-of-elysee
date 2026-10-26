@@ -35,4 +35,25 @@ class ShopTest {
         // spent 2
         assertEquals(6 - 2, buyer.energy)
     }
+
+    @Test
+    fun `offers carry the price each player pays`() {
+        val testCards = listOf(
+            PowerCard(CardId("t1"), "Test One", 3, CardType.KEEP, "Test"),
+            PowerCard(CardId("t2"), "Test Two", 3, CardType.KEEP, "Test"),
+            PowerCard(CardId("t3"), "Test Three", 3, CardType.KEEP, "Test")
+        )
+        val shop = Shop(initialCards = testCards, marketSize = 3, sweepCost = 2)
+
+        // Clientelisme: purchases cost 1 less
+        val discounted = Player(id = PlayerId("discounted"), name = "Discounted", monster = Monster.KRAKEN, initialEnergy = 5)
+        discounted.addCard(CardCatalog.createPowerCards().first { it.id == CardId("clientelisme") })
+        assertEquals(listOf(2, 2, 2), shop.offers(discounted, listOf(discounted)).map { it.cost })
+
+        // An opponent with Loi liberticide adds 1 to every purchase
+        val plain = Player(id = PlayerId("plain"), name = "Plain", monster = Monster.ALIENOID, initialEnergy = 5)
+        val rival = Player(id = PlayerId("rival"), name = "Rival", monster = Monster.MEKA_DRAGON)
+        rival.addCard(CardCatalog.createPowerCards().first { it.id == CardId("loi_liberticide") })
+        assertEquals(listOf(4, 4, 4), shop.offers(plain, listOf(plain, rival)).map { it.cost })
+    }
 }

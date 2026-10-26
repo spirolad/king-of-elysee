@@ -10,7 +10,8 @@ data class DiceResolutionSummary(
     val energy: Int,
     val attackDamage: Int,
     val heartsRolled: Int,
-    val actualHeal: Int
+    val actualHeal: Int,
+    val mechanceteGained: Int
 )
 
 /**
@@ -44,13 +45,18 @@ object DiceResolver {
         val hearts = counts[DieFace.HEAL] ?: 0
         // Monsters in Tokyo cannot heal via dice hearts
         val actualHeal = if (isInTokyo) 0 else hearts
+        // Méchanceté: 3+ [1] give +1, 3+ [2] give +2 (both can apply)
+        val mechanceteGained =
+            (if ((counts[DieFace.ONE] ?: 0) >= 3) 1 else 0) +
+                (if ((counts[DieFace.TWO] ?: 0) >= 3) 2 else 0)
 
         return DiceResolutionSummary(
             victoryPoints = vp,
             energy = energy,
             attackDamage = attack,
             heartsRolled = hearts,
-            actualHeal = actualHeal
+            actualHeal = actualHeal,
+            mechanceteGained = mechanceteGained
         )
     }
 }
