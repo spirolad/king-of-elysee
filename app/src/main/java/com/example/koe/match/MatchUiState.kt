@@ -57,7 +57,7 @@ data class MatchUiState(
     val me: MeUi,
     val dice: List<DieUi>,
     // null hides the result pill.
-    val turnResult: String?,
+    val turnResult: TurnResultUi?,
     val cardsCount: Int,
     // false hides FIN DU TOUR.
     val canEndTurn: Boolean,
@@ -65,10 +65,30 @@ data class MatchUiState(
     val votesDelta: Int? = null,
     // Tweet banner under the target chip; null hides it.
     val tweetBanner: TweetBannerUi? = null,
+    // Non-null while the human rolls; the dice are tappable once thrown.
+    val roll: RollUi? = null,
 )
 
 @Immutable
 data class TweetBannerUi(
     val target: Candidate,
     val popularityLoss: Int,
+)
+
+/** The human's roll phase: [rollNumber] is 0 before the first throw. */
+@Immutable
+data class RollUi(
+    val rollNumber: Int,
+    val maxRolls: Int,
+)
+
+/** What the current player's dice did this turn. */
+@Immutable
+data class TurnResultUi(
+    val votes: Int,
+    val fonds: Int,
+    val popularite: Int,
+    val tweets: Int,
+    // Candidates hit by the tweets, in order.
+    val targets: List<Candidate>,
 )

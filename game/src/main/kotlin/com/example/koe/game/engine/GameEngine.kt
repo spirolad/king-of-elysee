@@ -144,7 +144,7 @@ class GameEngine(
         val maxRolls = 1 + rollsLeft
         var rollNumber = 1
 
-        controller.awaitFirstRoll(player)
+        controller.awaitFirstRoll(player, maxRolls)
         var currentDice = diceRoller.roll(diceCount)
         var keptIndices = mutableListOf<Int>()
 

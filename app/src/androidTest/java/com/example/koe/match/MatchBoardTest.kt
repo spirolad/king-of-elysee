@@ -64,6 +64,9 @@ class MatchBoardTest {
         onShopClick: () -> Unit = {},
         onCardsClick: () -> Unit = {},
         onEndTurnClick: () -> Unit = {},
+        onDieClick: (Int) -> Unit = {},
+        onRollClick: () -> Unit = {},
+        onValidateDiceClick: () -> Unit = {},
     ) {
         setFrame {
             MatchBoard(
@@ -73,6 +76,9 @@ class MatchBoardTest {
                 onShopClick = onShopClick,
                 onCardsClick = onCardsClick,
                 onEndTurnClick = onEndTurnClick,
+                onDieClick = onDieClick,
+                onRollClick = onRollClick,
+                onValidateDiceClick = onValidateDiceClick,
             )
         }
     }
@@ -197,6 +203,9 @@ class MatchBoardTest {
                 onShopClick = {},
                 onCardsClick = {},
                 onEndTurnClick = {},
+                onDieClick = {},
+                onRollClick = {},
+                onValidateDiceClick = {},
             )
         }
         composeTestRule.onNodeWithTag(MatchBoardTags.END_TURN).assertDoesNotExist()
@@ -273,5 +282,83 @@ class MatchBoardTest {
         composeTestRule.onNodeWithTag(MatchBoardTags.END_TURN).performClick()
 
         assertEquals("end turn clicks", 1, endTurnCount)
+    }
+
+    // Dice rolling
+
+    @Test
+    fun rollPromptAndRollButtonShownBeforeFirstThrow() {
+        setBoard(state = mockRollingUiState(rollNumber = 0))
+
+        composeTestRule.onNodeWithText("Lance les dés pour commencer ton tour.").assertIsDisplayed()
+        composeTestRule.onNodeWithTag(MatchBoardTags.ROLL).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(MatchBoardTags.END_TURN).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(MatchBoardTags.VALIDATE_DICE).assertDoesNotExist()
+    }
+
+    @Test
+    fun diceIgnoreClicksBeforeFirstThrow() {
+        var dieClicks = 0
+        setBoard(state = mockRollingUiState(rollNumber = 0), onDieClick = { dieClicks++ })
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.die(2)).performClick()
+
+        assertEquals("die clicks", 0, dieClicks)
+    }
+
+    @Test
+    fun rollCountAndValidateShownAfterThrow() {
+        setBoard(state = mockRollingUiState(rollNumber = 1))
+
+        composeTestRule.onNodeWithText("Lancer 1 sur 3 · touche un dé pour le garder").assertIsDisplayed()
+        composeTestRule.onNodeWithTag(MatchBoardTags.VALIDATE_DICE).assertIsDisplayed()
+    }
+
+    @Test
+    fun dieInvokesCallbackWithIndexAfterThrow() {
+        var clicked: Int? = null
+        setBoard(state = mockRollingUiState(rollNumber = 1), onDieClick = { clicked = it })
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.die(2)).performClick()
+
+        assertEquals("die click", 2, clicked)
+    }
+
+    @Test
+    fun rollButtonInvokesCallback() {
+        var rollCount = 0
+        setBoard(state = mockRollingUiState(rollNumber = 1), onRollClick = { rollCount++ })
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.ROLL).performClick()
+
+        assertEquals("roll clicks", 1, rollCount)
+    }
+
+    @Test
+    fun validateButtonInvokesCallback() {
+        var validateCount = 0
+        setBoard(state = mockRollingUiState(rollNumber = 1), onValidateDiceClick = { validateCount++ })
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.VALIDATE_DICE).performClick()
+
+        assertEquals("validate clicks", 1, validateCount)
+    }
+
+    @Test
+    fun resultPillSaysNothingWhenNoEffect() {
+        setBoard(state = mockMatchUiState().copy(turnResult = TurnResultUi(0, 0, 0, 0, emptyList())))
+
+        composeTestRule.onNodeWithText("Rien ce tour").assertIsDisplayed()
+    }
+
+    @Test
+    fun resultPillListsPopulariteAndTweetsWithoutTargets() {
+        setBoard(
+            state = mockMatchUiState().copy(
+                turnResult = TurnResultUi(votes = 0, fonds = 0, popularite = 2, tweets = 1, targets = emptyList()),
+            ),
+        )
+
+        composeTestRule.onNodeWithText("+2 Popularité, 1 Tweet").assertIsDisplayed()
     }
 }

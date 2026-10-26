@@ -39,7 +39,7 @@ private class RecordingController(
 ) : PlayerController {
     private var shopCalls = 0
 
-    override suspend fun awaitFirstRoll(player: Player) {
+    override suspend fun awaitFirstRoll(player: Player, maxRolls: Int) {
         log.add("awaitFirstRoll:${player.name}")
     }
 

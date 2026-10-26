@@ -16,6 +16,9 @@ import com.example.koe.match.DieUi
 import com.example.koe.match.MatchUiState
 import com.example.koe.match.MeUi
 import com.example.koe.match.OpponentUi
+import com.example.koe.match.RollUi
+import com.example.koe.match.TurnResultUi
+import com.example.koe.match.TweetBannerUi
 import com.example.koe.match.dialog.CardKind
 import com.example.koe.match.dialog.CardPaymentUi
 import com.example.koe.match.dialog.MatchDialog
@@ -80,6 +83,10 @@ fun boardState(
     dice: List<EngineDieFace>,
     keptIndices: List<Int>,
     canEndTurn: Boolean,
+    roll: RollUi? = null,
+    turnResult: TurnResultUi? = null,
+    votesDelta: Int? = null,
+    tweetBanner: TweetBannerUi? = null,
 ): MatchUiState {
     val player = engine.players.first { it.id == me }
     return MatchUiState(
@@ -102,9 +109,12 @@ fun boardState(
         dice = dice.mapIndexed { index, face ->
             DieUi(face = face.toUi(), highlighted = index in keptIndices)
         },
-        turnResult = null,
+        turnResult = turnResult,
         cardsCount = player.cards.size,
         canEndTurn = canEndTurn,
+        votesDelta = votesDelta,
+        tweetBanner = tweetBanner,
+        roll = roll,
     )
 }
 

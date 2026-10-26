@@ -11,6 +11,9 @@ import com.example.koe.game.shop.CardType
 import com.example.koe.game.shop.ShopOffer
 import com.example.koe.match.Candidate
 import com.example.koe.match.DieFace
+import com.example.koe.match.RollUi
+import com.example.koe.match.TurnResultUi
+import com.example.koe.match.TweetBannerUi
 import com.example.koe.match.dialog.CardKind
 import com.example.koe.match.dialog.CardPaymentUi
 import com.example.koe.match.dialog.MatchDialog
@@ -150,6 +153,37 @@ class MatchGameMapperTest {
         assertTrue(after.opponents.first { it.candidate == Candidate.MELENCHON }.isKing)
         assertFalse(after.opponents.first { it.candidate == Candidate.MACRON }.isKing)
         assertFalse(after.canEndTurn)
+    }
+
+    @Test
+    fun `board state passes the roll, turn result, votes delta and tweet banner through`() {
+        val engine = newEngine()
+        val lepen = engine.player(Candidate.LEPEN)
+        val roll = RollUi(rollNumber = 1, maxRolls = 3)
+        val turnResult = TurnResultUi(
+            votes = 2,
+            fonds = 1,
+            popularite = 0,
+            tweets = 2,
+            targets = listOf(Candidate.MACRON),
+        )
+        val banner = TweetBannerUi(target = Candidate.MACRON, popularityLoss = 2)
+
+        val state = boardState(
+            engine,
+            lepen.id,
+            listOf(EngineDieFace.ATTACK),
+            keptIndices = emptyList(),
+            canEndTurn = false,
+            roll = roll,
+            turnResult = turnResult,
+            votesDelta = 2,
+            tweetBanner = banner,
+        )
+        assertEquals(roll, state.roll)
+        assertEquals(turnResult, state.turnResult)
+        assertEquals(2, state.votesDelta)
+        assertEquals(banner, state.tweetBanner)
     }
 
     @Test

@@ -18,6 +18,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -34,6 +35,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,7 +57,9 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -82,6 +86,8 @@ object MatchBoardTags {
     const val SHOP = "match:shop"
     const val CARDS = "match:cards"
     const val END_TURN = "match:endTurn"
+    const val ROLL = "match:roll"
+    const val VALIDATE_DICE = "match:validateDice"
     const val VOTES_DELTA = "match:votesDelta"
     const val TWEET_BANNER = "match:tweetBanner"
     fun chip(candidate: Candidate) = "match:chip:${candidate.name}"
@@ -99,6 +105,9 @@ fun MatchBoard(
     onShopClick: () -> Unit,
     onCardsClick: () -> Unit,
     onEndTurnClick: () -> Unit,
+    onDieClick: (Int) -> Unit,
+    onRollClick: () -> Unit,
+    onValidateDiceClick: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = MatchBoardDefaultPadding,
 ) {
@@ -145,6 +154,7 @@ fun MatchBoard(
             KingPanel(king = state.king)
             CenterColumn(
                 state = state,
+                onDieClick = onDieClick,
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 18.dp),
@@ -176,12 +186,31 @@ fun MatchBoard(
                 badgeCount = state.cardsCount,
             )
             Spacer(Modifier.weight(1f))
+            val roll = state.roll
+            if (roll != null && roll.rollNumber >= 1) {
+                SecondaryButton(
+                    onClick = onValidateDiceClick,
+                    icon = null,
+                    label = R.string.btn_validate,
+                    tag = MatchBoardTags.VALIDATE_DICE,
+                    modifier = Modifier.size(162.9.dp, BoardMetrics.BottomButtonHeight),
+                )
+                Spacer(Modifier.width(BoardMetrics.Gap))
+            }
             // The fixed box keeps the row height while the button is hidden.
             Box(Modifier.size(216.3.dp, 64.dp)) {
-                EndTurnButton(
-                    visible = state.canEndTurn,
-                    onClick = onEndTurnClick,
-                )
+                if (roll != null) {
+                    PrimaryPillButton(
+                        label = R.string.btn_roll,
+                        tag = MatchBoardTags.ROLL,
+                        onClick = onRollClick,
+                    )
+                } else {
+                    EndTurnButton(
+                        visible = state.canEndTurn,
+                        onClick = onEndTurnClick,
+                    )
+                }
             }
         }
     }
@@ -364,9 +393,18 @@ private fun KingPanel(king: Candidate?) {
 @Composable
 private fun CenterColumn(
     state: MatchUiState,
+    onDieClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val myName = stringResource(state.me.candidate.nameRes)
+    val roll = state.roll
+    val subtitle = when {
+        roll == null -> stringResource(R.string.match_turn_result)
+        roll.rollNumber == 0 -> stringResource(R.string.match_roll_prompt)
+        else -> stringResource(R.string.match_roll_count, roll.rollNumber, roll.maxRolls)
+    }
+    // Dice only lock in once the human has thrown at least once.
+    val diceTappable = roll != null && roll.rollNumber >= 1
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -383,7 +421,7 @@ private fun CenterColumn(
             VotesDelta(delta = state.votesDelta)
         }
         KoeText(
-            text = stringResource(R.string.match_turn_result),
+            text = subtitle,
             style = KoeTextStyles.Subtitle,
             color = colorResource(R.color.koe_screen_board_content),
             textAlign = TextAlign.Center,
@@ -395,7 +433,12 @@ private fun CenterColumn(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             state.dice.forEachIndexed { index, die ->
-                Die(die = die, index = index)
+                Die(
+                    die = die,
+                    index = index,
+                    tappable = diceTappable,
+                    onClick = { onDieClick(index) },
+                )
             }
         }
         ResultPill(turnResult = state.turnResult)
@@ -510,20 +553,21 @@ private fun TweetBannerContent(banner: TweetBannerUi) {
 }
 
 @Composable
-private fun ResultPill(turnResult: String?) {
+private fun ResultPill(turnResult: TurnResultUi?) {
+    val text = turnResult?.let { turnResultText(it) }
     // Keeps the last text so the exit animation still shows it.
-    val shown = remember { mutableStateOf(turnResult.orEmpty()) }
-    LaunchedEffect(turnResult) {
-        if (turnResult != null) shown.value = turnResult
+    val shown = remember { mutableStateOf(text.orEmpty()) }
+    LaunchedEffect(text) {
+        if (text != null) shown.value = text
     }
     AnimatedVisibility(
-        visible = turnResult != null,
+        visible = text != null,
         enter = fadeIn(tween(220)) + scaleIn(initialScale = 0.85f),
         exit = fadeOut(tween(160)) + scaleOut(targetScale = 0.85f),
         label = "resultPill",
     ) {
         KoeText(
-            text = turnResult ?: shown.value,
+            text = text ?: shown.value,
             style = KoeTextStyles.Pill,
             color = colorResource(R.color.koe_text_on_dark),
             modifier = Modifier
@@ -538,7 +582,34 @@ private fun ResultPill(turnResult: String?) {
 }
 
 @Composable
-private fun Die(die: DieUi, index: Int) {
+private fun turnResultText(result: TurnResultUi): String {
+    val parts = mutableListOf<String>()
+    if (result.votes > 0) parts += stringResource(R.string.match_result_votes, result.votes)
+    if (result.fonds > 0) parts += stringResource(R.string.match_result_fonds, result.fonds)
+    if (result.popularite > 0) parts += stringResource(R.string.match_result_popularite, result.popularite)
+    if (result.tweets > 0) {
+        val tweets = pluralStringResource(R.plurals.match_result_tweets, result.tweets, result.tweets)
+        parts += if (result.targets.isEmpty()) {
+            tweets
+        } else {
+            val names = result.targets.map { stringResource(it.nameRes) }.joinToString(", ")
+            stringResource(R.string.match_result_tweets_on, tweets, names)
+        }
+    }
+    return if (parts.isEmpty()) {
+        stringResource(R.string.match_result_nothing)
+    } else {
+        parts.joinToString(", ")
+    }
+}
+
+@Composable
+private fun Die(
+    die: DieUi,
+    index: Int,
+    tappable: Boolean,
+    onClick: () -> Unit,
+) {
     val ring by animateColorAsState(
         targetValue = if (die.highlighted) {
             colorResource(R.color.koe_status_highlight)
@@ -558,11 +629,21 @@ private fun Die(die: DieUi, index: Int) {
             DieFace.Popularite -> stringResource(R.string.die_face_popularite)
         },
     )
+    // No ripple: the highlight ring is the feedback.
+    val interactionSource = remember { MutableInteractionSource() }
     Box(
         Modifier
             .testTag(MatchBoardTags.die(index))
             .semantics { contentDescription = description }
             .size(BoardMetrics.DieSize)
+            .toggleable(
+                value = die.highlighted,
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = tappable,
+                role = Role.Checkbox,
+                onValueChange = { onClick() },
+            )
             .background(colorResource(R.color.koe_surface), RoundedCornerShape(16.dp))
             .drawWithContent {
                 drawContent()
@@ -715,7 +796,7 @@ private fun StatRow(
 @Composable
 private fun SecondaryButton(
     onClick: () -> Unit,
-    icon: Int,
+    icon: Int?,
     label: Int,
     tag: String,
     modifier: Modifier = Modifier,
@@ -733,11 +814,13 @@ private fun SecondaryButton(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(22.dp),
-            )
+            if (icon != null) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
             KoeText(
                 text = stringResource(label),
                 style = KoeTextStyles.Button,
@@ -772,30 +855,43 @@ private fun EndTurnButton(
         exit = slideOutHorizontally { it / 2 } + fadeOut(),
         label = "endTurn",
     ) {
-        PressableSurface(
+        PrimaryPillButton(
+            label = R.string.btn_end_turn,
+            tag = MatchBoardTags.END_TURN,
             onClick = onClick,
-            shape = RoundedCornerShape(32.dp),
-            color = colorResource(R.color.koe_action_primary_container),
-            modifier = Modifier
-                .testTag(MatchBoardTags.END_TURN)
-                .fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+private fun PrimaryPillButton(
+    label: Int,
+    tag: String,
+    onClick: () -> Unit,
+) {
+    PressableSurface(
+        onClick = onClick,
+        shape = RoundedCornerShape(32.dp),
+        color = colorResource(R.color.koe_action_primary_container),
+        modifier = Modifier
+            .testTag(tag)
+            .fillMaxSize(),
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                Modifier.padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                KoeText(
-                    text = stringResource(R.string.btn_end_turn),
-                    style = KoeTextStyles.ButtonLarge,
-                    color = colorResource(R.color.koe_action_primary_content),
-                )
-                Image(
-                    painter = painterResource(R.drawable.ic_board_arrow),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
+            KoeText(
+                text = stringResource(label),
+                style = KoeTextStyles.ButtonLarge,
+                color = colorResource(R.color.koe_action_primary_content),
+            )
+            Image(
+                painter = painterResource(R.drawable.ic_board_arrow),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+            )
         }
     }
 }
@@ -847,6 +943,9 @@ private fun MatchBoardPreview() {
         onShopClick = {},
         onCardsClick = {},
         onEndTurnClick = {},
+        onDieClick = {},
+        onRollClick = {},
+        onValidateDiceClick = {},
     )
 }
 

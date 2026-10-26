@@ -32,6 +32,15 @@
     <string name="match_roll_count">Lancer %1$d sur %2$d · touche un dé pour le garder</string>
     <string name="match_roll_prompt">Lance les dés pour commencer ton tour.</string>
     <string name="match_turn_result">Résultat du tour</string>
+    <string name="match_result_votes">+%1$d Votes</string>
+    <string name="match_result_fonds">+%1$d Fonds</string>
+    <string name="match_result_popularite">+%1$d Popularité</string>
+    <plurals name="match_result_tweets">
+        <item quantity="one">%1$d Tweet</item>
+        <item quantity="other">%1$d Tweets</item>
+    </plurals>
+    <string name="match_result_tweets_on">%1$s sur %2$s</string>
+    <string name="match_result_nothing">Rien ce tour</string>
     <string name="match_me_label">TOI</string>
 
     <!-- Stats -->

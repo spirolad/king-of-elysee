@@ -18,6 +18,9 @@ fun MatchScreen(
     onShopClick: () -> Unit,
     onCardsClick: () -> Unit,
     onEndTurnClick: () -> Unit,
+    onDieClick: (Int) -> Unit,
+    onRollClick: () -> Unit,
+    onValidateDiceClick: () -> Unit,
     dialogActions: MatchDialogActions,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = MatchBoardDefaultPadding,
@@ -31,6 +34,9 @@ fun MatchScreen(
             onShopClick = onShopClick,
             onCardsClick = onCardsClick,
             onEndTurnClick = onEndTurnClick,
+            onDieClick = onDieClick,
+            onRollClick = onRollClick,
+            onValidateDiceClick = onValidateDiceClick,
             contentPadding = contentPadding,
         )
         MatchDialogHost(

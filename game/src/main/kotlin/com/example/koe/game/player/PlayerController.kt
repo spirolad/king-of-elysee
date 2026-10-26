@@ -24,13 +24,13 @@ interface PlayerController {
      * Called at the start of the roll phase, before the first roll.
      * Returns when the player throws the dice.
      * @param player The player whose turn it is.
+     * @param maxRolls Total rolls allowed this turn (first roll included).
      */
-    suspend fun awaitFirstRoll(player: Player) {}
+    suspend fun awaitFirstRoll(player: Player, maxRolls: Int) {}
 
     /**
      * Called after a dice roll to determine which dice to keep for the next re-roll.
      * @param rollNumber Current roll attempt (1-based).
-     * @param maxRolls Total rolls allowed this turn (first roll included).
      * Return all indices to stop rolling.
      * @param currentDice Current faces of all active dice.
      * @param currentlyKept Booleans indicating which dice are currently locked/kept.

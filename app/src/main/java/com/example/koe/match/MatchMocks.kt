@@ -24,9 +24,17 @@ fun mockMatchUiState(): MatchUiState = MatchUiState(
         DieUi(DieFace.Tweet, highlighted = false),
         DieUi(DieFace.Fonds, highlighted = false),
     ),
-    turnResult = "+3 Votes, +1 Fonds, 2 Tweets sur Le Pen",
+    turnResult = TurnResultUi(votes = 3, fonds = 1, popularite = 0, tweets = 2, targets = listOf(Candidate.LEPEN)),
     cardsCount = 3,
     canEndTurn = true,
     votesDelta = 3,
     tweetBanner = TweetBannerUi(Candidate.LEPEN, 2),
+)
+
+fun mockRollingUiState(rollNumber: Int = 1): MatchUiState = mockMatchUiState().copy(
+    roll = RollUi(rollNumber, maxRolls = 3),
+    canEndTurn = false,
+    turnResult = null,
+    votesDelta = null,
+    tweetBanner = null,
 )

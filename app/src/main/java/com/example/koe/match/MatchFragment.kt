@@ -76,6 +76,9 @@ class MatchFragment : Fragment() {
                 onShopClick = viewModel::onShopClick,
                 onCardsClick = viewModel::onCardsClick,
                 onEndTurnClick = viewModel::onEndTurnClick,
+                onDieClick = viewModel::onDieClick,
+                onRollClick = viewModel::onRollClick,
+                onValidateDiceClick = viewModel::onValidateDiceClick,
                 dialogActions = dialogActions,
                 contentPadding = PaddingValues(start = start, top = 12.dp, end = end, bottom = 21.dp),
             )

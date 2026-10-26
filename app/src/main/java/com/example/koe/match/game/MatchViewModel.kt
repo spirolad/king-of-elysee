@@ -21,6 +21,7 @@ import com.example.koe.game.shop.CardEffectResult
 import com.example.koe.game.shop.PowerCard
 import com.example.koe.match.Candidate
 import com.example.koe.match.MatchUiState
+import com.example.koe.match.RollUi
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.PowerCardUi
 import kotlinx.coroutines.Job
@@ -43,11 +44,14 @@ class MatchViewModel(
     private var pending: HumanDecision? = null
     private var shownDice: List<DieFace> = emptyList()
     private var keptDice: List<Int> = emptyList()
+    private var keptSelection: Set<Int> = emptySet()
     private var requests: List<DialogRequest> = emptyList()
     private var gameJob: Job? = null
+    private val tally = TurnTally()
 
     private val listener = object : GameEventListener {
         override fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) {
+            tally.start(player)
             shownDice = emptyList()
             keptDice = emptyList()
             refresh()
@@ -66,9 +70,15 @@ class MatchViewModel(
         }
 
         override fun onTurnSkipped(player: Player) = refresh()
-        override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) = refresh()
+        override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {
+            tally.resolved(player, summary)
+            refresh()
+        }
         override fun onMechanceteGained(player: Player, amount: Int, total: Int) = refresh()
-        override fun onPlayerDamaged(target: Player, attacker: Player, damage: Int, remainingHealth: Int) = refresh()
+        override fun onPlayerDamaged(target: Player, attacker: Player, damage: Int, remainingHealth: Int) {
+            tally.hit(attacker, target, damage)
+            refresh()
+        }
         override fun onPlayerHealed(player: Player, amount: Int, currentHealth: Int) = refresh()
         override fun onPlayerEnteredTokyo(player: Player, zone: TokyoZone) = refresh()
         override fun onPlayerYieldedTokyo(player: Player, zone: TokyoZone) = refresh()
@@ -129,6 +139,32 @@ class MatchViewModel(
         decision.answer.complete(ShopAction.Pass)
         pending = null
         requests = requests.filterNot { it == DialogRequest.Shop }
+        refresh()
+    }
+
+    /** Toggles a die's keep state while the human is choosing which dice to keep. */
+    fun onDieClick(index: Int) {
+        if (pending !is HumanDecision.KeepDice || index !in shownDice.indices) return
+        keptSelection = if (index in keptSelection) keptSelection - index else keptSelection + index
+        refresh()
+    }
+
+    /** Throws the dice, or rerolls the dice not kept. */
+    fun onRollClick() {
+        when (val decision = pending) {
+            is HumanDecision.Roll -> decision.answer.complete(Unit)
+            is HumanDecision.KeepDice -> decision.answer.complete(keptSelection.sorted())
+            else -> return
+        }
+        pending = null
+        refresh()
+    }
+
+    /** Keeps every die, which ends the rolls. */
+    fun onValidateDiceClick() {
+        val decision = pending as? HumanDecision.KeepDice ?: return
+        decision.answer.complete(shownDice.indices.toList())
+        pending = null
         refresh()
     }
 
@@ -193,6 +229,10 @@ class MatchViewModel(
     private fun onHumanDecision(decision: HumanDecision?) {
         pending = decision
         when (decision) {
+            is HumanDecision.KeepDice -> keptSelection = decision.currentlyKept.withIndex()
+                .filter { it.value }
+                .map { it.index }
+                .toSet()
             is HumanDecision.Yield -> requests = requests + DialogRequest.Yield
             is HumanDecision.Mechancete -> requests = requests + DialogRequest.Mechancete
             else -> Unit
@@ -224,12 +264,21 @@ class MatchViewModel(
                 else -> true
             }
         }
+        val roll = when (decision) {
+            is HumanDecision.Roll -> RollUi(0, decision.maxRolls)
+            is HumanDecision.KeepDice -> RollUi(decision.rollNumber, decision.maxRolls)
+            else -> null
+        }
         _uiState.value = boardState(
             engine,
             humanPlayer.id,
             shownDice,
-            keptDice,
+            if (decision is HumanDecision.KeepDice) keptSelection.toList() else keptDice,
             canEndTurn = decision is HumanDecision.Shop,
+            roll = roll,
+            turnResult = tally.result,
+            votesDelta = tally.votesDelta,
+            tweetBanner = tally.tweetBanner(humanPlayer.id),
         )
         _dialogs.value = requests.map { buildDialog(it, decision) }
     }

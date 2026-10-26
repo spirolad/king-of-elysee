@@ -10,6 +10,18 @@ import kotlinx.coroutines.CompletableDeferred
 
 /** A decision the engine is waiting for from the human player. */
 sealed interface HumanDecision {
+    data class Roll(
+        val maxRolls: Int,
+        val answer: CompletableDeferred<Unit>,
+    ) : HumanDecision
+
+    data class KeepDice(
+        val rollNumber: Int,
+        val maxRolls: Int,
+        val currentlyKept: List<Boolean>,
+        val answer: CompletableDeferred<List<Int>>,
+    ) : HumanDecision
+
     data class Shop(
         val offers: List<ShopOffer>,
         val sweepCost: Int,
@@ -32,8 +44,9 @@ sealed interface HumanDecision {
 /** Suspends the engine on the human's decisions until the UI answers them through [onDecision]'s deferred. */
 class HumanPlayerController(private val onDecision: (HumanDecision?) -> Unit) : PlayerController {
 
-    // Until the dice row is interactive, the first roll is kept.
-    override suspend fun awaitFirstRoll(player: Player) {}
+    override suspend fun awaitFirstRoll(player: Player, maxRolls: Int) {
+        ask<Unit> { HumanDecision.Roll(maxRolls, it) }
+    }
 
     override suspend fun chooseDiceToKeep(
         player: Player,
@@ -41,45 +54,32 @@ class HumanPlayerController(private val onDecision: (HumanDecision?) -> Unit) : 
         maxRolls: Int,
         currentDice: List<DieFace>,
         currentlyKept: List<Boolean>,
-    ): List<Int> = currentDice.indices.toList()
+    ): List<Int> = ask<List<Int>> { HumanDecision.KeepDice(rollNumber, maxRolls, currentlyKept, it) }
 
     override suspend fun shouldYieldTokyo(
         player: Player,
         attacker: Player,
         damage: Int,
-    ): Boolean {
-        val decision = HumanDecision.Yield(attacker, damage, CompletableDeferred())
-        onDecision(decision)
-        return try {
-            decision.answer.await()
-        } finally {
-            onDecision(null)
-        }
-    }
+    ): Boolean = ask<Boolean> { HumanDecision.Yield(attacker, damage, it) }
 
     override suspend fun chooseShopAction(
         player: Player,
         offers: List<ShopOffer>,
         sweepCost: Int,
-    ): ShopAction {
-        val decision = HumanDecision.Shop(offers, sweepCost, CompletableDeferred())
-        onDecision(decision)
-        return try {
-            decision.answer.await()
-        } finally {
-            onDecision(null)
-        }
-    }
+    ): ShopAction = ask<ShopAction> { HumanDecision.Shop(offers, sweepCost, it) }
 
     override suspend fun chooseMechanceteCard(
         player: Player,
         tier: Int,
         choices: List<PowerCard>,
-    ): PowerCard {
-        val decision = HumanDecision.Mechancete(tier, choices, CompletableDeferred())
-        onDecision(decision)
+    ): PowerCard = ask<PowerCard> { HumanDecision.Mechancete(tier, choices, it) }
+
+    /** Publishes the decision built around a fresh answer, then suspends until the UI completes it. */
+    private suspend fun <T> ask(create: (CompletableDeferred<T>) -> HumanDecision): T {
+        val answer = CompletableDeferred<T>()
+        onDecision(create(answer))
         return try {
-            decision.answer.await()
+            answer.await()
         } finally {
             onDecision(null)
         }

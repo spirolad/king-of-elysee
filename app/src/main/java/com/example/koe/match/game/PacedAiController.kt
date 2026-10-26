@@ -15,9 +15,9 @@ class PacedAiController(
     private val delayMillis: Long,
 ) : PlayerController {
 
-    override suspend fun awaitFirstRoll(player: Player) {
+    override suspend fun awaitFirstRoll(player: Player, maxRolls: Int) {
         delay(delayMillis)
-        delegate.awaitFirstRoll(player)
+        delegate.awaitFirstRoll(player, maxRolls)
     }
 
     override suspend fun chooseDiceToKeep(
