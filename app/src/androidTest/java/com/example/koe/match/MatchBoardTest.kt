@@ -372,7 +372,8 @@ class MatchBoardTest {
 
     @Test
     fun rollCountAndValidateShownAfterThrow() {
-        setBoard(state = mockRollingUiState(rollNumber = 1))
+        val state = mockRollingUiState(rollNumber = 1).let { it.copy(dice = it.dice.map { die -> die.copy(highlighted = false) }) }
+        setBoard(state = state)
 
         composeTestRule.onNodeWithText("Lancer 1 sur 3 · touche un dé pour le garder").assertIsDisplayed()
         composeTestRule.onNodeWithTag(MatchBoardTags.VALIDATE_DICE).assertIsDisplayed()
