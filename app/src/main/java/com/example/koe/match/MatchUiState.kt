@@ -27,6 +27,8 @@ data class OpponentUi(
     val isKing: Boolean,
     // Their turn is being played.
     val isPlaying: Boolean = false,
+    // Out of popularité; out of the game.
+    val isEliminated: Boolean = false,
 )
 
 @Immutable

@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
@@ -250,13 +251,19 @@ private fun OpponentChip(
     } else {
         stringResource(R.string.match_chip_description, name, opponent.popularite, opponent.votes)
     }
-    val playingState = if (opponent.isPlaying) stringResource(R.string.match_chip_playing) else null
+    // Eliminated wins over playing: a player cannot be both in practice.
+    val chipState = when {
+        opponent.isEliminated -> stringResource(R.string.match_chip_eliminated)
+        opponent.isPlaying -> stringResource(R.string.match_chip_playing)
+        else -> null
+    }
     PressableSurface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = colorResource(R.color.koe_surface),
         // The playing border wins over the king's so the turn is visible; the king stays in the description.
         border = when {
+            opponent.isEliminated -> null
             opponent.isPlaying -> BorderStroke(3.dp, colorResource(R.color.koe_action_focus))
             opponent.isKing -> BorderStroke(3.dp, colorResource(R.color.koe_status_highlight))
             else -> null
@@ -264,10 +271,11 @@ private fun OpponentChip(
         contentAlignment = Alignment.TopStart,
         modifier = modifier
             .height(56.dp)
+            .alpha(if (opponent.isEliminated) 0.4f else 1f)
             .testTag(MatchBoardTags.chip(opponent.candidate))
             .semantics(mergeDescendants = true) {
                 contentDescription = description
-                playingState?.let { stateDescription = it }
+                chipState?.let { stateDescription = it }
             },
     ) {
         Row(

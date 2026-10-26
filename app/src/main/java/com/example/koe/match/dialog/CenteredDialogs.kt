@@ -68,50 +68,7 @@ internal fun PauseDialog(
                 color = colorResource(R.color.koe_text_primary),
             )
             Spacer(Modifier.height(10.dp))
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .height(128.dp)
-                    .background(colorResource(R.color.koe_surface_inset), RoundedCornerShape(16.dp))
-                    .padding(start = 12.dp, top = 12.dp, end = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                dialog.ranking.forEach { row ->
-                    Row(
-                        Modifier.height(20.dp),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(20.dp)
-                                .background(colorResource(row.candidate.avatarColor), CircleShape),
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        KoeText(
-                            text = stringResource(row.candidate.nameRes),
-                            style = KoeTextStyles.Name,
-                            color = colorResource(R.color.koe_text_primary),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(top = 1.dp),
-                        )
-                        KoeText(
-                            text = row.votes.toString(),
-                            style = KoeTextStyles.ChipStat,
-                            color = colorResource(R.color.koe_text_votes),
-                            modifier = Modifier.padding(top = 1.dp),
-                        )
-                        Spacer(Modifier.width(10.dp))
-                        Image(
-                            painter = painterResource(R.drawable.ic_board_vote),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                                .size(16.dp),
-                        )
-                    }
-                }
-            }
+            RankingBox(ranking = dialog.ranking)
         }
         Spacer(Modifier.width(24.dp))
         Column(
@@ -152,6 +109,118 @@ internal fun PauseDialog(
                     .height(52.dp),
                 leadingIcon = R.drawable.ic_dialog_logout,
             )
+        }
+    }
+}
+
+@Composable
+internal fun GameOverDialog(
+    dialog: MatchDialog.GameOver,
+    actions: MatchDialogActions,
+) {
+    val winner = dialog.winner
+    val winnerName = winner?.let { stringResource(it.nameRes) }.orEmpty()
+    Row(
+        Modifier
+            .size(560.dp, 286.dp)
+            .background(colorResource(R.color.koe_surface), RoundedCornerShape(32.dp))
+            .testTag(MatchDialogTags.GAME_OVER)
+            .padding(start = 24.dp, top = 24.dp, end = 24.dp),
+    ) {
+        Column(Modifier.width(278.dp)) {
+            KoeText(
+                text = stringResource(
+                    if (dialog.youWon) R.string.game_over_title_win else R.string.game_over_title_loss,
+                ),
+                style = KoeTextStyles.DialogTitle,
+                color = colorResource(R.color.koe_text_primary),
+            )
+            Spacer(Modifier.height(26.dp))
+            KoeText(
+                text = when (dialog.reason) {
+                    GameOverReason.VOTES -> stringResource(R.string.game_over_votes, winnerName)
+                    GameOverReason.LAST_STANDING -> stringResource(R.string.game_over_last_standing, winnerName)
+                    GameOverReason.ELIMINATED -> stringResource(R.string.game_over_eliminated)
+                },
+                style = KoeTextStyles.Body,
+                color = colorResource(R.color.koe_text_primary),
+            )
+            Spacer(Modifier.height(10.dp))
+            RankingBox(ranking = dialog.ranking)
+        }
+        Spacer(Modifier.width(24.dp))
+        Column(
+            Modifier.width(210.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            KoeButton(
+                text = stringResource(R.string.btn_replay),
+                onClick = actions.onReplay,
+                style = KoeButtonStyle.Primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .testTag(MatchDialogTags.REPLAY),
+                leadingIcon = R.drawable.ic_dialog_play,
+            )
+            KoeButton(
+                text = stringResource(R.string.btn_quit),
+                onClick = actions.onQuitConfirmed,
+                style = KoeButtonStyle.Secondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .testTag(MatchDialogTags.GAME_OVER_QUIT),
+                leadingIcon = R.drawable.ic_dialog_logout,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RankingBox(ranking: List<RankingRowUi>) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .height(128.dp)
+            .background(colorResource(R.color.koe_surface_inset), RoundedCornerShape(16.dp))
+            .padding(start = 12.dp, top = 12.dp, end = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ranking.forEach { row ->
+            Row(
+                Modifier.height(20.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Box(
+                    Modifier
+                        .size(20.dp)
+                        .background(colorResource(row.candidate.avatarColor), CircleShape),
+                )
+                Spacer(Modifier.width(8.dp))
+                KoeText(
+                    text = stringResource(row.candidate.nameRes),
+                    style = KoeTextStyles.Name,
+                    color = colorResource(R.color.koe_text_primary),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 1.dp),
+                )
+                KoeText(
+                    text = row.votes.toString(),
+                    style = KoeTextStyles.ChipStat,
+                    color = colorResource(R.color.koe_text_votes),
+                    modifier = Modifier.padding(top = 1.dp),
+                )
+                Spacer(Modifier.width(10.dp))
+                Image(
+                    painter = painterResource(R.drawable.ic_board_vote),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .size(16.dp),
+                )
+            }
         }
     }
 }

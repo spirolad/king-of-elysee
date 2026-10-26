@@ -2,6 +2,7 @@ package com.example.koe.match.game
 
 import com.example.koe.game.dice.DieFace as EngineDieFace
 import com.example.koe.game.engine.GameEngine
+import com.example.koe.game.engine.WinReason
 import com.example.koe.game.player.Monster
 import com.example.koe.game.player.Player
 import com.example.koe.game.player.PlayerId
@@ -21,6 +22,7 @@ import com.example.koe.match.TurnResultUi
 import com.example.koe.match.TweetBannerUi
 import com.example.koe.match.dialog.CardKind
 import com.example.koe.match.dialog.CardPaymentUi
+import com.example.koe.match.dialog.GameOverReason
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.PowerCardUi
 import com.example.koe.match.dialog.RankingRowUi
@@ -96,7 +98,8 @@ fun boardState(
                 popularite = opponent.health,
                 votes = opponent.victoryPoints,
                 isKing = engine.tokyoBoard.isInsideTokyo(opponent),
-                isPlaying = opponent.id == engine.currentPlayer.id,
+                isPlaying = opponent.id == engine.currentPlayer.id && opponent.isAlive,
+                isEliminated = !opponent.isAlive,
             )
         },
         king = engine.tokyoBoard.occupants.firstOrNull()?.candidate,
@@ -120,14 +123,31 @@ fun boardState(
     )
 }
 
+/** Players by victory points, most first. */
+private fun ranking(engine: GameEngine): List<RankingRowUi> =
+    engine.players
+        .sortedByDescending { it.victoryPoints }
+        .map { RankingRowUi(candidate = it.candidate, votes = it.victoryPoints) }
+
 /** Pause dialog with the turn and the ranking by victory points. */
 fun pauseDialog(engine: GameEngine): MatchDialog.Pause =
     MatchDialog.Pause(
         turn = engine.roundNumber,
         currentPlayer = engine.currentPlayer.candidate,
-        ranking = engine.players
-            .sortedByDescending { it.victoryPoints }
-            .map { RankingRowUi(candidate = it.candidate, votes = it.victoryPoints) },
+        ranking = ranking(engine),
+    )
+
+/** End of match seen from [me]; a null [winner] means [me] was eliminated and the match stopped there. */
+fun gameOverDialog(engine: GameEngine, me: PlayerId, winner: Player?, reason: WinReason?): MatchDialog.GameOver =
+    MatchDialog.GameOver(
+        winner = winner?.candidate,
+        youWon = winner?.id == me,
+        reason = when {
+            winner == null -> GameOverReason.ELIMINATED
+            reason is WinReason.LastMonsterStanding -> GameOverReason.LAST_STANDING
+            else -> GameOverReason.VOTES
+        },
+        ranking = ranking(engine),
     )
 
 /** Details of one candidate, with the cards they hold. */

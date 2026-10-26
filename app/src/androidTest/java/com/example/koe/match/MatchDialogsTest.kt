@@ -29,9 +29,11 @@ import androidx.compose.ui.unit.dp
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.MatchDialogActions
 import com.example.koe.match.dialog.MatchDialogHost
+import com.example.koe.match.dialog.GameOverReason
 import com.example.koe.match.dialog.MatchDialogTags
 import com.example.koe.match.dialog.PowerCardUi
 import com.example.koe.match.dialog.mockCardDetailDialog
+import com.example.koe.match.dialog.mockGameOverDialog
 import com.example.koe.match.dialog.mockMechanceteDialog
 import com.example.koe.match.dialog.mockMyCardsDialog
 import com.example.koe.match.dialog.mockPauseDialog
@@ -496,6 +498,63 @@ class MatchDialogsTest {
         composeTestRule.onNodeWithTag(MatchDialogTags.CLOSE).performClick()
 
         assertEquals("close dismiss calls", 1, dismissCount)
+    }
+
+    // Game over
+
+    @Test
+    fun gameOverWonShowsResultAndButtons() {
+        setDialogs(listOf(mockGameOverDialog(youWon = true)))
+
+        composeTestRule.onNodeWithText("VICTOIRE !").assertExists()
+        composeTestRule.onNodeWithText("Macron atteint 20 Votes et prend l'Élysée.").assertExists()
+        composeTestRule.onNodeWithTag(MatchDialogTags.REPLAY).assertExists()
+        composeTestRule.onNodeWithTag(MatchDialogTags.GAME_OVER_QUIT).assertExists()
+    }
+
+    @Test
+    fun gameOverReplayAndQuitInvokeCallbacks() {
+        var replayCount = 0
+        var quitCount = 0
+        setDialogs(
+            listOf(mockGameOverDialog()),
+            MatchDialogActions(
+                onReplay = { replayCount++ },
+                onQuitConfirmed = { quitCount++ },
+            ),
+        )
+
+        composeTestRule.onNodeWithTag(MatchDialogTags.REPLAY).performClick()
+        composeTestRule.onNodeWithTag(MatchDialogTags.GAME_OVER_QUIT).performClick()
+
+        assertEquals("replay clicks", 1, replayCount)
+        assertEquals("quit confirmed clicks", 1, quitCount)
+    }
+
+    @Test
+    fun gameOverIgnoresScrimAndBack() {
+        var dismissCount = 0
+        setDialogs(listOf(mockGameOverDialog()), MatchDialogActions(onDismiss = { dismissCount++ }))
+
+        clickScrim()
+        pressBack()
+
+        assertEquals("game over dismiss calls", 0, dismissCount)
+    }
+
+    @Test
+    fun gameOverEliminatedShowsDefeat() {
+        setDialogs(
+            listOf(
+                mockGameOverDialog(youWon = false).copy(
+                    winner = null,
+                    reason = GameOverReason.ELIMINATED,
+                ),
+            ),
+        )
+
+        composeTestRule.onNodeWithText("DÉFAITE").assertExists()
+        composeTestRule.onNodeWithText("Tu n'as plus de popularité : tu quittes la course.").assertExists()
     }
 
     // Stack

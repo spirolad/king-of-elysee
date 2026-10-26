@@ -49,6 +49,7 @@ class MatchViewModel(
     private var keptSelection: Set<Int> = emptySet()
     private var requests: List<DialogRequest> = emptyList()
     private var gameJob: Job? = null
+    private var outcome: Outcome? = null
     private val tally = TurnTally()
 
     private val listener = object : GameEventListener {
@@ -95,7 +96,10 @@ class MatchViewModel(
             refresh()
         override fun onTurnEnded(player: Player) = refresh()
         override fun onPlayerEliminated(player: Player, reason: String) = refresh()
-        override fun onGameOver(winner: Player, reason: WinReason) = refresh()
+        override fun onGameOver(winner: Player, reason: WinReason) {
+            endMatch(Outcome(winner, reason))
+            refresh()
+        }
     }
 
     private val engine = GameEngine(
@@ -238,6 +242,8 @@ class MatchViewModel(
     fun onCardDetails(card: PowerCardUi) = push(DialogRequest.CardDetail(card))
 
     private fun onHumanDecision(decision: HumanDecision?) {
+        // The engine may ask once more before its job stops; the board takes no input after the game over.
+        if (outcome != null && decision != null) return
         pending = decision
         when (decision) {
             is HumanDecision.KeepDice -> keptSelection = decision.currentlyKept.withIndex()
@@ -252,21 +258,36 @@ class MatchViewModel(
     }
 
     private fun push(request: DialogRequest) {
+        if (outcome != null) return
         requests = requests + request
         refresh()
     }
 
     private fun pop() {
+        if (outcome != null) return
         requests = requests.dropLast(1)
         refresh()
     }
 
     private fun replaceTop(request: DialogRequest) {
+        if (outcome != null) return
         requests = requests.dropLast(1) + request
         refresh()
     }
 
+    /** Ends the match with the game over as the only dialog; the caller refreshes. */
+    private fun endMatch(result: Outcome) {
+        outcome = result
+        pending = null
+        requests = listOf(DialogRequest.GameOver)
+    }
+
     private fun refresh() {
+        // Cards can damage the human without an elimination event, so every refresh checks the human.
+        if (outcome == null && !humanPlayer.isAlive && !engine.isGameOver) {
+            gameJob?.cancel()
+            endMatch(Outcome(winner = null, reason = null))
+        }
         val decision = pending
         requests = requests.filter { request ->
             when (request) {
@@ -313,6 +334,10 @@ class MatchViewModel(
             }
         }
         DialogRequest.MyCards -> myCardsDialog(humanPlayer)
+        DialogRequest.GameOver -> {
+            val result = checkNotNull(outcome)
+            gameOverDialog(engine, humanPlayer.id, result.winner, result.reason)
+        }
         is DialogRequest.CardDetail -> MatchDialog.CardDetail(request.card)
         DialogRequest.Yield -> {
             val yieldDecision = decision as HumanDecision.Yield
@@ -346,4 +371,8 @@ private sealed interface DialogRequest {
     data class CardDetail(val card: PowerCardUi) : DialogRequest
     data object Yield : DialogRequest
     data object Mechancete : DialogRequest
+    data object GameOver : DialogRequest
 }
+
+/** How the match ended; [winner] is null when the human was eliminated. */
+private class Outcome(val winner: Player?, val reason: WinReason?)

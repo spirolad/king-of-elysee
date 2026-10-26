@@ -5,6 +5,8 @@ import com.example.koe.match.Candidate
 
 enum class CardKind { POUVOIR, ACTION, MECHANCETE }
 
+enum class GameOverReason { VOTES, LAST_STANDING, ELIMINATED }
+
 @Immutable
 data class PowerCardUi(
     val id: String,
@@ -97,6 +99,16 @@ sealed interface MatchDialog {
     ) : MatchDialog {
         override val dismissible = true
     }
+
+    data class GameOver(
+        // null when the human was eliminated and the match stopped there.
+        val winner: Candidate?,
+        val youWon: Boolean,
+        val reason: GameOverReason,
+        val ranking: List<RankingRowUi>,
+    ) : MatchDialog {
+        override val dismissible = false
+    }
 }
 
 /** Every dialog button. Defaults are no-ops so tests pass only what they assert. */
@@ -108,6 +120,7 @@ class MatchDialogActions(
     val onSettings: () -> Unit = {},
     val onQuitRequest: () -> Unit = {},
     val onQuitConfirmed: () -> Unit = {},
+    val onReplay: () -> Unit = {},
     val onStay: () -> Unit = {},
     val onYield: () -> Unit = {},
     val onMechanceteValidate: (PowerCardUi) -> Unit = {},
@@ -121,6 +134,9 @@ object MatchDialogTags {
     const val SCRIM = "dialog:scrim"
     const val PAUSE = "dialog:pause"
     const val QUIT = "dialog:quit"
+    const val GAME_OVER = "dialog:gameOver"
+    const val GAME_OVER_QUIT = "dialog:gameOverQuit"
+    const val REPLAY = "dialog:replay"
     const val YIELD = "dialog:yield"
     const val MECHANCETE = "dialog:mechancete"
     const val CARD_DETAIL = "dialog:cardDetail"

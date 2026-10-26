@@ -45,6 +45,7 @@ fun MatchDialogHost(
     val yieldElysee = dialogs.lastOrNull { it is MatchDialog.YieldElysee } as MatchDialog.YieldElysee?
     val mechancete = dialogs.lastOrNull { it is MatchDialog.Mechancete } as MatchDialog.Mechancete?
     val cardDetail = dialogs.lastOrNull { it is MatchDialog.CardDetail } as MatchDialog.CardDetail?
+    val gameOver = dialogs.lastOrNull { it is MatchDialog.GameOver } as MatchDialog.GameOver?
 
     // Later in this order draws on top.
     Box(modifier) {
@@ -119,6 +120,15 @@ fun MatchDialogHost(
             onScrimClick = actions.onDismiss,
         ) {
             CardDetailDialog(dialog = it, actions = actions)
+        }
+        DialogLayer(
+            entry = gameOver,
+            isTop = isTop(gameOver, top),
+            sheet = false,
+            scrim = scrim,
+            onScrimClick = actions.onDismiss,
+        ) {
+            GameOverDialog(dialog = it, actions = actions)
         }
     }
 }

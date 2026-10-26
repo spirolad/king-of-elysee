@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.koe.R
 import com.example.koe.match.dialog.MatchDialogActions
@@ -37,6 +38,14 @@ class MatchFragment : Fragment() {
         onQuitConfirmed = {
             viewModel.onQuitConfirmed()
             findNavController().popBackStack(R.id.homeFragment, false)
+        },
+        onReplay = {
+            // A new fragment gets a new ViewModel, so the match restarts with the same candidate.
+            findNavController().navigate(
+                R.id.matchFragment,
+                requireArguments(),
+                NavOptions.Builder().setPopUpTo(R.id.matchFragment, true).build(),
+            )
         },
         onStay = { viewModel.onStay() },
         onYield = { viewModel.onYield() },

@@ -205,6 +205,19 @@ class MatchBoardTest {
     }
 
     @Test
+    fun eliminatedOpponentChipSaysItIsEliminated() {
+        val state = mockMatchUiState().copy(
+            opponents = mockMatchUiState().opponents.map {
+                if (it.candidate == Candidate.POUTOU) it.copy(isEliminated = true) else it
+            },
+        )
+        setBoard(state = state)
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.chip(Candidate.POUTOU))
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "éliminé"))
+    }
+
+    @Test
     fun resultPillHiddenWithoutResult() {
         setBoard(state = mockMatchUiState().copy(turnResult = null))
 

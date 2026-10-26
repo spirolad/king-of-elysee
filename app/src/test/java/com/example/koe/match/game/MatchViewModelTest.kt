@@ -6,6 +6,7 @@ import com.example.koe.game.shop.Shop
 import com.example.koe.match.Candidate
 import com.example.koe.match.DieFace
 import com.example.koe.match.RollUi
+import com.example.koe.match.dialog.GameOverReason
 import com.example.koe.match.dialog.MatchDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,11 +51,11 @@ class MatchViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(vararg turns: List<RolledFace>) = MatchViewModel(
+    private fun viewModel(vararg turns: List<RolledFace>, aiDelayMillis: Long = 0) = MatchViewModel(
         Candidate.MACRON,
         diceRoller = QueueDiceRoller(*turns),
         shop = Shop(initialCards = emptyList()),
-        aiDelayMillis = 0,
+        aiDelayMillis = aiDelayMillis,
     )
 
     private fun energyRoll() = List(6) { RolledFace.ENERGY }
@@ -274,5 +275,64 @@ class MatchViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(6, state.dice.size)
         assertEquals(List(6) { true }, highlighted(viewModel))
+    }
+
+    @Test
+    fun humanWinsOnVotes() = runTest {
+        // The human's three 3s give 6 votes a turn; the AIs only collect energy.
+        val humanThrow = List(6) { RolledFace.THREE }
+        val turns = List(3) { listOf(humanThrow, energyRoll(), energyRoll(), energyRoll()) }.flatten()
+        val viewModel = viewModel(*turns.toTypedArray())
+        viewModel.start()
+        advanceUntilIdle()
+
+        // Turn 1: 6 votes and 1 for entering the Elysee. Turn 2: 2 for staying and 6, so 15.
+        // Turn 3: 2 and 6 more reach 23, past the 20 needed.
+        throwAndKeepAll(viewModel)
+        viewModel.onEndTurnClick()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+        viewModel.onEndTurnClick()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+
+        val dialogs = viewModel.dialogs.value
+        assertEquals(1, dialogs.size)
+        val gameOver = dialogs.single() as MatchDialog.GameOver
+        assertTrue(gameOver.youWon)
+        assertEquals(Candidate.MACRON, gameOver.winner)
+        assertEquals(GameOverReason.VOTES, gameOver.reason)
+        assertFalse(viewModel.uiState.value.canEndTurn)
+    }
+
+    @Test
+    fun humanEliminatedEndsTheMatch() = runTest {
+        // The AI pause is 1 ms, not 0: a cancelled match stops only at a suspension, and a 0 ms pause never suspends.
+        val viewModel = viewModel(
+            energyRoll(),
+            List(6) { RolledFace.ATTACK },
+            List(6) { RolledFace.ATTACK },
+            aiDelayMillis = 1,
+        )
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+
+        viewModel.onEndTurnClick()
+        advanceUntilIdle()
+        // Melenchon's attack leaves the human at 4 popularite; Le Pen's attack then takes the rest.
+        viewModel.onStay()
+        advanceUntilIdle()
+
+        val dialogs = viewModel.dialogs.value
+        assertEquals(1, dialogs.size)
+        val gameOver = dialogs.single() as MatchDialog.GameOver
+        assertEquals(GameOverReason.ELIMINATED, gameOver.reason)
+        assertNull(gameOver.winner)
+        assertFalse(gameOver.youWon)
+        assertNull(viewModel.uiState.value.roll)
+
+        advanceUntilIdle()
+        assertEquals(dialogs, viewModel.dialogs.value)
     }
 }

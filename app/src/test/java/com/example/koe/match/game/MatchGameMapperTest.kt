@@ -2,6 +2,7 @@ package com.example.koe.match.game
 
 import com.example.koe.game.dice.DieFace as EngineDieFace
 import com.example.koe.game.engine.GameEngine
+import com.example.koe.game.engine.WinReason
 import com.example.koe.game.player.AiPlayerController
 import com.example.koe.game.player.CardPurchase
 import com.example.koe.game.player.Player
@@ -16,6 +17,7 @@ import com.example.koe.match.TurnResultUi
 import com.example.koe.match.TweetBannerUi
 import com.example.koe.match.dialog.CardKind
 import com.example.koe.match.dialog.CardPaymentUi
+import com.example.koe.match.dialog.GameOverReason
 import com.example.koe.match.dialog.MatchDialog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -189,6 +191,26 @@ class MatchGameMapperTest {
     }
 
     @Test
+    fun `eliminated opponent is not shown as playing even on its turn`() {
+        val players = listOf(Candidate.MELENCHON, Candidate.LEPEN, Candidate.MACRON, Candidate.POUTOU)
+            .map { it.toPlayer() }
+        val engine = GameEngine(
+            players = players,
+            controllers = players.associate { it.id to AiPlayerController() },
+        )
+        val lepen = engine.player(Candidate.LEPEN)
+        engine.player(Candidate.MELENCHON).damage(100)
+
+        val state = boardState(engine, lepen.id, emptyList(), emptyList(), canEndTurn = false)
+
+        assertEquals(Candidate.MELENCHON, state.currentPlayer)
+        val melenchon = state.opponents.first { it.candidate == Candidate.MELENCHON }
+        assertTrue(melenchon.isEliminated)
+        assertFalse(melenchon.isPlaying)
+        assertFalse(state.opponents.first { it.candidate == Candidate.MACRON }.isEliminated)
+    }
+
+    @Test
     fun `board state passes the roll, turn result, votes delta and tweet banner through`() {
         val engine = newEngine()
         val lepen = engine.player(Candidate.LEPEN)
@@ -229,6 +251,58 @@ class MatchGameMapperTest {
         val dialog = pauseDialog(engine)
         assertEquals(1, dialog.turn)
         assertEquals(Candidate.MACRON, dialog.currentPlayer)
+        assertEquals(
+            listOf(Candidate.MACRON, Candidate.POUTOU, Candidate.LEPEN, Candidate.MELENCHON),
+            dialog.ranking.map { it.candidate },
+        )
+        assertEquals(listOf(7, 7, 3, 0), dialog.ranking.map { it.votes })
+    }
+
+    @Test
+    fun `game over by votes names the winner and whether it was me`() {
+        val engine = newEngine()
+        val lepen = engine.player(Candidate.LEPEN)
+        lepen.addVictoryPoints(20)
+
+        val dialog = gameOverDialog(engine, lepen.id, lepen, WinReason.VictoryPointsReached(20))
+        assertEquals(Candidate.LEPEN, dialog.winner)
+        assertTrue(dialog.youWon)
+        assertEquals(GameOverReason.VOTES, dialog.reason)
+    }
+
+    @Test
+    fun `last monster standing won by an opponent is not my win`() {
+        val engine = newEngine()
+        val lepen = engine.player(Candidate.LEPEN)
+        val macron = engine.player(Candidate.MACRON)
+
+        val dialog = gameOverDialog(engine, lepen.id, macron, WinReason.LastMonsterStanding)
+        assertEquals(Candidate.MACRON, dialog.winner)
+        assertFalse(dialog.youWon)
+        assertEquals(GameOverReason.LAST_STANDING, dialog.reason)
+    }
+
+    @Test
+    fun `eliminated before the end has no winner`() {
+        val engine = newEngine()
+        val lepen = engine.player(Candidate.LEPEN)
+
+        val dialog = gameOverDialog(engine, lepen.id, winner = null, reason = null)
+        assertNull(dialog.winner)
+        assertFalse(dialog.youWon)
+        assertEquals(GameOverReason.ELIMINATED, dialog.reason)
+    }
+
+    @Test
+    fun `game over ranking matches the pause ranking sorted by votes`() {
+        val engine = newEngine()
+        engine.player(Candidate.POUTOU).addVictoryPoints(7)
+        engine.player(Candidate.MACRON).addVictoryPoints(7)
+        engine.player(Candidate.LEPEN).addVictoryPoints(3)
+        val winner = engine.player(Candidate.POUTOU)
+
+        val dialog = gameOverDialog(engine, engine.player(Candidate.LEPEN).id, winner, WinReason.VictoryPointsReached(7))
+        assertEquals(pauseDialog(engine).ranking, dialog.ranking)
         assertEquals(
             listOf(Candidate.MACRON, Candidate.POUTOU, Candidate.LEPEN, Candidate.MELENCHON),
             dialog.ranking.map { it.candidate },

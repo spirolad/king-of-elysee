@@ -65,6 +65,27 @@ fun mockPauseDialog(): MatchDialog.Pause = MatchDialog.Pause(
 
 fun mockQuitDialog(): MatchDialog.QuitConfirm = MatchDialog.QuitConfirm(Candidate.LEPEN)
 
+fun mockGameOverDialog(youWon: Boolean = true): MatchDialog.GameOver = MatchDialog.GameOver(
+    winner = if (youWon) Candidate.MACRON else Candidate.LEPEN,
+    youWon = youWon,
+    reason = GameOverReason.VOTES,
+    ranking = if (youWon) {
+        listOf(
+            RankingRowUi(Candidate.MACRON, 21),
+            RankingRowUi(Candidate.LEPEN, 17),
+            RankingRowUi(Candidate.MELENCHON, 11),
+            RankingRowUi(Candidate.POUTOU, 6),
+        )
+    } else {
+        listOf(
+            RankingRowUi(Candidate.LEPEN, 20),
+            RankingRowUi(Candidate.MACRON, 14),
+            RankingRowUi(Candidate.MELENCHON, 11),
+            RankingRowUi(Candidate.POUTOU, 6),
+        )
+    },
+)
+
 fun mockYieldDialog(): MatchDialog.YieldElysee = MatchDialog.YieldElysee(
     king = Candidate.LEPEN,
     attacker = Candidate.MACRON,
