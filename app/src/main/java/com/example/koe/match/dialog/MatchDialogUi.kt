@@ -17,8 +17,14 @@ data class PowerCardUi(
     val owned: Boolean = false,
     // false = 50 % alpha, not selectable (too expensive).
     val enabled: Boolean = true,
-    // Detail dialog only: "Payée 7 Fonds publics au tour 6".
-    val paidLine: String? = null,
+    // Detail dialog only: what was paid and in which turn.
+    val paid: CardPaymentUi? = null,
+)
+
+@Immutable
+data class CardPaymentUi(
+    val cost: Int,
+    val turn: Int,
 )
 
 @Immutable
@@ -39,7 +45,7 @@ sealed interface MatchDialog {
         override val dismissible = false
     }
 
-    data class QuitConfirm(val king: Candidate) : MatchDialog {
+    data class QuitConfirm(val king: Candidate?) : MatchDialog {
         override val dismissible = true
     }
 

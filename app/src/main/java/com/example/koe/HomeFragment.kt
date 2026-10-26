@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.koe.databinding.FragmentHomeBinding
+import com.example.koe.match.Candidate
 
 class HomeFragment : Fragment() {
 
@@ -109,9 +110,8 @@ class HomeFragment : Fragment() {
         updateSelection(0)
 
         binding.btnStartGame.setOnClickListener {
-            val selectedName = characters[selectedCharacterIndex].name
             val bundle = Bundle().apply {
-                putString("characterName", selectedName)
+                putString("candidate", Candidate.valueOf(characters[selectedCharacterIndex].id.uppercase()).name)
             }
             findNavController().navigate(R.id.action_homeFragment_to_matchFragment, bundle)
         }

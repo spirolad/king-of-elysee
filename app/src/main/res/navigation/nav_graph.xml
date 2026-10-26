@@ -19,8 +19,8 @@
         android:id="@+id/matchFragment"
         android:name="com.example.koe.match.MatchFragment">
         <argument
-            android:name="characterName"
-            android:defaultValue="Macron"
+            android:name="candidate"
+            android:defaultValue="MACRON"
             app:argType="string" />
     </fragment>
 

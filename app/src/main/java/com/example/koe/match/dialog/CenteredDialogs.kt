@@ -180,11 +180,13 @@ internal fun QuitConfirmDialog(
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(12.dp))
+            val king = dialog.king
             KoeText(
-                text = stringResource(
-                    R.string.quit_message,
-                    stringResource(dialog.king.nameRes),
-                ),
+                text = if (king != null) {
+                    stringResource(R.string.quit_message, stringResource(king.nameRes))
+                } else {
+                    stringResource(R.string.quit_message_no_king)
+                },
                 style = KoeTextStyles.Body,
                 color = colorResource(R.color.koe_text_muted),
                 textAlign = TextAlign.Center,
@@ -471,7 +473,7 @@ internal fun CardDetailDialog(
                 style = KoeTextStyles.Body,
                 color = colorResource(R.color.koe_text_primary),
             )
-            if (card.paidLine != null || card.kind == CardKind.POUVOIR) {
+            if (card.paid != null || card.kind == CardKind.POUVOIR) {
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -479,7 +481,7 @@ internal fun CardDetailDialog(
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    card.paidLine?.let { paidLine ->
+                    card.paid?.let { paid ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -490,7 +492,7 @@ internal fun CardDetailDialog(
                                 modifier = Modifier.size(18.dp),
                             )
                             KoeText(
-                                text = paidLine,
+                                text = stringResource(R.string.card_detail_paid, paid.cost, paid.turn),
                                 style = KoeTextStyles.StatLabelLarge,
                                 color = colorResource(R.color.koe_text_primary),
                             )

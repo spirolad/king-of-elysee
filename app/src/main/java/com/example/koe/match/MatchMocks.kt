@@ -1,6 +1,6 @@
 package com.example.koe.match
 
-// Mock data for the Figma frame. Delete once the engine feeds real values.
+// Mock data for the Figma frame, for previews and UI tests.
 fun mockMatchUiState(): MatchUiState = MatchUiState(
     opponents = listOf(
         OpponentUi(Candidate.MELENCHON, popularite = 8, votes = 11, isKing = false),

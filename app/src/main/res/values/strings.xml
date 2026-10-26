@@ -20,6 +20,7 @@
     <string name="match_king_title">KING OF ÉLYSÉE</string>
     <string name="match_badge_in_power">AU POUVOIR</string>
     <string name="match_king_bonus">+2 Votes à chaque début de tour</string>
+    <string name="match_king_empty">Siège vide</string>
     <string name="match_chip_description">%1$s, %2$d Popularité, %3$d Votes</string>
     <string name="match_chip_description_king">%1$s, %2$d Popularité, %3$d Votes, au pouvoir</string>
     <string name="match_die_description">Dé %1$d : %2$s</string>
@@ -65,6 +66,7 @@
     <!-- Quit confirmation dialog -->
     <string name="quit_title">QUITTER LA PARTIE ?</string>
     <string name="quit_message">La partie en cours sera perdue. %1$s garde l\'Élysée, par forfait.</string>
+    <string name="quit_message_no_king">La partie en cours sera perdue.</string>
 
     <!-- Yield dialog -->
     <string name="yield_pass_phone">PASSE LE TÉLÉPHONE À %1$s</string>

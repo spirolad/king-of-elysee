@@ -52,7 +52,8 @@ data class DieUi(
 @Immutable
 data class MatchUiState(
     val opponents: List<OpponentUi>,
-    val king: Candidate,
+    // null while nobody holds the Élysée.
+    val king: Candidate?,
     val me: MeUi,
     val dice: List<DieUi>,
     // null hides the result pill.

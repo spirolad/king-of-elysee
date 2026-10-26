@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -17,73 +15,39 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.koe.R
-import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.MatchDialogActions
-import com.example.koe.match.dialog.mockMechanceteDialog
-import com.example.koe.match.dialog.mockMyCardsDialog
-import com.example.koe.match.dialog.mockPauseDialog
-import com.example.koe.match.dialog.mockPlayerDetailsDialog
-import com.example.koe.match.dialog.mockShopDialog
-import com.example.koe.match.dialog.mockYieldDialog
+import com.example.koe.match.game.MatchViewModel
 
 class MatchFragment : Fragment() {
 
-    private var state by mutableStateOf(mockMatchUiState())
+    private val viewModel: MatchViewModel by viewModels { MatchViewModel.factory(candidateArg()) }
 
-    // Top of the list is the visible dialog; the host draws the rest underneath.
-    private var dialogs by mutableStateOf(emptyList<MatchDialog>())
-
-    private fun push(dialog: MatchDialog) {
-        dialogs = dialogs + dialog
-    }
-
-    private fun pop() {
-        dialogs = dialogs.dropLast(1)
-    }
-
-    private fun replaceTop(dialog: MatchDialog) {
-        dialogs = dialogs.dropLast(1) + dialog
-    }
-
-    // Highest Méchanceté tier already rewarded with a card.
-    private var rewardedMechanceteTier = 0
-
-    /** FIN DU TOUR: a newly reached Méchanceté tier is rewarded before the phone is handed over. */
-    private fun endTurn() {
-        val mechancete = state.me.mechancete
-        if (unrewardedMechanceteTier(mechancete, rewardedMechanceteTier) != null) {
-            push(mockMechanceteDialog().copy(level = mechancete))
-        } else {
-            push(mockYieldDialog())
-        }
-    }
-
+    // Lambdas keep the ViewModel untouched until the view exists.
     private val dialogActions = MatchDialogActions(
-        onDismiss = { pop() },
-        onResume = { pop() },
+        onDismiss = { viewModel.onDismiss() },
+        onResume = { viewModel.onResume() },
         // No rules or settings screens yet.
         onRules = {},
         onSettings = {},
-        // The pause dialog is replaced, not stacked, so the confirmation is the only one left.
-        onQuitRequest = { replaceTop(MatchDialog.QuitConfirm(state.king)) },
+        onQuitRequest = { viewModel.onQuitRequest() },
         onQuitConfirmed = {
-            dialogs = emptyList()
+            viewModel.onQuitConfirmed()
             findNavController().popBackStack(R.id.homeFragment, false)
         },
-        onStay = { pop() },
-        onYield = { pop() },
-        onMechanceteValidate = {
-            rewardedMechanceteTier =
-                unrewardedMechanceteTier(state.me.mechancete, rewardedMechanceteTier) ?: rewardedMechanceteTier
-            // The end of turn goes on with the hand-over.
-            replaceTop(mockYieldDialog())
-        },
-        onBuy = { pop() },
-        onRenew = {},
-        onCardDetails = { push(MatchDialog.CardDetail(it)) },
+        onStay = { viewModel.onStay() },
+        onYield = { viewModel.onYield() },
+        onMechanceteValidate = { viewModel.onMechanceteValidate(it) },
+        onBuy = { viewModel.onBuy(it) },
+        onRenew = { viewModel.onRenew() },
+        onCardDetails = { viewModel.onCardDetails(it) },
     )
+
+    private fun candidateArg(): Candidate =
+        requireArguments().getString("candidate")?.let { Candidate.valueOf(it) } ?: Candidate.MACRON
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,6 +56,9 @@ class MatchFragment : Fragment() {
     ): View = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val dialogs by viewModel.dialogs.collectAsStateWithLifecycle()
+
             // The board is drawn edge to edge; Figma's 47 dp edge already leaves room for the camera
             // cutout, so it only grows when a cutout is deeper than that.
             val density = LocalDensity.current
@@ -104,27 +71,19 @@ class MatchFragment : Fragment() {
             MatchScreen(
                 state = state,
                 dialogs = dialogs,
-                onPauseClick = { push(mockPauseDialog()) },
-                onOpponentClick = { candidate ->
-                    val opponent = state.opponents.first { it.candidate == candidate }
-                    push(
-                        mockPlayerDetailsDialog(
-                            candidate = candidate,
-                            isKing = opponent.isKing,
-                            popularite = opponent.popularite,
-                            votes = opponent.votes,
-                        ),
-                    )
-                },
-                onShopClick = { push(mockShopDialog()) },
-                onCardsClick = {
-                    val mechancete = state.me.mechancete
-                    push(mockMyCardsDialog().copy(mechancete = mechancete, nextTier = nextMechanceteTier(mechancete)))
-                },
-                onEndTurnClick = ::endTurn,
+                onPauseClick = viewModel::onPauseClick,
+                onOpponentClick = viewModel::onOpponentClick,
+                onShopClick = viewModel::onShopClick,
+                onCardsClick = viewModel::onCardsClick,
+                onEndTurnClick = viewModel::onEndTurnClick,
                 dialogActions = dialogActions,
                 contentPadding = PaddingValues(start = start, top = 12.dp, end = end, bottom = 21.dp),
             )
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.start()
     }
 }

@@ -2,7 +2,7 @@ package com.example.koe.match.dialog
 
 import com.example.koe.match.Candidate
 
-// Figma data. Delete once the engine feeds real values.
+// Figma data for previews and UI tests.
 
 fun mockMeetingGeant(
     owned: Boolean = false,
@@ -49,7 +49,7 @@ val mockCumulDesMandats = PowerCardUi(
     kind = CardKind.POUVOIR,
     cost = 7,
     owned = true,
-    paidLine = "Payée 7 Fonds publics au tour 6",
+    paid = CardPaymentUi(cost = 7, turn = 6),
 )
 
 fun mockPauseDialog(): MatchDialog.Pause = MatchDialog.Pause(

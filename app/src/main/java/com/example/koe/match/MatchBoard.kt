@@ -300,7 +300,7 @@ private fun OpponentChip(
 }
 
 @Composable
-private fun KingPanel(king: Candidate) {
+private fun KingPanel(king: Candidate?) {
     Column(
         Modifier
             .testTag(MatchBoardTags.KING_PANEL)
@@ -315,25 +315,42 @@ private fun KingPanel(king: Candidate) {
             color = colorResource(R.color.koe_text_primary),
             textAlign = TextAlign.Center,
         )
-        Avatar(
-            candidate = king,
-            size = 64.dp,
-            border = BorderStroke(3.dp, colorResource(R.color.koe_status_highlight)),
-        )
+        if (king != null) {
+            Avatar(
+                candidate = king,
+                size = 64.dp,
+                border = BorderStroke(3.dp, colorResource(R.color.koe_status_highlight)),
+            )
+        } else {
+            // Empty seat: same footprint as the avatar, outlined instead of filled.
+            Box(
+                Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.koe_surface_sunken))
+                    .border(BorderStroke(3.dp, colorResource(R.color.koe_surface_line)), CircleShape),
+            )
+        }
         KoeText(
-            text = stringResource(king.nameRes),
+            text = if (king != null) {
+                stringResource(king.nameRes)
+            } else {
+                stringResource(R.string.match_king_empty)
+            },
             style = KoeTextStyles.Name,
             color = colorResource(R.color.koe_text_primary),
             textAlign = TextAlign.Center,
         )
-        KoeText(
-            text = stringResource(R.string.match_badge_in_power),
-            style = KoeTextStyles.Caption,
-            color = colorResource(R.color.koe_text_primary),
-            modifier = Modifier
-                .background(colorResource(R.color.koe_status_highlight), RoundedCornerShape(10.dp))
-                .padding(horizontal = 8.dp, vertical = 3.dp),
-        )
+        if (king != null) {
+            KoeText(
+                text = stringResource(R.string.match_badge_in_power),
+                style = KoeTextStyles.Caption,
+                color = colorResource(R.color.koe_text_primary),
+                modifier = Modifier
+                    .background(colorResource(R.color.koe_status_highlight), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
+            )
+        }
         KoeText(
             text = stringResource(R.string.match_king_bonus),
             style = KoeTextStyles.Description,
