@@ -296,7 +296,7 @@ class MatchDialogsTest {
     fun yieldTextsAreShown() {
         setDialogs(listOf(mockYieldDialog()))
 
-        composeTestRule.onNodeWithText("PASSE LE TÉLÉPHONE À LE PEN").assertExists()
+        composeTestRule.onNodeWithText("À TOI DE DÉCIDER").assertExists()
         composeTestRule.onNodeWithText("CÉDER L'ÉLYSÉE ?").assertExists()
         composeTestRule.onNodeWithText("−2 Popularité").assertExists()
     }

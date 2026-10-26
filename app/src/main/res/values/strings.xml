@@ -89,7 +89,7 @@
     <string name="btn_replay">REJOUER</string>
 
     <!-- Yield dialog -->
-    <string name="yield_pass_phone">PASSE LE TÉLÉPHONE À %1$s</string>
+    <string name="yield_your_call">À TOI DE DÉCIDER</string>
     <string name="yield_title">CÉDER L\'ÉLYSÉE ?</string>
     <string name="yield_tweet_notice">%1$s t\'a tweeté dessus :</string>
     <string name="yield_damage">−%1$d Popularité</string>

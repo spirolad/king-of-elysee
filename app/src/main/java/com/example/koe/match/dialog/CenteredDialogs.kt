@@ -293,7 +293,6 @@ internal fun YieldElyseeDialog(
     dialog: MatchDialog.YieldElysee,
     actions: MatchDialogActions,
 ) {
-    val kingName = stringResource(dialog.king.nameRes)
     val attackerName = stringResource(dialog.attacker.nameRes)
     Column(
         Modifier
@@ -321,7 +320,7 @@ internal fun YieldElyseeDialog(
             Spacer(Modifier.width(23.dp))
             Column {
                 KoeBadge(
-                    text = stringResource(R.string.yield_pass_phone, kingName.uppercase()),
+                    text = stringResource(R.string.yield_your_call),
                     container = colorResource(R.color.koe_action_primary_container),
                     content = colorResource(R.color.koe_text_on_dark),
                     style = KoeTextStyles.Caption,
