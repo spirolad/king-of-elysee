@@ -9,14 +9,22 @@ import com.example.koe.game.shop.PowerCard
 import com.example.koe.game.shop.ShopOffer
 import kotlinx.coroutines.delay
 
-/** Wraps an AI controller so each of its decisions waits [delayMillis], letting the player follow AI turns. */
+/**
+ * Wraps an AI controller so the player can follow AI turns. Each decision waits [thinkMillis], except the
+ * first shop decision of a turn, which waits [resultMillis] so the turn's result stays readable.
+ * The first shop decision is detected from the start of the turn, [awaitFirstRoll].
+ */
 class PacedAiController(
     private val delegate: PlayerController = AiPlayerController(),
-    private val delayMillis: Long,
+    private val thinkMillis: Long,
+    private val resultMillis: Long,
 ) : PlayerController {
 
+    private var isFirstShopDecision = true
+
     override suspend fun awaitFirstRoll(player: Player, maxRolls: Int) {
-        delay(delayMillis)
+        isFirstShopDecision = true
+        delay(thinkMillis)
         delegate.awaitFirstRoll(player, maxRolls)
     }
 
@@ -27,7 +35,7 @@ class PacedAiController(
         currentDice: List<DieFace>,
         currentlyKept: List<Boolean>,
     ): List<Int> {
-        delay(delayMillis)
+        delay(thinkMillis)
         return delegate.chooseDiceToKeep(player, rollNumber, maxRolls, currentDice, currentlyKept)
     }
 
@@ -36,7 +44,7 @@ class PacedAiController(
         attacker: Player,
         damage: Int,
     ): Boolean {
-        delay(delayMillis)
+        delay(thinkMillis)
         return delegate.shouldYieldTokyo(player, attacker, damage)
     }
 
@@ -45,7 +53,9 @@ class PacedAiController(
         offers: List<ShopOffer>,
         sweepCost: Int,
     ): ShopAction {
-        delay(delayMillis)
+        val wait = if (isFirstShopDecision) resultMillis else thinkMillis
+        isFirstShopDecision = false
+        delay(wait)
         return delegate.chooseShopAction(player, offers, sweepCost)
     }
 
@@ -54,7 +64,7 @@ class PacedAiController(
         tier: Int,
         choices: List<PowerCard>,
     ): PowerCard {
-        delay(delayMillis)
+        delay(thinkMillis)
         return delegate.chooseMechanceteCard(player, tier, choices)
     }
 }

@@ -62,6 +62,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -249,20 +250,25 @@ private fun OpponentChip(
     } else {
         stringResource(R.string.match_chip_description, name, opponent.popularite, opponent.votes)
     }
+    val playingState = if (opponent.isPlaying) stringResource(R.string.match_chip_playing) else null
     PressableSurface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = colorResource(R.color.koe_surface),
-        border = if (opponent.isKing) {
-            BorderStroke(3.dp, colorResource(R.color.koe_status_highlight))
-        } else {
-            null
+        // The playing border wins over the king's so the turn is visible; the king stays in the description.
+        border = when {
+            opponent.isPlaying -> BorderStroke(3.dp, colorResource(R.color.koe_action_focus))
+            opponent.isKing -> BorderStroke(3.dp, colorResource(R.color.koe_status_highlight))
+            else -> null
         },
         contentAlignment = Alignment.TopStart,
         modifier = modifier
             .height(56.dp)
             .testTag(MatchBoardTags.chip(opponent.candidate))
-            .semantics(mergeDescendants = true) { contentDescription = description },
+            .semantics(mergeDescendants = true) {
+                contentDescription = description
+                playingState?.let { stateDescription = it }
+            },
     ) {
         Row(
             Modifier
@@ -397,6 +403,11 @@ private fun CenterColumn(
     modifier: Modifier = Modifier,
 ) {
     val myName = stringResource(state.me.candidate.nameRes)
+    val title = if (state.currentPlayer == state.me.candidate) {
+        stringResource(R.string.match_your_turn, myName)
+    } else {
+        stringResource(R.string.match_their_turn, stringResource(state.currentPlayer.nameRes))
+    }
     val roll = state.roll
     val subtitle = when {
         roll == null -> stringResource(R.string.match_turn_result)
@@ -412,7 +423,7 @@ private fun CenterColumn(
     ) {
         Box(contentAlignment = Alignment.Center) {
             KoeText(
-                text = stringResource(R.string.match_your_turn, myName).uppercase(),
+                text = title.uppercase(),
                 style = KoeTextStyles.Display,
                 color = colorResource(R.color.koe_screen_board_content),
                 textAlign = TextAlign.Center,

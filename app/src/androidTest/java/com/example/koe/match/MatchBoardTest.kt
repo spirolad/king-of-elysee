@@ -10,7 +10,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -176,6 +179,29 @@ class MatchBoardTest {
         composeTestRule.onNodeWithText("Résultat du tour").assertIsDisplayed()
         composeTestRule.onNodeWithText("+3 Votes, +1 Fonds, 2 Tweets sur Le Pen").assertIsDisplayed()
         composeTestRule.onNodeWithText("AU POUVOIR").assertIsDisplayed()
+    }
+
+    @Test
+    fun theirTurnTitleNamesThePlayingCandidate() {
+        setBoard(state = mockMatchUiState().copy(currentPlayer = Candidate.LEPEN))
+
+        composeTestRule.onNodeWithText("AU TOUR DE LE PEN").assertIsDisplayed()
+        composeTestRule.onNodeWithText("À TOI, MACRON").assertDoesNotExist()
+    }
+
+    @Test
+    fun playingOpponentChipSaysItIsPlaying() {
+        val state = mockMatchUiState().copy(
+            opponents = mockMatchUiState().opponents.map {
+                if (it.candidate == Candidate.LEPEN) it.copy(isPlaying = true) else it
+            },
+        )
+        setBoard(state = state)
+
+        composeTestRule.onNodeWithTag(MatchBoardTags.chip(Candidate.LEPEN))
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "en train de jouer"))
+        composeTestRule.onNodeWithTag(MatchBoardTags.chip(Candidate.MELENCHON))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
     }
 
     @Test

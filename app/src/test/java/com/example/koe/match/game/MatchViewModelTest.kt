@@ -2,6 +2,7 @@ package com.example.koe.match.game
 
 import com.example.koe.game.dice.DiceRoller
 import com.example.koe.game.dice.DieFace as RolledFace
+import com.example.koe.game.shop.Shop
 import com.example.koe.match.Candidate
 import com.example.koe.match.DieFace
 import com.example.koe.match.RollUi
@@ -10,8 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -50,6 +53,7 @@ class MatchViewModelTest {
     private fun viewModel(vararg turns: List<RolledFace>) = MatchViewModel(
         Candidate.MACRON,
         diceRoller = QueueDiceRoller(*turns),
+        shop = Shop(initialCards = emptyList()),
         aiDelayMillis = 0,
     )
 
@@ -213,5 +217,62 @@ class MatchViewModelTest {
         viewModel.onStay()
         assertEquals(4, viewModel.uiState.value.me.popularite)
         assertTrue(viewModel.dialogs.value.none { it is MatchDialog.YieldElysee })
+    }
+
+    @Test
+    fun aiTurnShowsWhoIsPlaying() = runTest {
+        val viewModel = MatchViewModel(
+            Candidate.MACRON,
+            diceRoller = QueueDiceRoller(energyRoll()),
+            shop = Shop(initialCards = emptyList()),
+            aiDelayMillis = 1_000,
+        )
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+
+        viewModel.onEndTurnClick()
+        runCurrent()
+
+        val aiTurn = viewModel.uiState.value
+        assertEquals(Candidate.MELENCHON, aiTurn.currentPlayer)
+        assertEquals(
+            mapOf(
+                Candidate.MELENCHON to true,
+                Candidate.LEPEN to false,
+                Candidate.POUTOU to false,
+            ),
+            aiTurn.opponents.associate { it.candidate to it.isPlaying },
+        )
+        assertFalse(aiTurn.canEndTurn)
+        assertNull(aiTurn.roll)
+
+        advanceUntilIdle()
+
+        val humanTurn = viewModel.uiState.value
+        assertEquals(Candidate.MACRON, humanTurn.currentPlayer)
+        assertFalse(humanTurn.opponents.any { it.isPlaying })
+    }
+
+    @Test
+    fun aiFinalKeepIsHighlighted() = runTest {
+        val viewModel = MatchViewModel(
+            Candidate.MACRON,
+            diceRoller = QueueDiceRoller(energyRoll(), energyRoll()),
+            shop = Shop(initialCards = emptyList()),
+            aiDelayMillis = 1_000,
+        )
+        viewModel.start()
+        advanceUntilIdle()
+        throwAndKeepAll(viewModel)
+
+        viewModel.onEndTurnClick()
+        // The AI throws after 1 000 ms and keeps all after another 1 000 ms; its shop waits 2 000 ms more.
+        advanceTimeBy(2_500)
+        runCurrent()
+
+        val state = viewModel.uiState.value
+        assertEquals(6, state.dice.size)
+        assertEquals(List(6) { true }, highlighted(viewModel))
     }
 }

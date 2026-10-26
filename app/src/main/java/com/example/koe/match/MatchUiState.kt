@@ -25,6 +25,8 @@ data class OpponentUi(
     val popularite: Int,
     val votes: Int,
     val isKing: Boolean,
+    // Their turn is being played.
+    val isPlaying: Boolean = false,
 )
 
 @Immutable
@@ -55,6 +57,8 @@ data class MatchUiState(
     // null while nobody holds the Élysée.
     val king: Candidate?,
     val me: MeUi,
+    // Whose turn it is; the title addresses the player only on their own turn.
+    val currentPlayer: Candidate,
     val dice: List<DieUi>,
     // null hides the result pill.
     val turnResult: TurnResultUi?,

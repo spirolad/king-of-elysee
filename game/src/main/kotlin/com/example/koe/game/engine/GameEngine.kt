@@ -160,6 +160,7 @@ class GameEngine(
             ).distinct().filter { it in currentDice.indices }
 
             keptIndices = keptChoices.toMutableList()
+            eventListener.onDiceKept(player, rollNumber, keptIndices.toList())
 
             // If player keeps all dice, stop rerolling
             if (keptIndices.size == currentDice.size) {

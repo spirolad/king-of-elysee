@@ -71,6 +71,10 @@ private class RecordingListener(private val log: MutableList<String>) : GameEven
         log.add("rolled:$rollNumber/$maxRolls")
     }
 
+    override fun onDiceKept(player: Player, rollNumber: Int, keptIndices: List<Int>) {
+        log.add("kept:$rollNumber:${keptIndices.joinToString(",")}")
+    }
+
     override fun onTurnSkipped(player: Player) {
         log.add("skipped:${player.name}")
     }
@@ -132,6 +136,19 @@ class GameEngineFlowTest {
 
         assertEquals(listOf("awaitFirstRoll:P1", "rolled:1/3"), log.take(2))
         assertEquals(1, log.count { it.startsWith("rolled:") })
+    }
+
+    @Test
+    fun `keeping every die is reported before the rolls end`() = runTest {
+        val log = mutableListOf<String>()
+        val game = newGame(ScriptedDice(List(6) { DieFace.ENERGY }), log)
+
+        game.engine.playTurn()
+
+        val rolled = log.indexOf("rolled:1/3")
+        val kept = log.indexOf("kept:1:0,1,2,3,4,5")
+        assertTrue(rolled >= 0 && kept > rolled)
+        assertFalse(log.contains("rolled:2/3"))
     }
 
     @Test

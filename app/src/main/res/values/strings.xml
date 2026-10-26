@@ -23,12 +23,14 @@
     <string name="match_king_empty">Siège vide</string>
     <string name="match_chip_description">%1$s, %2$d Popularité, %3$d Votes</string>
     <string name="match_chip_description_king">%1$s, %2$d Popularité, %3$d Votes, au pouvoir</string>
+    <string name="match_chip_playing">en train de jouer</string>
     <string name="match_die_description">Dé %1$d : %2$s</string>
     <string name="match_tweet_banner">%1$s −%2$d Popularité</string>
     <string name="die_face_tweet">Tweet</string>
     <string name="die_face_fonds">Fonds publics</string>
     <string name="die_face_popularite">Popularité</string>
     <string name="match_your_turn">À toi, %1$s</string>
+    <string name="match_their_turn">Au tour de %1$s</string>
     <string name="match_roll_count">Lancer %1$d sur %2$d · touche un dé pour le garder</string>
     <string name="match_roll_prompt">Lance les dés pour commencer ton tour.</string>
     <string name="match_turn_result">Résultat du tour</string>

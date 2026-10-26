@@ -19,6 +19,7 @@ import com.example.koe.game.player.PlayerController
 import com.example.koe.game.player.ShopAction
 import com.example.koe.game.shop.CardEffectResult
 import com.example.koe.game.shop.PowerCard
+import com.example.koe.game.shop.Shop
 import com.example.koe.match.Candidate
 import com.example.koe.match.MatchUiState
 import com.example.koe.match.RollUi
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 class MatchViewModel(
     private val human: Candidate,
     diceRoller: DiceRoller = RandomDiceRoller(),
+    shop: Shop = Shop(),
     aiDelayMillis: Long = AI_DELAY_MILLIS,
 ) : ViewModel() {
 
@@ -69,6 +71,11 @@ class MatchViewModel(
             refresh()
         }
 
+        override fun onDiceKept(player: Player, rollNumber: Int, keptIndices: List<Int>) {
+            keptDice = keptIndices.toList()
+            refresh()
+        }
+
         override fun onTurnSkipped(player: Player) = refresh()
         override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {
             tally.resolved(player, summary)
@@ -97,12 +104,16 @@ class MatchViewModel(
             val controller: PlayerController = if (player.id == humanPlayer.id) {
                 HumanPlayerController { decision -> onHumanDecision(decision) }
             } else {
-                PacedAiController(delayMillis = aiDelayMillis)
+                PacedAiController(
+                    thinkMillis = aiDelayMillis,
+                    resultMillis = aiDelayMillis * AI_RESULT_FACTOR,
+                )
             }
             player.id to controller
         },
         config = GameConfig(),
         diceRoller = diceRoller,
+        shop = shop,
         eventListener = listener,
     )
 
@@ -315,6 +326,9 @@ class MatchViewModel(
 
     companion object {
         const val AI_DELAY_MILLIS = 700L
+
+        // The turn result stays up longer than a single decision.
+        private const val AI_RESULT_FACTOR = 2
 
         fun factory(human: Candidate): ViewModelProvider.Factory = viewModelFactory {
             initializer { MatchViewModel(human) }

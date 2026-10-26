@@ -156,6 +156,39 @@ class MatchGameMapperTest {
     }
 
     @Test
+    fun `fresh board state has the first player as current and no opponent playing`() {
+        val engine = newEngine()
+        val state = boardState(engine, Candidate.MACRON.toPlayer().id, emptyList(), emptyList(), canEndTurn = false)
+
+        assertEquals(Candidate.MACRON, state.currentPlayer)
+        assertFalse(state.opponents.any { it.isPlaying })
+    }
+
+    @Test
+    fun `board state marks only the opponent whose turn it is as playing`() {
+        val players = listOf(Candidate.MELENCHON, Candidate.LEPEN, Candidate.MACRON, Candidate.POUTOU)
+            .map { it.toPlayer() }
+        val engine = GameEngine(
+            players = players,
+            controllers = players.associate { it.id to AiPlayerController() },
+        )
+        val lepen = engine.player(Candidate.LEPEN)
+
+        val state = boardState(engine, lepen.id, emptyList(), emptyList(), canEndTurn = false)
+
+        assertEquals(Candidate.MELENCHON, state.currentPlayer)
+        assertEquals(
+            listOf(Candidate.MELENCHON),
+            state.opponents.filter { it.isPlaying }.map { it.candidate },
+        )
+        assertEquals(
+            listOf(Candidate.MELENCHON, Candidate.MACRON, Candidate.POUTOU),
+            state.opponents.map { it.candidate },
+        )
+        assertEquals(listOf(true, false, false), state.opponents.map { it.isPlaying })
+    }
+
+    @Test
     fun `board state passes the roll, turn result, votes delta and tweet banner through`() {
         val engine = newEngine()
         val lepen = engine.player(Candidate.LEPEN)

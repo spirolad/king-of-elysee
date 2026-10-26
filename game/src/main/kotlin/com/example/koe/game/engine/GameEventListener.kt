@@ -23,6 +23,8 @@ interface GameEventListener {
     fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) {}
     fun onTurnSkipped(player: Player) {}
     fun onDiceRolled(player: Player, rollNumber: Int, maxRolls: Int, dice: List<DieFace>, keptIndices: List<Int>) {}
+    /** A player chose the dice to keep after roll [rollNumber]; keeping all of them ends the rolls. */
+    fun onDiceKept(player: Player, rollNumber: Int, keptIndices: List<Int>) {}
     fun onDiceResolved(player: Player, summary: DiceResolutionSummary) {}
     fun onMechanceteGained(player: Player, amount: Int, total: Int) {}
     fun onPlayerDamaged(target: Player, attacker: Player, damage: Int, remainingHealth: Int) {}
@@ -63,6 +65,9 @@ class CompositeGameEventListener(
 
     override fun onDiceRolled(player: Player, rollNumber: Int, maxRolls: Int, dice: List<DieFace>, keptIndices: List<Int>) =
         listeners.forEach { it.onDiceRolled(player, rollNumber, maxRolls, dice, keptIndices) }
+
+    override fun onDiceKept(player: Player, rollNumber: Int, keptIndices: List<Int>) =
+        listeners.forEach { it.onDiceKept(player, rollNumber, keptIndices) }
 
     override fun onDiceResolved(player: Player, summary: DiceResolutionSummary) =
         listeners.forEach { it.onDiceResolved(player, summary) }

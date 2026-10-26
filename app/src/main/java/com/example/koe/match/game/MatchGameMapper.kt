@@ -96,6 +96,7 @@ fun boardState(
                 popularite = opponent.health,
                 votes = opponent.victoryPoints,
                 isKing = engine.tokyoBoard.isInsideTokyo(opponent),
+                isPlaying = opponent.id == engine.currentPlayer.id,
             )
         },
         king = engine.tokyoBoard.occupants.firstOrNull()?.candidate,
@@ -106,6 +107,7 @@ fun boardState(
             fonds = player.energy,
             mechancete = player.mechancete,
         ),
+        currentPlayer = engine.currentPlayer.candidate,
         dice = dice.mapIndexed { index, face ->
             DieUi(face = face.toUi(), highlighted = index in keptIndices)
         },
