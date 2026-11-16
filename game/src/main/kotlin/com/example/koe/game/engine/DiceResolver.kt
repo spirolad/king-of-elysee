@@ -11,7 +11,8 @@ data class DiceResolutionSummary(
     val attackDamage: Int,
     val heartsRolled: Int,
     val actualHeal: Int,
-    val mechanceteGained: Int
+    val mechanceteGained: Int,
+    val wickednessPoints: Int = 0
 )
 
 /**
@@ -40,6 +41,17 @@ object DiceResolver {
             }
         }
 
+        // Calculate Wickedness points from 1s and 2s (Dark Edition rule)
+        var wickedness = 0
+        val ones = counts[DieFace.ONE] ?: 0
+        if (ones >= 3) {
+            wickedness += 2 + (ones - 3)
+        }
+        val twos = counts[DieFace.TWO] ?: 0
+        if (twos >= 3) {
+            wickedness += 1 + (twos - 3)
+        }
+
         val energy = counts[DieFace.ENERGY] ?: 0
         val attack = counts[DieFace.ATTACK] ?: 0
         val hearts = counts[DieFace.HEAL] ?: 0
@@ -56,7 +68,8 @@ object DiceResolver {
             attackDamage = attack,
             heartsRolled = hearts,
             actualHeal = actualHeal,
-            mechanceteGained = mechanceteGained
+            mechanceteGained = mechanceteGained,
+            wickednessPoints = wickedness
         )
     }
 }
