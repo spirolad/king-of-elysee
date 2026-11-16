@@ -26,6 +26,7 @@ fun MatchScreen(
     onElyseeBannerDismiss: () -> Unit,
     dialogActions: MatchDialogActions,
     modifier: Modifier = Modifier,
+    onTurnIntroDismiss: () -> Unit = {},
     contentPadding: PaddingValues = MatchBoardDefaultPadding,
 ) {
     // Back on the bare board pauses instead of leaving the match; QUITTER in the pause dialog is the way out.
@@ -46,6 +47,10 @@ fun MatchScreen(
             onElyseeBannerDismiss = onElyseeBannerDismiss,
             contentPadding = contentPadding,
         )
+        // Covers the board until the human starts their turn; the dialogs still open above it.
+        state.turnIntro?.let { intro ->
+            TurnIntro(candidate = state.me.candidate, intro = intro, onStart = onTurnIntroDismiss)
+        }
         MatchDialogHost(
             dialogs = dialogs,
             actions = dialogActions,

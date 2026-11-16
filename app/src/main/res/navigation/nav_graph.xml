@@ -1,18 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/titleFragment">
 
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.koe.HomeFragment"
-        android:label="Accueil"
-        tools:layout="@layout/fragment_home">
+        android:id="@+id/titleFragment"
+        android:name="com.example.koe.home.TitleFragment">
         <action
-            android:id="@+id/action_homeFragment_to_matchFragment"
-            app:destination="@id/matchFragment" />
+            android:id="@+id/action_title_to_menu"
+            app:destination="@id/menuFragment"
+            app:popUpTo="@id/titleFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/menuFragment"
+        android:name="com.example.koe.home.MenuFragment">
+        <action
+            android:id="@+id/action_menu_to_character"
+            app:destination="@id/characterFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/rulesFragment"
+        android:name="com.example.koe.home.RulesFragment" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.koe.home.SettingsFragment" />
+
+    <fragment
+        android:id="@+id/characterFragment"
+        android:name="com.example.koe.home.CharacterFragment">
+        <action
+            android:id="@+id/action_character_to_ready"
+            app:destination="@id/readyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/readyFragment"
+        android:name="com.example.koe.home.ReadyFragment">
+        <argument
+            android:name="candidate"
+            android:defaultValue="MACRON"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_ready_to_match"
+            app:destination="@id/matchFragment"
+            app:popUpTo="@id/menuFragment" />
     </fragment>
 
     <fragment
@@ -22,6 +58,20 @@
             android:name="candidate"
             android:defaultValue="MACRON"
             app:argType="string" />
+        <!-- Play order, by Candidate name; empty plays the human first. -->
+        <argument
+            android:name="order"
+            app:argType="string[]"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
+
+    <!-- Rules and settings open from the menu, from each other and from the match's pause dialog. -->
+    <action
+        android:id="@+id/action_global_rules"
+        app:destination="@id/rulesFragment" />
+    <action
+        android:id="@+id/action_global_settings"
+        app:destination="@id/settingsFragment" />
 
 </navigation>

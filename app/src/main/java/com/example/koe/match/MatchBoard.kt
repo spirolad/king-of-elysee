@@ -47,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +80,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.koe.R
+import com.example.koe.home.rememberSetting
+import com.example.koe.home.KoeSetting
+import kotlin.math.sin
+import kotlin.math.PI
+import kotlinx.coroutines.launch
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Animatable
 import com.example.koe.ui.components.AnimatedCount
 import com.example.koe.ui.components.KoeText
 import com.example.koe.ui.components.PressableSurface
@@ -105,8 +111,6 @@ object MatchBoardTags {
     const val STEP_BAR = "match:stepBar"
     const val SHOP_LOCK = "match:shopLock"
     const val SHOP_AFFORDABLE = "match:shopAffordable"
-    const val DICE_LEGEND_BUTTON = "match:diceLegendButton"
-    const val DICE_LEGEND = "match:diceLegend"
     const val ELYSEE_BANNER = "match:elyseeBanner"
     fun chip(candidate: Candidate) = "match:chip:${candidate.name}"
     fun die(index: Int) = "match:die:$index"
@@ -497,6 +501,7 @@ private fun CenterColumn(
             )
             DiceTray(
                 dice = state.dice,
+                diceThrow = state.diceThrow,
                 tappable = diceTappable,
                 keeping = keeping,
                 onDieClick = onDieClick,
@@ -669,10 +674,38 @@ private fun turnResultText(result: TurnResultUi): String {
 private fun Die(
     die: DieUi,
     index: Int,
+    diceThrow: Int,
+    tumbles: Boolean,
     tappable: Boolean,
     kept: Boolean,
     onClick: () -> Unit,
 ) {
+    // 0 at rest, 1 once the die has landed: drives the spin and the hop.
+    val tumble = remember { Animatable(1f) }
+    // A random face flashed while the die is in the air; null shows the real one.
+    var flicker by remember { mutableStateOf<DieFace?>(null) }
+    // Dice kept before the throw stay put; the others tumble, one after the other.
+    LaunchedEffect(diceThrow) {
+        flicker = null
+        if (!tumbles || die.highlighted) {
+            tumble.snapTo(1f)
+            return@LaunchedEffect
+        }
+        try {
+            delay(index * DIE_STAGGER_MS)
+            tumble.snapTo(0f)
+            val spin = launch { tumble.animateTo(1f, tween(DIE_TUMBLE_MS, easing = FastOutSlowInEasing)) }
+            repeat(DIE_FLICKERS) {
+                flicker = TUMBLE_FACES.random()
+                delay((DIE_TUMBLE_MS / DIE_FLICKERS).toLong())
+            }
+            flicker = null
+            spin.join()
+        } finally {
+            flicker = null
+        }
+    }
+    val spinDirection = if (index % 2 == 0) 1f else -1f
     val ring by animateColorAsState(
         targetValue = if (die.highlighted) {
             colorResource(R.color.koe_status_highlight)
@@ -695,7 +728,18 @@ private fun Die(
     // No ripple: the highlight ring is the feedback.
     val interactionSource = remember { MutableInteractionSource() }
     // The tag is a sibling of the die, not a child of its background, so it is not cut by the die's edge.
-    Box(Modifier.size(BoardMetrics.DieSize)) {
+    Box(
+        Modifier
+            .size(BoardMetrics.DieSize)
+            .graphicsLayer {
+                val t = tumble.value
+                val arc = sin(PI * t).toFloat()
+                rotationZ = t * 360f * spinDirection
+                translationY = -arc * 14.dp.toPx()
+                scaleX = 1f + arc * 0.12f
+                scaleY = scaleX
+            },
+    ) {
         Box(
             Modifier
                 .testTag(MatchBoardTags.die(index))
@@ -723,36 +767,18 @@ private fun Die(
                 },
             contentAlignment = Alignment.Center,
         ) {
-            AnimatedContent(
-                targetState = die.face,
-                transitionSpec = {
-                    (fadeIn(tween(180)) + scaleIn(initialScale = 0.6f)) togetherWith
-                        (fadeOut(tween(120)) + scaleOut(targetScale = 1.2f))
-                },
-                label = "dieFace",
-            ) { face ->
-                when (face) {
-                    is DieFace.Number -> KoeText(
-                        text = face.value.toString(),
-                        style = KoeTextStyles.DieNumber,
-                        color = colorResource(R.color.koe_text_primary),
-                    )
-                    DieFace.Tweet -> Image(
-                        painter = painterResource(R.drawable.ic_board_tweet),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                    )
-                    DieFace.Fonds -> Image(
-                        painter = painterResource(R.drawable.ic_board_fonds),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                    )
-                    DieFace.Popularite -> Image(
-                        painter = painterResource(R.drawable.ic_board_stat_popularite),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                    )
-                }
+            val airborne = flicker
+            if (airborne != null) {
+                DieFaceContent(airborne)
+            } else {
+                AnimatedContent(
+                    targetState = die.face,
+                    transitionSpec = {
+                        (fadeIn(tween(180)) + scaleIn(initialScale = 0.6f)) togetherWith
+                            (fadeOut(tween(120)) + scaleOut(targetScale = 1.2f))
+                    },
+                    label = "dieFace",
+                ) { face -> DieFaceContent(face) }
             }
         }
         // Overlaps the top edge and draws above the ring; the die keeps its 56 dp box.
@@ -769,6 +795,44 @@ private fun Die(
                     .padding(horizontal = 6.dp, vertical = 1.dp),
             )
         }
+    }
+}
+
+private const val DIE_TUMBLE_MS = 520
+private const val DIE_STAGGER_MS = 45L
+private const val DIE_FLICKERS = 6
+private val TUMBLE_FACES = listOf(
+    DieFace.Number(1),
+    DieFace.Number(2),
+    DieFace.Number(3),
+    DieFace.Tweet,
+    DieFace.Fonds,
+    DieFace.Popularite,
+)
+
+@Composable
+private fun DieFaceContent(face: DieFace) {
+    when (face) {
+        is DieFace.Number -> KoeText(
+            text = face.value.toString(),
+            style = KoeTextStyles.DieNumber,
+            color = colorResource(R.color.koe_text_primary),
+        )
+        DieFace.Tweet -> Image(
+            painter = painterResource(R.drawable.ic_board_tweet),
+            contentDescription = null,
+            modifier = Modifier.size(32.dp),
+        )
+        DieFace.Fonds -> Image(
+            painter = painterResource(R.drawable.ic_board_fonds),
+            contentDescription = null,
+            modifier = Modifier.size(32.dp),
+        )
+        DieFace.Popularite -> Image(
+            painter = painterResource(R.drawable.ic_board_stat_popularite),
+            contentDescription = null,
+            modifier = Modifier.size(32.dp),
+        )
     }
 }
 
@@ -1133,126 +1197,33 @@ private fun BoxScope.ShopBadge(availability: ShopAvailability) {
     }
 }
 
-/** The dice row, with the legend button on its right edge and the legend card under it. */
+/** The dice row. */
 @Composable
 private fun DiceTray(
     dice: List<DieUi>,
+    diceThrow: Int,
     tappable: Boolean,
     keeping: Boolean,
     onDieClick: (Int) -> Unit,
 ) {
-    var legendOpen by rememberSaveable { mutableStateOf(false) }
-    val legendDescription = stringResource(R.string.cd_dice_legend)
-    // The legend may cover the result pill below, so the tray draws above it.
-    Box(Modifier.zIndex(1f)) {
-        Row(
-            Modifier
-                .testTag(MatchBoardTags.DICE_ROW)
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            dice.forEachIndexed { index, die ->
-                Die(
-                    die = die,
-                    index = index,
-                    tappable = tappable,
-                    kept = keeping && die.highlighted,
-                    onClick = { onDieClick(index) },
-                )
-            }
-        }
-        // Zero-size anchor on the row's bottom right: the info button tucks under the last die, clear of the MePanel.
-        Box(
-            Modifier
-                .align(Alignment.BottomEnd)
-                .layout { measurable, _ ->
-                    val placeable = measurable.measure(Constraints())
-                    layout(0, 0) {
-                        placeable.place(-placeable.width, 4.dp.roundToPx())
-                    }
-                },
-        ) {
-            PressableSurface(
-                onClick = { legendOpen = !legendOpen },
-                shape = CircleShape,
-                color = colorResource(R.color.koe_surface),
-                border = BorderStroke(3.dp, colorResource(R.color.koe_action_outline)),
-                modifier = Modifier
-                    .size(32.dp)
-                    .testTag(MatchBoardTags.DICE_LEGEND_BUTTON)
-                    .semantics { contentDescription = legendDescription },
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_board_info),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-        }
-        // Zero-size anchor on the row's bottom centre: the legend card hangs 8 dp below the dice.
-        Box(
-            Modifier
-                .align(Alignment.BottomCenter)
-                .layout { measurable, _ ->
-                    val placeable = measurable.measure(Constraints())
-                    layout(0, 0) {
-                        placeable.place(-placeable.width / 2, 8.dp.roundToPx())
-                    }
-                },
-        ) {
-            AnimatedVisibility(
-                visible = legendOpen,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                label = "diceLegend",
-            ) {
-                DiceLegendCard(onClick = { legendOpen = false })
-            }
-        }
-    }
-}
-
-@Composable
-private fun DiceLegendCard(onClick: () -> Unit) {
-    PressableSurface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = colorResource(R.color.koe_surface),
-        border = BorderStroke(3.dp, colorResource(R.color.koe_action_outline)),
-        modifier = Modifier
-            .testTag(MatchBoardTags.DICE_LEGEND)
-            .width(340.dp),
+    // A throw made before the board was drawn (a restored match) is shown at rest.
+    val firstThrow = remember { diceThrow }
+    val reducedMotion by rememberSetting(KoeSetting.REDUCED_MOTION)
+    Row(
+        Modifier
+            .testTag(MatchBoardTags.DICE_ROW)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            KoeText(
-                text = stringResource(R.string.match_legend_title),
-                style = KoeTextStyles.CardTitle,
-                color = colorResource(R.color.koe_text_primary),
-            )
-            KoeText(
-                text = stringResource(R.string.match_legend_numbers),
-                style = KoeTextStyles.Description,
-                color = colorResource(R.color.koe_text_primary),
-            )
-            KoeText(
-                text = stringResource(R.string.match_legend_tweet),
-                style = KoeTextStyles.Description,
-                color = colorResource(R.color.koe_text_primary),
-            )
-            KoeText(
-                text = stringResource(R.string.match_legend_fonds),
-                style = KoeTextStyles.Description,
-                color = colorResource(R.color.koe_text_primary),
-            )
-            KoeText(
-                text = stringResource(R.string.match_legend_popularite),
-                style = KoeTextStyles.Description,
-                color = colorResource(R.color.koe_text_primary),
+        dice.forEachIndexed { index, die ->
+            Die(
+                die = die,
+                index = index,
+                diceThrow = diceThrow,
+                tumbles = diceThrow != firstThrow && !reducedMotion,
+                tappable = tappable,
+                kept = keeping && die.highlighted,
+                onClick = { onDieClick(index) },
             )
         }
     }

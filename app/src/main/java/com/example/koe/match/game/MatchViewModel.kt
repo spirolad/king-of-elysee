@@ -27,6 +27,7 @@ import com.example.koe.match.Candidate
 import com.example.koe.match.MatchUiState
 import com.example.koe.match.RollUi
 import com.example.koe.match.ShopAvailability
+import com.example.koe.match.TurnIntroUi
 import com.example.koe.match.dialog.MatchDialog
 import com.example.koe.match.dialog.PowerCardUi
 import kotlin.random.Random
@@ -49,6 +50,8 @@ class MatchViewModel(
     diceRoller: DiceRoller? = null,
     shop: Shop? = null,
     aiDelayMillis: Long = AI_DELAY_MILLIS,
+    // Play order drawn on the PRÊTS ? screen; null plays the human first.
+    order: List<Candidate>? = null,
 ) : ViewModel() {
 
     private val seed: Long = savedState.get<Long>(KEY_SEED) ?: Random.nextLong().also { savedState[KEY_SEED] = it }
@@ -56,13 +59,16 @@ class MatchViewModel(
         savedState.get<ArrayList<String>>(KEY_ANSWERS)?.toMutableList() ?: mutableListOf()
     private val replay = ArrayDeque(answers)
 
-    private val players: List<Player> = (listOf(human) + Candidate.entries.filter { it != human })
+    private val players: List<Player> = (order ?: (listOf(human) + Candidate.entries.filter { it != human }))
         .map { it.toPlayer() }
-    private val humanPlayer: Player = players.first()
+    private val humanPlayer: Player = players.first { it.candidate == human }
 
     private var pending: HumanDecision? = null
     private var shownDice: List<DieFace> = emptyList()
     private var keptDice: List<Int> = emptyList()
+
+    // Counts every throw, so the board tumbles the dice even when a face comes back unchanged.
+    private var diceThrow = 0
     private var keptSelection: Set<Int> = emptySet()
     private var requests: List<DialogRequest> = emptyList()
     private var gameJob: Job? = null
@@ -70,11 +76,14 @@ class MatchViewModel(
     private val tally = TurnTally()
     private val history = GameHistory()
     private var elyseeBanner = false
+    private var turnIntro = false
 
     private val listener: GameEventListener = object : GameEventListener {
         override fun onTurnStarted(player: Player, roundNumber: Int, isInTokyo: Boolean) {
             tally.start(player)
             history.turnStarted(player, roundNumber)
+            // A restored match replays its past turns without announcing them.
+            turnIntro = player.id == humanPlayer.id && replay.isEmpty()
             shownDice = emptyList()
             keptDice = emptyList()
             refresh()
@@ -89,6 +98,7 @@ class MatchViewModel(
         ) {
             shownDice = dice
             keptDice = keptIndices.toList()
+            diceThrow++
             refresh()
         }
 
@@ -136,7 +146,10 @@ class MatchViewModel(
             refresh()
         }
         override fun onTurnEnded(player: Player) {
-            if (player.id == humanPlayer.id) elyseeBanner = false
+            if (player.id == humanPlayer.id) {
+                elyseeBanner = false
+                turnIntro = false
+            }
             refresh()
         }
         override fun onPlayerEliminated(player: Player, reason: String) {
@@ -227,6 +240,12 @@ class MatchViewModel(
     fun onValidateDiceClick() {
         val decision = pending as? HumanDecision.KeepDice ?: return
         keepDice(decision, shownDice.indices.toList())
+        refresh()
+    }
+
+    /** Closes the À TOI screen that opens the human's turn. */
+    fun onTurnIntroDismiss() {
+        turnIntro = false
         refresh()
     }
 
@@ -442,6 +461,18 @@ class MatchViewModel(
             tweetBanner = tally.tweetBanner(humanPlayer.id),
             shopAvailability = shopAvailability,
             elyseeBanner = elyseeBanner,
+        ).copy(
+            diceThrow = diceThrow,
+            turnIntro = if (turnIntro && outcome == null) {
+                TurnIntroUi(
+                    round = engine.roundNumber,
+                    votes = humanPlayer.victoryPoints,
+                    popularite = humanPlayer.health,
+                    fonds = humanPlayer.energy,
+                )
+            } else {
+                null
+            },
         )
         _dialogs.value = requests.map { buildDialog(it, decision) }
     }
@@ -491,8 +522,8 @@ class MatchViewModel(
         private const val KEY_SEED = "match.seed"
         private const val KEY_ANSWERS = "match.answers"
 
-        fun factory(human: Candidate): ViewModelProvider.Factory = viewModelFactory {
-            initializer { MatchViewModel(human, createSavedStateHandle()) }
+        fun factory(human: Candidate, order: List<Candidate>? = null): ViewModelProvider.Factory = viewModelFactory {
+            initializer { MatchViewModel(human, createSavedStateHandle(), order = order) }
         }
     }
 }

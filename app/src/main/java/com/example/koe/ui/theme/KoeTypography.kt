@@ -45,6 +45,18 @@ object KoeTextStyles {
     val DialogTitleSmall = base(KoeFonts.Anton, FontWeight.Normal, 30.sp, 36.sp, 0.sp)
     val SheetTitle = base(KoeFonts.Anton, FontWeight.Normal, 26.sp, 28.sp, 0.sp)
     val PlayerName = base(KoeFonts.Anton, FontWeight.Normal, 28.sp, 36.sp, 0.sp)
+    // Title, menu and setup screens
+    val LogoKingOf = base(KoeFonts.Hanken, FontWeight.Bold, 64.sp, 64.sp, 3.sp)
+    val LogoElysee = base(KoeFonts.Anton, FontWeight.Normal, 104.sp, 100.sp, 0.sp)
+    val Hero = base(KoeFonts.Anton, FontWeight.Normal, 64.sp, 60.sp, 0.sp)
+    val CardHeading = base(KoeFonts.Anton, FontWeight.Normal, 22.sp, 28.sp, 0.sp)
+    val Rank = base(KoeFonts.Anton, FontWeight.Normal, 18.sp, 22.sp, 0.sp)
+    val Lead = base(KoeFonts.Hanken, FontWeight.Bold, 16.sp, 18.sp, 0.sp)
+    val LeadSmall = base(KoeFonts.Hanken, FontWeight.Bold, 14.sp, 18.sp, 0.sp)
+    val BodySmall = base(KoeFonts.Hanken, FontWeight.SemiBold, 14.sp, 20.sp, 0.sp)
+    val Small = base(KoeFonts.Hanken, FontWeight.SemiBold, 12.sp, 18.sp, 0.sp)
+    val Multiplier = base(KoeFonts.Hanken, FontWeight.ExtraBold, 18.sp, 17.sp, 0.sp)
+
     val Body = base(KoeFonts.Hanken, FontWeight.SemiBold, 15.sp, 20.sp, 0.sp)
     val BodyStrong = base(KoeFonts.Hanken, FontWeight.ExtraBold, 15.sp, 20.sp, 0.sp)
     val SectionTitle = base(KoeFonts.Hanken, FontWeight.ExtraBold, 20.sp, 24.sp, 0.sp)

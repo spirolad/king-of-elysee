@@ -66,6 +66,7 @@ internal fun KoeButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     @DrawableRes leadingIcon: Int? = null,
+    iconSize: Dp = 18.dp,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val palette = style.palette(enabled)
@@ -86,7 +87,7 @@ internal fun KoeButton(
                 Image(
                     painter = painterResource(leadingIcon),
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(iconSize),
                 )
             }
             KoeText(

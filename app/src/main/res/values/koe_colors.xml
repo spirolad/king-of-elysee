@@ -43,6 +43,7 @@
     <color name="koe_palette_rose_pale">#FFEBB5C1</color>
     <color name="koe_palette_bleu_vote">#FF2F5FD6</color>
     <color name="koe_palette_bleu_pale">#FFDDE6FB</color>
+    <color name="koe_palette_glacier">#FFD5EAFC</color>
 
     <!-- Text, all readable on koe_surface -->
     <color name="koe_text_primary">@color/koe_palette_ink</color>
@@ -120,6 +121,8 @@
     <!-- Dialogs -->
     <color name="koe_scrim">@color/koe_palette_ardoise_overlay</color>
     <color name="koe_scrim_evil">@color/koe_palette_nuit_violette_overlay</color>
+    <!-- Player cards of the PRÊTS ? screen -->
+    <color name="koe_surface_player_card">@color/koe_palette_glacier</color>
     <color name="koe_surface_inset">@color/koe_palette_brume</color>
     <color name="koe_surface_mechancete">@color/koe_palette_lilas</color>
     <color name="koe_action_disabled">@color/koe_palette_gris_bleu</color>

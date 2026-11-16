@@ -463,25 +463,6 @@ class MatchBoardTest {
     }
 
     @Test
-    fun diceLegendOpensAndClosesFromItsButton() {
-        setBoard()
-
-        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND).assertDoesNotExist()
-        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND_BUTTON).performClick()
-        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND).assertIsDisplayed()
-        composeTestRule.onNodeWithText(
-            "Tweet : attaque. Dehors tu vises l'Élysée, à l'Élysée tu vises tous les autres",
-            useUnmergedTree = true,
-        ).assertIsDisplayed()
-
-        composeTestRule.onNodeWithTag(MatchBoardTags.DICE_LEGEND_BUTTON).performClick()
-        composeTestRule.waitUntil(timeoutMillis = 2_000) {
-            composeTestRule.onAllNodesWithTag(MatchBoardTags.DICE_LEGEND, useUnmergedTree = true)
-                .fetchSemanticsNodes().isEmpty()
-        }
-    }
-
-    @Test
     fun elyseeBannerShownAndTapDismisses() {
         var dismissed = false
         setBoard(

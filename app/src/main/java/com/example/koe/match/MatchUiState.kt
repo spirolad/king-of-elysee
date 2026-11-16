@@ -8,15 +8,45 @@ import com.example.koe.R
 
 enum class Candidate(
     @param:StringRes val nameRes: Int,
+    @param:StringRes val quoteRes: Int,
+    @param:StringRes val taglineRes: Int,
     @param:DrawableRes val portrait: Int?,
     @param:ColorRes val avatarColor: Int,
     // White silhouette on dark discs, ink silhouette otherwise.
     val lightSilhouette: Boolean,
 ) {
-    MACRON(R.string.character_macron_name, R.drawable.macron, R.color.koe_avatar_macron, lightSilhouette = false),
-    MELENCHON(R.string.character_melenchon_name, R.drawable.melanchon, R.color.koe_avatar_melenchon, lightSilhouette = false),
-    LEPEN(R.string.character_lepen_name, R.drawable.lepen, R.color.koe_avatar_lepen, lightSilhouette = true),
-    POUTOU(R.string.character_poutou_name, R.drawable.poutou, R.color.koe_avatar_poutou, lightSilhouette = false),
+    MACRON(
+        R.string.character_macron_name,
+        R.string.character_macron_quote,
+        R.string.character_macron_tagline,
+        R.drawable.macron,
+        R.color.koe_avatar_macron,
+        lightSilhouette = false,
+    ),
+    MELENCHON(
+        R.string.character_melenchon_name,
+        R.string.character_melenchon_quote,
+        R.string.character_melenchon_tagline,
+        R.drawable.melanchon,
+        R.color.koe_avatar_melenchon,
+        lightSilhouette = false,
+    ),
+    LEPEN(
+        R.string.character_lepen_name,
+        R.string.character_lepen_quote,
+        R.string.character_lepen_tagline,
+        R.drawable.lepen,
+        R.color.koe_avatar_lepen,
+        lightSilhouette = true,
+    ),
+    POUTOU(
+        R.string.character_poutou_name,
+        R.string.character_poutou_quote,
+        R.string.character_poutou_tagline,
+        R.drawable.poutou,
+        R.color.koe_avatar_poutou,
+        lightSilhouette = false,
+    ),
 }
 
 @Immutable
@@ -77,6 +107,19 @@ data class MatchUiState(
     val shopAvailability: ShopAvailability = ShopAvailability.LOCKED,
     // Explains the Élysée the moment the player takes it.
     val elyseeBanner: Boolean = false,
+    // Announces the human's turn before they roll; null hides it.
+    val turnIntro: TurnIntroUi? = null,
+    // Goes up with every throw of the dice: the dice that were not kept tumble.
+    val diceThrow: Int = 0,
+)
+
+/** The human's standing, shown before each of their turns. */
+@Immutable
+data class TurnIntroUi(
+    val round: Int,
+    val votes: Int,
+    val popularite: Int,
+    val fonds: Int,
 )
 
 @Immutable

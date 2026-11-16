@@ -25,19 +25,20 @@ import com.example.koe.match.game.MatchViewModel
 
 class MatchFragment : Fragment() {
 
-    private val viewModel: MatchViewModel by viewModels { MatchViewModel.factory(candidateArg()) }
+    private val viewModel: MatchViewModel by viewModels {
+        MatchViewModel.factory(candidateArg(), requireArguments().getStringArray("order")?.map { Candidate.valueOf(it) })
+    }
 
     // Lambdas keep the ViewModel untouched until the view exists.
     private val dialogActions = MatchDialogActions(
         onDismiss = { viewModel.onDismiss() },
         onResume = { viewModel.onResume() },
-        // No rules or settings screens yet.
-        onRules = {},
-        onSettings = {},
+        onRules = { findNavController().navigate(R.id.action_global_rules) },
+        onSettings = { findNavController().navigate(R.id.action_global_settings) },
         onQuitRequest = { viewModel.onQuitRequest() },
         onQuitConfirmed = {
             viewModel.onQuitConfirmed()
-            findNavController().popBackStack(R.id.homeFragment, false)
+            findNavController().popBackStack(R.id.menuFragment, false)
         },
         onReplay = {
             // A new fragment gets a new ViewModel, so the match restarts with the same candidate.
@@ -90,6 +91,7 @@ class MatchFragment : Fragment() {
                 onRollClick = viewModel::onRollClick,
                 onValidateDiceClick = viewModel::onValidateDiceClick,
                 onElyseeBannerDismiss = viewModel::onElyseeBannerDismiss,
+                onTurnIntroDismiss = viewModel::onTurnIntroDismiss,
                 dialogActions = dialogActions,
                 contentPadding = PaddingValues(start = start, top = 12.dp, end = end, bottom = 21.dp),
             )
