@@ -1,10 +1,6 @@
 <resources>
+    <!-- Existing app strings -->
     <string name="app_name">King of Elysee</string>
-    <string name="choose_character">Choisir votre politicien</string>
-    <string name="btn_start_game">Commencer</string>
-    <string name="game_title">Écran du Jeu</string>
-    <string name="selected_character_format">Personnage sélectionné : %1$s</string>
-    <string name="btn_back_home">Retour au choix</string>
 
     <string name="character_macron_name">Macron</string>
     <string name="character_macron_quote">"Qu\'ils viennent me chercher !"</string>
@@ -17,4 +13,237 @@
 
     <string name="character_poutou_name">Poutou</string>
     <string name="character_poutou_quote">"Ce qui peut changer la société, ce sont les luttes sociales et populaires. !"</string>
+
+    <!-- Match screen -->
+    <string name="match_king_title">KING OF ÉLYSÉE</string>
+    <string name="match_badge_in_power">AU POUVOIR</string>
+    <string name="match_king_bonus">+2 Votes à chaque début de tour</string>
+    <string name="match_king_empty">Siège vide</string>
+    <string name="match_chip_description">%1$s, %2$d Popularité, %3$d Votes</string>
+    <string name="match_chip_description_king">%1$s, %2$d Popularité, %3$d Votes, au pouvoir</string>
+    <string name="match_chip_playing">en train de jouer</string>
+    <string name="match_chip_eliminated">éliminé</string>
+    <string name="match_die_description">Dé %1$d : %2$s</string>
+    <string name="match_tweet_banner">%1$s −%2$d Popularité</string>
+    <string name="die_face_tweet">Tweet</string>
+    <string name="die_face_fonds">Fonds publics</string>
+    <string name="die_face_popularite">Popularité</string>
+    <string name="match_your_turn">À toi, %1$s</string>
+    <string name="match_their_turn">Au tour de %1$s</string>
+    <string name="match_roll_count">Lancer %1$d sur %2$d · touche un dé pour le garder</string>
+    <string name="match_roll_prompt">Lance les dés pour commencer ton tour.</string>
+    <string name="match_turn_result">Résultat du tour</string>
+    <string name="match_result_votes">+%1$d Votes</string>
+    <string name="match_result_fonds">+%1$d Fonds</string>
+    <string name="match_result_popularite">+%1$d Popularité</string>
+    <plurals name="match_result_tweets">
+        <item quantity="one">%1$d Tweet</item>
+        <item quantity="other">%1$d Tweets</item>
+    </plurals>
+    <string name="match_result_tweets_on">%1$s sur %2$s</string>
+    <string name="match_result_nothing">Rien ce tour</string>
+    <string name="match_me_label">TOI</string>
+    <string name="match_step_roll">Lancer</string>
+    <string name="match_step_keep">Garder</string>
+    <string name="match_step_shop">Boutique</string>
+    <string name="match_step_end">Fin du tour</string>
+    <string name="match_step_current">étape en cours</string>
+    <plurals name="match_roll_count_kept">
+        <item quantity="one">Lancer %1$d sur %2$d · %3$d dé gardé</item>
+        <item quantity="other">Lancer %1$d sur %2$d · %3$d dés gardés</item>
+    </plurals>
+    <string name="match_die_kept">GARDÉ</string>
+    <string name="match_shop_locked">fermée pour l\'instant</string>
+    <string name="match_shop_affordable">une carte est à ta portée</string>
+    <string name="match_elysee_banner_title">TU PRENDS L\'ÉLYSÉE !</string>
+    <string name="match_elysee_banner_body">+1 Vote maintenant, +2 à chaque début de tour. Pas de soin ici, et tu encaisses les tweets des autres.</string>
+
+    <!-- Stats -->
+    <string name="stat_votes_max">/ 20 Votes</string>
+    <string name="stat_popularite_max">/ 10 Popularité</string>
+    <string name="stat_fonds">Fonds</string>
+    <string name="stat_mechancete">Méchanceté</string>
+
+    <!-- Buttons -->
+    <string name="btn_shop">BOUTIQUE</string>
+    <string name="btn_cards">CARTES</string>
+    <string name="btn_history">HISTORIQUE</string>
+    <string name="btn_validate">VALIDER</string>
+    <string name="btn_roll">LANCER</string>
+    <string name="btn_end_turn">FIN DU TOUR</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">ANNULER</string>
+    <string name="btn_quit">QUITTER</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_pause">Pause</string>
+    <string name="cd_close">Fermer</string>
+    <string name="cd_die">Dé</string>
+    <string name="cd_avatar">Portrait</string>
+
+    <!-- Pause dialog -->
+    <string name="pause_title">PAUSE</string>
+    <string name="pause_turn">Tour %1$d · à %2$s de jouer</string>
+    <string name="btn_resume">REPRENDRE</string>
+    <string name="btn_rules">RÈGLES</string>
+    <string name="btn_settings">RÉGLAGES</string>
+
+    <!-- Quit confirmation dialog -->
+    <string name="quit_title">QUITTER LA PARTIE ?</string>
+    <string name="quit_message">La partie en cours sera perdue. %1$s garde l\'Élysée, par forfait.</string>
+    <string name="quit_message_no_king">La partie en cours sera perdue.</string>
+
+    <!-- Game over dialog -->
+    <string name="game_over_title_win">VICTOIRE !</string>
+    <string name="game_over_title_loss">DÉFAITE</string>
+    <string name="game_over_votes">%1$s atteint 20 Votes et prend l\'Élysée.</string>
+    <string name="game_over_last_standing">%1$s est le dernier en lice et prend l\'Élysée.</string>
+    <string name="game_over_eliminated">Tu n\'as plus de popularité : tu quittes la course.</string>
+    <string name="btn_replay">REJOUER</string>
+
+    <!-- Yield dialog -->
+    <string name="yield_your_call">À TOI DE DÉCIDER</string>
+    <string name="yield_title">CÉDER L\'ÉLYSÉE ?</string>
+    <string name="yield_tweet_notice">%1$s t\'a tweeté dessus :</string>
+    <string name="yield_damage">−%1$d Popularité</string>
+    <string name="yield_remaining">. Il t\'en reste %1$d.</string>
+    <string name="btn_stay">RESTER</string>
+    <string name="btn_yield">CÉDER</string>
+    <string name="yield_stay_hint">+2 Votes à ton prochain tour, si tu tiens.</string>
+    <string name="yield_cede_hint">%1$s entre à l\'Élysée et gagne 1 Vote.</string>
+
+    <!-- Player details dialog -->
+    <string name="player_details_cards">Ses cartes</string>
+    <string name="player_details_number">Joueur %1$d</string>
+
+    <!-- Shop dialog -->
+    <string name="shop_title">BOUTIQUE</string>
+    <string name="shop_hint">Touche une carte pour la choisir. Appui long pour les détails.</string>
+    <string name="shop_your_choice">TON CHOIX</string>
+    <string name="shop_affordable">Achetable · il te restera %1$d Fonds.</string>
+    <string name="btn_buy">ACHETER</string>
+    <string name="btn_renew">RENOUVELER</string>
+    <string name="shop_unaffordable">Pas assez de Fonds.</string>
+    <string name="shop_no_choice">Touche une carte pour la choisir.</string>
+    <string name="shop_locked_hint">Tu pourras acheter après tes lancers, pendant ton tour.</string>
+
+    <!-- My cards dialog -->
+    <string name="my_cards_title">TES CARTES</string>
+    <string name="my_cards_hint">Les cartes Pouvoir restent en jeu. Appui long pour les détails.</string>
+    <string name="mechancete_progress">/ %1$d pour une carte</string>
+    <string name="mechancete_tiers_hint">Paliers à 3, 6 et 10. Chaque palier donne une carte Méchanceté.</string>
+
+    <!-- History dialog -->
+    <string name="history_title">HISTORIQUE</string>
+    <string name="history_empty">Rien ne s\'est encore passé.</string>
+    <string name="history_round">Tour %1$d</string>
+    <string name="history_turn_started">%1$s commence son tour</string>
+    <string name="history_turn_skipped">%1$s passe son tour</string>
+    <string name="history_dice_result">%1$s lance les dés</string>
+    <string name="history_tweet">%1$s tweete sur %2$s</string>
+    <string name="history_entered">%1$s entre à l\'Élysée</string>
+    <string name="history_yielded">%1$s cède l\'Élysée</string>
+    <string name="history_bought">%1$s achète %2$s</string>
+    <string name="history_mechancete">%1$s gagne la carte Méchanceté %2$s</string>
+    <string name="history_eliminated">%1$s est éliminé</string>
+    <string name="history_cd_popularite_loss">−%1$d Popularité</string>
+    <string name="history_cd_fonds">%1$d Fonds</string>
+    <string name="history_cd_votes">+%1$d Votes</string>
+    <string name="history_cd_popularite">+%1$d Popularité</string>
+    <string name="history_cd_mechancete">Niveau %1$d</string>
+    <string name="history_cd_tweets">%1$d Tweets</string>
+
+    <!-- Card types and card detail -->
+    <string name="card_type_action">ACTION</string>
+    <string name="card_type_pouvoir">POUVOIR</string>
+    <string name="card_type_mechancete">MÉCHANCETÉ</string>
+    <string name="card_detail_badge_pouvoir">CARTE POUVOIR</string>
+    <string name="card_detail_badge_action">CARTE ACTION</string>
+    <string name="card_detail_badge_mechancete">CARTE MÉCHANCETÉ</string>
+    <string name="card_detail_paid">Payée %1$d Fonds publics au tour %2$d</string>
+    <string name="card_detail_permanent">Effet permanent</string>
+
+    <!-- Mechancete dialog -->
+    <string name="mechancete_title">MÉCHANCETÉ !</string>
+    <string name="mechancete_reached">Ta méchanceté atteint %1$d. Choisis une carte, garde-la pour toi.</string>
+    <!-- Title and main menu -->
+    <string name="logo_king_of">KING OF</string>
+    <string name="logo_elysee">ÉLYSÉE</string>
+    <string name="title_tagline">Le jeu de plateau où la politique se joue aux dés.</string>
+    <string name="title_tap_to_start">TOUCHE POUR COMMENCER</string>
+    <string name="menu_tagline">De 2 à 5 joueurs, un seul téléphone. Prends l\'Élysée et tiens bon.</string>
+    <string name="btn_play">JOUER</string>
+    <string name="cd_settings">Réglages</string>
+    <string name="cd_sound_off">Couper le son</string>
+    <string name="cd_sound_on">Remettre le son</string>
+    <string name="cd_last_games">Dernières parties</string>
+    <string name="cd_back">Retour</string>
+
+    <!-- Rules -->
+    <string name="rules_title">RÈGLES</string>
+    <string name="btn_understood">COMPRIS</string>
+    <string name="rules_roll_title">1. LANCE</string>
+    <string name="rules_roll_body">Lance 6 dés, jusqu\'à 3 fois.</string>
+    <string name="rules_roll_hint">Touche un dé pour le garder entre deux lancers. Les dés gardés passent en vert.</string>
+    <string name="rules_resolve_title">2. RÉSOUS</string>
+    <string name="rules_resolve_triple_mark">3×</string>
+    <string name="rules_resolve_triple">Trois pareils : autant de Votes</string>
+    <string name="rules_resolve_popularite">+1 Popularité</string>
+    <string name="rules_resolve_fonds">+1 Fonds publics</string>
+    <string name="rules_resolve_tweet">Tweet : −1 Popularité en face</string>
+    <string name="rules_elysee_title">3. ÉLYSÉE</string>
+    <string name="rules_elysee_body">Entre : +1 Vote. Commence ton tour au pouvoir : +2 Votes.</string>
+    <string name="rules_elysee_hint">Au pouvoir, tu tweetes sur tout le monde et tout le monde tweete sur toi. Pas de soin à l\'Élysée.</string>
+    <string name="rules_win_title">4. GAGNE</string>
+    <string name="rules_win_body">20 Votes, ou dernier avec de la Popularité.</string>
+    <string name="rules_win_hint">Dépense tes Fonds publics à la Boutique pour des cartes Action et Pouvoir.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">RÉGLAGES</string>
+    <string name="settings_sounds">Sons</string>
+    <string name="settings_sounds_hint">Dés, tweets et applaudissements</string>
+    <string name="settings_music">Musique</string>
+    <string name="settings_music_hint">Fanfare de meeting en fond</string>
+    <string name="settings_vibrations">Vibrations</string>
+    <string name="settings_vibrations_hint">Quand tu prends un tweet</string>
+    <string name="settings_reduced_motion">Animations réduites</string>
+    <string name="settings_reduced_motion_hint">Moins de rebonds et de confettis</string>
+    <string name="settings_language">LANGUE</string>
+    <string name="settings_language_value">Français</string>
+    <string name="btn_review_rules">REVOIR LES RÈGLES</string>
+    <string name="settings_disclaimer">Satire. Toute ressemblance avec des promesses tenues serait fortuite.</string>
+
+    <!-- Character choice -->
+    <string name="character_quote_format">«\u00A0%1$s\u00A0»</string>
+    <string name="character_choose">Choisis ton personnage</string>
+    <string name="btn_validate_character">VALIDER</string>
+    <string name="character_macron_tagline">Banquier d\'affaires, en marche permanente.</string>
+    <string name="character_lepen_tagline">Héritière de l\'entreprise familiale.</string>
+    <string name="character_melenchon_tagline">Tribun de meeting, hologramme en option.</string>
+    <string name="character_poutou_tagline">Ouvrier, débatteur sans cravate.</string>
+
+    <!-- Ready -->
+    <string name="ready_title">PRÊTS ?</string>
+    <string name="ready_subtitle">Ordre de jeu tiré au sort. Premier arrivé, premier à l\'Élysée.</string>
+    <string name="ready_you">TOI</string>
+    <string name="ready_ai">ORDINATEUR</string>
+    <string name="btn_start_match">COMMENCER</string>
+    <plurals name="ready_start_votes">
+        <item quantity="one">%1$d Vote</item>
+        <item quantity="other">%1$d Votes</item>
+    </plurals>
+    <string name="ready_start_popularite">%1$d Popularité</string>
+    <string name="ready_start_fonds">%1$d Fonds publics</string>
+
+    <!-- Turn intro -->
+    <string name="turn_intro_badge">TOUR %1$d · À TOI DE JOUER</string>
+    <string name="turn_intro_title">À TOI, %1$s !</string>
+    <plurals name="turn_intro_votes">
+        <item quantity="one">%1$d Vote</item>
+        <item quantity="other">%1$d Votes</item>
+    </plurals>
+    <string name="turn_intro_popularite">%1$d Popularité</string>
+    <string name="turn_intro_fonds">%1$d Fonds</string>
+    <string name="turn_intro_hint">Les adversaires ont joué. Touche quand tu es prêt.</string>
+    <string name="btn_lets_go">C\'EST PARTI</string>
 </resources>
