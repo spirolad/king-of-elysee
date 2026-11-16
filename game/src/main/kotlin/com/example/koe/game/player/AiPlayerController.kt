@@ -23,6 +23,8 @@ class AiPlayerController(
         val keptIndices = mutableListOf<Int>()
         val counts = currentDice.groupingBy { it }.eachCount()
 
+        // Numbers only score in threes, so a pair is kept in hope of the third; hearts only when hurt.
+
         currentDice.forEachIndexed { index, face ->
             val shouldKeep = when (face) {
                 DieFace.HEAL -> player.health < player.maxHealth

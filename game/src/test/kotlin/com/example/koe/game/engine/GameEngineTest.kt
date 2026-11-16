@@ -24,7 +24,6 @@ class GameEngineTest {
         val p2 = Player(id = PlayerId("p2"), name = "P2", monster = Monster.MEKA_DRAGON)
         val players = listOf(p1, p2)
 
-        // Mock deterministic dice roller rolling all 3s
         val deterministicRoller = object : DiceRoller {
             override fun roll(count: Int): List<DieFace> = List(count) { DieFace.THREE }
             override fun rollSingle(): DieFace = DieFace.THREE
@@ -56,7 +55,6 @@ class GameEngineTest {
         val p2 = Player(id = PlayerId("p2"), name = "P2", monster = Monster.MEKA_DRAGON, initialHealth = 2)
         val players = listOf(p1, p2)
 
-        // Mock deterministic roller rolling all Attacks
         val attackRoller = object : DiceRoller {
             override fun roll(count: Int): List<DieFace> = List(count) { DieFace.ATTACK }
             override fun rollSingle(): DieFace = DieFace.ATTACK

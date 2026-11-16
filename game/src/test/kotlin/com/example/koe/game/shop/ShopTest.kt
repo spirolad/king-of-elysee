@@ -29,7 +29,6 @@ class ShopTest {
         // refilled with c4
         assertEquals(3, shop.faceUpCards.size)
 
-        // Sweep shop
         val swept = shop.sweep(buyer)
         assertTrue(swept)
         // spent 2

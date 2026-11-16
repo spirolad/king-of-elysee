@@ -135,7 +135,6 @@ data class RollUi(
     val maxRolls: Int,
 )
 
-/** What the current player's dice did this turn. */
 /** Whether the market can be used right now, and whether a card is affordable. */
 enum class ShopAvailability { LOCKED, OPEN, AFFORDABLE }
 

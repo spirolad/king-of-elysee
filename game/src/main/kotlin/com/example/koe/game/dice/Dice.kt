@@ -30,17 +30,11 @@ data class Die(
     val isKept: Boolean = false
 )
 
-/**
- * Abstraction for rolling dice, adhering to Dependency Inversion (DIP) and testability.
- */
 interface DiceRoller {
     fun roll(count: Int): List<DieFace>
     fun rollSingle(): DieFace
 }
 
-/**
- * Default random-based dice roller.
- */
 class RandomDiceRoller(
     private val random: java.util.Random = java.util.Random()
 ) : DiceRoller {

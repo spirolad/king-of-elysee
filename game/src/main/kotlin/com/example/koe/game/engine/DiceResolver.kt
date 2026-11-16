@@ -2,9 +2,6 @@ package com.example.koe.game.engine
 
 import com.example.koe.game.dice.DieFace
 
-/**
- * Summary of calculated effects from a resolved dice pool.
- */
 data class DiceResolutionSummary(
     val victoryPoints: Int,
     val energy: Int,
@@ -17,7 +14,6 @@ data class DiceResolutionSummary(
 
 /**
  * Encapsulates the rules for calculating results from rolled dice.
- * Adheres to SRP by separating dice arithmetic and rules from the game loop.
  */
 object DiceResolver {
 
@@ -41,7 +37,7 @@ object DiceResolver {
             }
         }
 
-        // Calculate Wickedness points from 1s and 2s (Dark Edition rule)
+        // Wickedness points (Dark Edition rule) are tallied but drive nothing; Méchanceté below is what grants cards.
         var wickedness = 0
         val ones = counts[DieFace.ONE] ?: 0
         if (ones >= 3) {

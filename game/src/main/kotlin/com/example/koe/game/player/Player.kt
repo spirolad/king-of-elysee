@@ -5,7 +5,6 @@ import com.example.koe.game.shop.PowerCard
 
 /**
  * Encapsulates the stats and mutable state of a monster/player in King of Tokyo.
- * Adheres to SRP by managing player attributes, life cycle, and card inventory.
  */
 class Player(
     val id: PlayerId,
@@ -32,6 +31,8 @@ class Player(
     var wickednessPoints: Int = initialWickednessPoints.coerceIn(0, MAX_WICKEDNESS_POINTS)
         private set
 
+    // One-turn effects of action cards: Bracelet électronique, Carte France Travail, Conférence,
+    // and Immunité parlementaire, which absorbs the first opponent action card.
     var noEnergyNextTurn: Boolean = false
     var skipNextTurn: Boolean = false
     var nextCardDiscount: Int = 0
@@ -73,6 +74,7 @@ class Player(
     fun damage(amount: Int): Int {
         if (amount <= 0 || !isAlive) return 0
         var effectiveDamage = amount
+        // Censure never takes a hit below 1; Gérontocratie and armor_plating can cancel it.
         if (hasCard("censure") && effectiveDamage > 1) {
             effectiveDamage = maxOf(1, effectiveDamage - 1)
         }
@@ -97,6 +99,7 @@ class Player(
 
     fun addEnergy(amount: Int) {
         if (amount > 0) {
+            // Paradis fiscal adds 1 per gain, not per energy point.
             val bonus = if (hasCard("paradis_fiscal")) 1 else 0
             energy += (amount + bonus)
         }
@@ -147,6 +150,7 @@ class Player(
         return deducted
     }
 
+    // Discard cards act once when bought and are never held.
     fun addCard(card: PowerCard) {
         if (card.type == CardType.KEEP) {
             _cards.add(card)

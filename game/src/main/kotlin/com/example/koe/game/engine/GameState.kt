@@ -3,9 +3,6 @@ package com.example.koe.game.engine
 import com.example.koe.game.player.Player
 import com.example.koe.game.shop.PowerCard
 
-/**
- * Configuration options for a King of Tokyo match.
- */
 data class GameConfig(
     val baseDiceCount: Int = 6,
     val maxRerolls: Int = 2,

@@ -15,8 +15,6 @@ sealed interface ShopAction {
 
 /**
  * Interface for decoupling player input / decisions from the game engine.
- * Allows seamless adaptation for Android UI, Desktop GUI (Windows/Linux), CLI, or AI bots.
- * Adheres to Dependency Inversion (DIP) and Interface Segregation (ISP).
  * Decision methods are suspending so that a UI controller can wait for user input.
  */
 interface PlayerController {

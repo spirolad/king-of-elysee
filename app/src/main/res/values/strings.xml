@@ -1,5 +1,4 @@
 <resources>
-    <!-- Existing app strings -->
     <string name="app_name">King of Elysee</string>
 
     <string name="character_macron_name">Macron</string>

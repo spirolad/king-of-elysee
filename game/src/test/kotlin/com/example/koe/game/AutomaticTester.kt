@@ -18,9 +18,6 @@ import com.example.koe.game.shop.Shop
 import kotlinx.coroutines.runBlocking
 import java.util.Random
 
-/**
- * Result data holder for a single simulated test game.
- */
 data class GameSimulationResult(
     val gameIndex: Int,
     val seed: Long,
@@ -71,9 +68,6 @@ data class BatchSimulationReport(
     }
 }
 
-/**
- * Configuration for automated test game generation.
- */
 data class GameGeneratorConfig(
     val totalGames: Int = 100,
     val baseSeed: Long = 42L,
@@ -193,7 +187,6 @@ class AutomaticTester(
             roundsCounter = engine.roundNumber
         }
 
-        // Invariant Validation
         val failureReasons = mutableListOf<String>()
 
         if (!engine.isGameOver) {

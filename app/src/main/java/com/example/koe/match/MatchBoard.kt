@@ -1197,7 +1197,6 @@ private fun BoxScope.ShopBadge(availability: ShopAvailability) {
     }
 }
 
-/** The dice row. */
 @Composable
 private fun DiceTray(
     dice: List<DieUi>,

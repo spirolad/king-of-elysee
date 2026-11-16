@@ -15,8 +15,6 @@ sealed interface WinReason {
 
 /**
  * Event listener interface for King of Tokyo game events.
- * Enables zero-coupling UI binding for Android (Jetpack Compose / Views),
- * Desktop (Windows / Linux Compose / JavaFX / Swing), CLI, and network broadcasting.
  */
 interface GameEventListener {
     fun onGameStarted(players: List<Player>) {}
@@ -39,9 +37,6 @@ interface GameEventListener {
     fun onGameOver(winner: Player, reason: WinReason) {}
 }
 
-/**
- * Composite listener to support multiple subscribers simultaneously.
- */
 class CompositeGameEventListener(
     private val listeners: MutableList<GameEventListener> = mutableListOf()
 ) : GameEventListener {

@@ -12,7 +12,6 @@ data class ShopOffer(
 
 /**
  * Manages the power card shop, deck, and face-up market in King of Tokyo.
- * Adheres to SRP by handling card distribution, sweeping, and transaction validations.
  */
 class Shop(
     initialCards: List<PowerCard> = CardCatalog.createStandardDeck().shuffled(),
@@ -47,6 +46,7 @@ class Shop(
         if (player.nextCardDiscount > 0) {
             discount += player.nextCardDiscount
         }
+        // No card is ever free, whatever the discounts.
         return maxOf(1, cost - discount)
     }
 
@@ -79,6 +79,7 @@ class Shop(
         val finalCost = calculateCardCost(player, card, allPlayers)
         if (!player.spendEnergy(finalCost)) return null
 
+        // Conférence's discount is spent on this purchase, even when the 1-energy floor cancelled part of it.
         if (player.nextCardDiscount > 0) {
             player.nextCardDiscount = 0
         }
@@ -86,14 +87,14 @@ class Shop(
         _faceUpCards.removeAt(index)
         refillMarket()
 
-        // Apply card effect
         val result = card.grantTo(player, allPlayers)
 
+        // Changement d'assemblée also replaces the market the buyer just refilled.
         if (card.id.value == "changement_d_assemblee") {
             sweepFree()
         }
 
-        // Trigger Trafic d'influence
+        // Trafic d'influence: every opponent purchase pays its holders 1 energy.
         allPlayers.filter { it.id != player.id && it.isAlive && it.hasCard("trafic_d_influence") }.forEach {
             it.addEnergy(1)
         }

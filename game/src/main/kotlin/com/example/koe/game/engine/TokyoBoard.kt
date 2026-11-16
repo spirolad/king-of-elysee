@@ -3,9 +3,6 @@ package com.example.koe.game.engine
 import com.example.koe.game.player.Player
 import com.example.koe.game.player.PlayerId
 
-/**
- * Zones within Tokyo.
- */
 enum class TokyoZone(val displayName: String) {
     TOKYO_CITY("Tokyo City"),
     TOKYO_BAY("Tokyo Bay")
@@ -13,7 +10,6 @@ enum class TokyoZone(val displayName: String) {
 
 /**
  * Manages the state and rules for occupying Tokyo.
- * Single Responsibility: Manages Tokyo slots, occupant tracking, and attack routing rules.
  */
 class TokyoBoard(
     val hasTokyoBay: Boolean = false
@@ -77,9 +73,6 @@ class TokyoBoard(
         }
     }
 
-    /**
-     * Cleans up dead occupants.
-     */
     fun cleanupDeadOccupants(): List<Player> {
         val removed = mutableListOf<Player>()
         if (cityOccupant?.isAlive == false) {

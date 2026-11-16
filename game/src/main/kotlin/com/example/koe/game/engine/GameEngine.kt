@@ -14,7 +14,9 @@ import com.example.koe.game.shop.grantTo
 
 /**
  * Core game engine orchestrating the rules and flow of King of Tokyo.
- * Adheres to Dependency Inversion (DIP) and Single Responsibility (SRP).
+ *
+ * The engine keeps the King of Tokyo names; the app renames them for King of Élysée:
+ * Tokyo is the Élysée, victory points are votes, energy is fonds and health is popularité.
  */
 class GameEngine(
     val players: List<Player>,
@@ -80,6 +82,7 @@ class GameEngine(
             return !isGameOver
         }
 
+        // Immunité parlementaire is re-armed every turn; the first opponent action card that hits it uses it up.
         if (active.hasCard("immunite_parlementaire")) {
             active.hasActionImmunity = true
         }
@@ -91,6 +94,7 @@ class GameEngine(
             active.heal(1)
         }
 
+        // Holding the Élysée at the start of a turn scores before the roll, so it can win the game outright.
         val isInTokyoAtStart = tokyoBoard.isInsideTokyo(active)
         if (isInTokyoAtStart) {
             active.addVictoryPoints(config.tokyoStartTurnVp)
@@ -100,24 +104,19 @@ class GameEngine(
 
         eventListener.onTurnStarted(active, roundNumber, isInTokyoAtStart)
 
-        // 1. Roll Dice Phase
         val finalDice = executeDiceRollPhase(active)
 
-        // 2. Resolve Dice Phase
         executeResolveDicePhase(active, finalDice)
         if (isGameOver) return false
 
-        // 3. Shop Phase
         executeShopPhase(active)
         if (isGameOver) return false
 
-        // 4. End Turn Effects
         executeEndTurnPhase(active)
         if (!isGameOver) {
             eventListener.onTurnEnded(active)
         }
 
-        // 5. Advance Turn
         advanceTurn()
         return !isGameOver
     }
@@ -159,15 +158,14 @@ class GameEngine(
                 currentlyKept = List(currentDice.size) { it in keptIndices }
             ).distinct().filter { it in currentDice.indices }
 
+            // The controller answers the whole kept set, so a die kept on an earlier roll can be released.
             keptIndices = keptChoices.toMutableList()
             eventListener.onDiceKept(player, rollNumber, keptIndices.toList())
 
-            // If player keeps all dice, stop rerolling
             if (keptIndices.size == currentDice.size) {
                 break
             }
 
-            // Reroll non-kept dice
             val nextDice = currentDice.toMutableList()
             for (i in currentDice.indices) {
                 if (i !in keptIndices) {
@@ -220,11 +218,11 @@ class GameEngine(
             if (finalAttack > 0) finalAttack += 1
         }
 
-        // Apply Points & Energy
         player.addVictoryPoints(finalVp)
         if (summary.wickednessPoints > 0) {
             player.addWickednessPoints(summary.wickednessPoints)
         }
+        // Bracelet électronique blocks dice energy for one turn; Détournement pays its holders 1 each time.
         if (!player.noEnergyNextTurn && finalEnergy > 0) {
             player.addEnergy(finalEnergy)
             alivePlayers.filter { it.id != player.id && it.hasCard("detournement") }.forEach {
@@ -238,7 +236,6 @@ class GameEngine(
             eventListener.onMechanceteGained(player, summary.mechanceteGained, player.mechancete)
         }
 
-        // Apply Heal
         if (finalHeal > 0) {
             val healed = player.heal(finalHeal)
             eventListener.onPlayerHealed(player, healed, player.health)
@@ -248,7 +245,7 @@ class GameEngine(
         checkWinConditions(player)
         if (isGameOver) return
 
-        // 49.3 power card check
+        // 49.3: when the dice dealt no damage, pay 3 energy to evict the occupant and take the Élysée.
         if (!isInTokyo && player.hasCard("49_3") && player.energy >= 3 && tokyoBoard.occupants.isNotEmpty() && finalAttack == 0) {
             player.spendEnergy(3)
             val currentOccupant = tokyoBoard.occupants.firstOrNull()
@@ -256,6 +253,7 @@ class GameEngine(
                 val zone = tokyoBoard.leave(currentOccupant)
                 if (zone != null) {
                     eventListener.onPlayerYieldedTokyo(currentOccupant, zone)
+                    // Campagne d'invectives hurts whoever replaces its holder in the Élysée.
                     if (currentOccupant.hasCard("campagne_d_invectives")) {
                         player.damage(2)
                     }
@@ -272,7 +270,6 @@ class GameEngine(
             }
         }
 
-        // Apply Attack Damage
         if (finalAttack > 0) {
             val targets = tokyoBoard.getTargetsForAttack(player, alivePlayers)
             var tokyoOccupantYielded = false
@@ -288,6 +285,7 @@ class GameEngine(
                 if (!target.isAlive) {
                     eventListener.onPlayerEliminated(target, "Defeated by ${player.name}")
                 } else if (tokyoBoard.isInsideTokyo(target) && !isInTokyo) {
+                    // Only an occupant hit from outside may yield: the attacker is the one who takes the seat.
                     val targetController = controllers[target.id]
                     if (targetController != null && targetController.shouldYieldTokyo(target, player, dmg)) {
                         val zone = tokyoBoard.leave(target)
@@ -302,6 +300,7 @@ class GameEngine(
                 }
             }
 
+            // A defeated occupant frees their seat, which the attacker may take below.
             tokyoBoard.cleanupDeadOccupants()
             checkWinConditions(player)
             if (isGameOver) return
@@ -355,6 +354,7 @@ class GameEngine(
             }
         }
 
+        // Bracelet électronique only covers the turn just played.
         player.noEnergyNextTurn = false
     }
 
@@ -393,7 +393,6 @@ class GameEngine(
     private fun checkWinConditions(triggerPlayer: Player? = null) {
         if (isGameOver) return
 
-        // Win by Victory Points
         val vpWinner = players.firstOrNull { it.isAlive && it.victoryPoints >= config.winningVictoryPoints }
         if (vpWinner != null) {
             isGameOver = true
@@ -402,7 +401,6 @@ class GameEngine(
             return
         }
 
-        // Win by Last Monster Standing
         val survivors = alivePlayers
         if (survivors.size == 1) {
             val soleSurvivor = survivors.first()
@@ -413,7 +411,7 @@ class GameEngine(
         }
 
         if (survivors.isEmpty()) {
-            // Draw or last trigger winner
+            // Everyone fell at once (Manifestation hits the attacker too): the player who caused it wins.
             isGameOver = true
             winner = triggerPlayer ?: players.first()
             eventListener.onGameOver(winner!!, WinReason.LastMonsterStanding)
